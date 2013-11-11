@@ -1,4 +1,4 @@
-
+package demo;
 
 
 import javax.media.opengl.GL2;
@@ -130,7 +130,7 @@ public class Gears implements GLEventListener {
             
     /* make the gears */
     if(0>=gear1) {
-        gear1 = gl.glGenLists(1);
+        gear1 = gl.glGenLists(1);			//DRAW LISTS
         gl.glNewList(gear1, GL2.GL_COMPILE);
         gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_AMBIENT_AND_DIFFUSE, red, 0);
         gear(gl, 1.0f, 4.0f, 1.0f, 20, 0.7f);
