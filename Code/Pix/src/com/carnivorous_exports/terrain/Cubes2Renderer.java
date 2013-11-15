@@ -1,15 +1,24 @@
 package com.carnivorous_exports.terrain;
 
-
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLAnimatorControl;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
+import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.glu.GLU;
+
+import com.jogamp.newt.Window;
+import com.jogamp.newt.event.MouseAdapter;
+import com.jogamp.newt.event.awt.AWTKeyAdapter;
+import com.jogamp.newt.event.awt.AWTMouseAdapter;
+
 import static javax.media.opengl.GL.*; // GL constants
 import static javax.media.opengl.GL2.*; // GL2 constants
 import static javax.media.opengl.GL2ES1.GL_PERSPECTIVE_CORRECTION_HINT;
@@ -23,40 +32,88 @@ import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_LIGHT0;
  */
 @SuppressWarnings("serial")
 public class Cubes2Renderer extends GLCanvas implements GLEventListener,
-		KeyListener {
+		KeyListener, MouseListener, MouseMotionListener {
 
 	private GLU glu; // for the GL Utility
 	private int cubeDList; // display list for cube
 
+	private boolean mouseRButtonDown;
+	private int prevMouseX;
+	private int prevMouseY;
+	private int view_rotx;
+	private int view_roty;
+	private int view_rotz;
+
 	private static float[][] boxColors = { // Bright: Red, Orange, Yellow,
-											// Green, Blue
-	{ 1.0f, 0.0f, 0.0f }, { 1.0f, 0.5f, 0.0f }, { 1.0f, 1.0f, 0.0f },
+			// Green, Blue
+			{ 1.0f, 0.0f, 0.0f }, { 1.0f, 0.5f, 0.0f }, { 1.0f, 1.0f, 0.0f },
 			{ 0.0f, 1.0f, 0.0f }, { 0.0f, 1.0f, 1.0f } };
 
 	/** Constructor to setup the GUI for this Component */
 	public Cubes2Renderer() {
+
 		this.addGLEventListener(this);
 		this.addKeyListener(this); // for Handling KeyEvents
+		this.addMouseListener(this);
+		this.addMouseMotionListener(this);
 		this.setFocusable(true);
 		this.requestFocus();
 	}
 
 	public void buildDisplayList(GL2 gl) {
 		// Build two lists, and returns handle for the first list
-			// create one display list
-			//GLuint index = glGenLists(1);
-		
+		// create one display list
+		// GLuint index = glGenLists(1);
+
 		int base = gl.glGenLists(1);
 
 		// Create a new list for box (with open-top), pre-compile for efficiency
 		cubeDList = base;
 
 		gl.glNewList(cubeDList, GL_COMPILE);
-		gl.glBegin(GL_TRIANGLES);
+		gl.glBegin(GL_QUADS);
 
-		gl.glVertex3f(0.0f, 1.0f, 0.0f);
-		gl.glVertex3f(-1.0f, -1.0f, 0.0f);
-		gl.glVertex3f(1.0f, -1.0f, 0.0f);
+		// Top-face
+		gl.glColor3f(0.0f, 1.0f, 0.0f); // green
+		gl.glVertex3f(1.0f, 1.0f, -1.0f);
+		gl.glVertex3f(-1.0f, 1.0f, -1.0f);
+		gl.glVertex3f(-1.0f, 1.0f, 1.0f);
+		gl.glVertex3f(1.0f, 1.0f, 1.0f);
+
+		// Bottom-face
+		gl.glColor3f(1.0f, 0.5f, 0.0f); // orange
+		gl.glVertex3f(1.0f, -1.0f, 1.0f);
+		gl.glVertex3f(-1.0f, -1.0f, 1.0f);
+		gl.glVertex3f(-1.0f, -1.0f, -1.0f);
+		gl.glVertex3f(1.0f, -1.0f, -1.0f);
+
+		// Front-face
+		gl.glColor3f(1.0f, 0.0f, 0.0f); // red
+		gl.glVertex3f(1.0f, 1.0f, 1.0f);
+		gl.glVertex3f(-1.0f, 1.0f, 1.0f);
+		gl.glVertex3f(-1.0f, -1.0f, 1.0f);
+		gl.glVertex3f(1.0f, -1.0f, 1.0f);
+
+		// Back-face
+		gl.glColor3f(1.0f, 1.0f, 0.0f); // yellow
+		gl.glVertex3f(1.0f, -1.0f, -1.0f);
+		gl.glVertex3f(-1.0f, -1.0f, -1.0f);
+		gl.glVertex3f(-1.0f, 1.0f, -1.0f);
+		gl.glVertex3f(1.0f, 1.0f, -1.0f);
+
+		// Left-face
+		gl.glColor3f(0.0f, 0.0f, 1.0f); // blue
+		gl.glVertex3f(-1.0f, 1.0f, 1.0f);
+		gl.glVertex3f(-1.0f, 1.0f, -1.0f);
+		gl.glVertex3f(-1.0f, -1.0f, -1.0f);
+		gl.glVertex3f(-1.0f, -1.0f, 1.0f);
+
+		// Right-face
+		gl.glColor3f(1.0f, 0.0f, 1.0f); // magenta
+		gl.glVertex3f(1.0f, 1.0f, -1.0f);
+		gl.glVertex3f(1.0f, 1.0f, 1.0f);
+		gl.glVertex3f(1.0f, -1.0f, 1.0f);
+		gl.glVertex3f(1.0f, -1.0f, -1.0f);
 
 		gl.glEnd();
 		gl.glEndList();
@@ -70,6 +127,7 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 	 */
 	@Override
 	public void init(GLAutoDrawable drawable) {
+
 		GL2 gl = drawable.getGL().getGL2(); // get the OpenGL graphics context
 		glu = new GLU(); // get GL Utilities
 		gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // set background (clear) color
@@ -132,28 +190,27 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 		gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear color
 																// and depth
 																// buffers
-		gl.glLoadIdentity(); // reset the model-view matrix
+		// gl.glLoadIdentity(); // reset the model-view matrix
+		gl.glPushMatrix();
 
-		//gl.glPushMatrix();
-		
-		// ----- Your OpenGL rendering code here (render a white triangle for
-		// testing) -----
-		
-		//gl.glPushMatrix();
-		
-		gl.glTranslatef(0.0f, 0.0f, -6.0f); // translate into the screen
-		gl.glColor3fv(boxColors[2], 0);
-		gl.glCallList(cubeDList); // draw the cube
-		
-		//gl.glPopMatrix();
-		
-		//gl.glPopMatrix();
-		
-		/*
-		 * gl.glBegin(GL_TRIANGLES); // draw using triangles gl.glVertex3f(0.0f,
-		 * 1.0f, 0.0f); gl.glVertex3f(-1.0f, -1.0f, 0.0f); gl.glVertex3f(1.0f,
-		 * -1.0f, 0.0f); gl.glEnd();
-		 */
+		// rotate around wherever the user drags the mouse
+		gl.glRotatef(view_rotx, 1.0f, 0.0f, 0.0f);
+		gl.glRotatef(view_roty, 0.0f, 1.0f, 0.0f);
+		gl.glRotatef(view_rotz, 0.0f, 0.0f, 1.0f);
+
+		// --------- Rendering Code
+
+		for (int i = 0; i < 5; i++) {
+			gl.glPushMatrix();
+			gl.glTranslatef(-3.0f + i * 3f, 0.0f, -6.0f); // translate into the
+															// screen
+			// gl.glColor3fv(boxColors[2], 0);
+
+			gl.glCallList(cubeDList); // draw the cube
+			gl.glPopMatrix();
+		}
+
+		gl.glPopMatrix();
 	}
 
 	/**
@@ -166,6 +223,8 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 
 	@Override
 	public void keyPressed(KeyEvent e) {
+		
+		//press esc to quit
 		int keyCode = e.getKeyCode();
 		switch (keyCode) {
 		case KeyEvent.VK_ESCAPE: // quit
@@ -182,6 +241,19 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 			}.start();
 			break;
 		}
+		
+		
+		//to rotate
+		int kc = e.getKeyCode();
+        if(KeyEvent.VK_LEFT == kc) {
+            view_roty -= 1;
+        } else if(KeyEvent.VK_RIGHT == kc) {
+            view_roty += 1;
+        } else if(KeyEvent.VK_UP == kc) {
+            view_rotx -= 1;
+        } else if(KeyEvent.VK_DOWN == kc) {
+            view_rotx += 1;
+        }
 	}
 
 	@Override
@@ -194,5 +266,71 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 	public void keyTyped(KeyEvent arg0) {
 		// TODO Auto-generated method stub
 
+	}
+
+	// class Cubes2MouseAdapter extends MouseAdapter implements MouseListener {
+
+	public void mouseClicked(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void mouseEntered(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void mouseExited(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void mousePressed(MouseEvent e) {
+		prevMouseX = e.getX();
+		prevMouseY = e.getY();
+		if ((e.getModifiers() & e.BUTTON3_MASK) != 0) {
+			mouseRButtonDown = true;
+		}
+	}
+
+	public void mouseReleased(MouseEvent e) {
+		if ((e.getModifiers() & e.BUTTON3_MASK) != 0) {
+			mouseRButtonDown = false;
+		}
+	}
+
+	public void mouseDragged(MouseEvent e) {
+		
+		int x = e.getX();
+		int y = e.getY();
+		int width = 0, height = 0;
+		Object source = e.getSource();
+		if (source instanceof Window) {
+			Window window = (Window) source;
+			width = window.getWidth();
+			height = window.getHeight();
+		} else if (GLProfile.isAWTAvailable()
+				&& source instanceof java.awt.Component) {
+			java.awt.Component comp = (java.awt.Component) source;
+			width = comp.getWidth();
+			height = comp.getHeight();
+		} else {
+			throw new RuntimeException(
+					"Event source neither Window nor Component: " + source);
+		}
+		float thetaY = 360.0f * ((float) (x - prevMouseX) / (float) width);
+		float thetaX = 360.0f * ((float) (prevMouseY - y) / (float) height);
+
+		prevMouseX = x;
+		prevMouseY = y;
+
+		view_rotx += thetaX;
+		view_roty += thetaY;
+	}
+
+	@Override
+	public void mouseMoved(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
 	}
 }
