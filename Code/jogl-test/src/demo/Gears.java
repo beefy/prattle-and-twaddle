@@ -385,7 +385,7 @@ public class Gears implements GLEventListener {
     }
   }
   
-  class GearsMouseAdapter extends MouseAdapter {
+	class GearsMouseAdapter extends MouseAdapter {
       public void mousePressed(MouseEvent e) {
         prevMouseX = e.getX();
         prevMouseY = e.getY();
