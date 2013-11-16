@@ -65,9 +65,6 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 		this.addMouseMotionListener(this);
 		this.setFocusable(true);
 		this.requestFocus();
-		//animator.add(this);
-		
-		Thread.dumpStack();
 	}
 
 	public void buildDisplayList(GL2 gl) {
