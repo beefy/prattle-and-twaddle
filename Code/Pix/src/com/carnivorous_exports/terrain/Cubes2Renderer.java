@@ -5,6 +5,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.text.MessageFormat;
 
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLAnimatorControl;
@@ -18,6 +19,7 @@ import com.jogamp.newt.Window;
 import com.jogamp.newt.event.MouseAdapter;
 import com.jogamp.newt.event.awt.AWTKeyAdapter;
 import com.jogamp.newt.event.awt.AWTMouseAdapter;
+import com.jogamp.opengl.util.Animator;
 
 import static javax.media.opengl.GL.*; // GL constants
 import static javax.media.opengl.GL2.*; // GL2 constants
@@ -40,9 +42,14 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 	private boolean mouseRButtonDown;
 	private int prevMouseX;
 	private int prevMouseY;
-	private int view_rotx;
-	private int view_roty;
-	private int view_rotz;
+	private float view_rotx;
+	private float view_roty = 15;
+	private float view_rotz;
+	
+	//for testing rotation
+	float tempRotX;
+	
+	//final Animator animator = new Animator();
 
 	private static float[][] boxColors = { // Bright: Red, Orange, Yellow,
 			// Green, Blue
@@ -58,6 +65,9 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 		this.addMouseMotionListener(this);
 		this.setFocusable(true);
 		this.requestFocus();
+		//animator.add(this);
+		
+		Thread.dumpStack();
 	}
 
 	public void buildDisplayList(GL2 gl) {
@@ -186,13 +196,19 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 	 */
 	@Override
 	public void display(GLAutoDrawable drawable) {
+		//System.out.println("Display Method Called!");
+		
 		GL2 gl = drawable.getGL().getGL2(); // get the OpenGL 2 graphics context
 		gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear color
 																// and depth
-																// buffers
-		// gl.glLoadIdentity(); // reset the model-view matrix
+																// buffers 
+		
+		//gl.glLoadIdentity(); // reset the model-view matrix
 		gl.glPushMatrix();
-
+		
+		//System.out.println("It's decided! roty = " + view_roty + 
+		//		" this " + this);
+		
 		// rotate around wherever the user drags the mouse
 		gl.glRotatef(view_rotx, 1.0f, 0.0f, 0.0f);
 		gl.glRotatef(view_roty, 0.0f, 1.0f, 0.0f);
@@ -202,10 +218,17 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 
 		for (int i = 0; i < 5; i++) {
 			gl.glPushMatrix();
+			
 			gl.glTranslatef(-3.0f + i * 3f, 0.0f, -6.0f); // translate into the
 															// screen
-			// gl.glColor3fv(boxColors[2], 0);
 
+			// gl.glColor3fv(boxColors[2], 0);
+			
+			if(i == 1) {
+				tempRotX += 2f;
+				gl.glRotatef(tempRotX, 1.0f, 0.0f, 0.0f);
+			}
+			
 			gl.glCallList(cubeDList); // draw the cube
 			gl.glPopMatrix();
 		}
@@ -246,14 +269,15 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 		//to rotate
 		int kc = e.getKeyCode();
         if(KeyEvent.VK_LEFT == kc) {
-            view_roty -= 1;
+            view_roty -= 10;
         } else if(KeyEvent.VK_RIGHT == kc) {
-            view_roty += 1;
+            view_roty += 10;
         } else if(KeyEvent.VK_UP == kc) {
-            view_rotx -= 1;
+            view_rotx -= 10;
         } else if(KeyEvent.VK_DOWN == kc) {
-            view_rotx += 1;
+            view_rotx += 10;
         }
+        
 	}
 
 	@Override

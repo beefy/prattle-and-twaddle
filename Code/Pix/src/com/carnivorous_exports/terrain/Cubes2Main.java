@@ -24,17 +24,17 @@ public class Cubes2Main extends JFrame {
 			@Override
 			public void run() {
 				// Create the OpenGL rendering canvas
-				GLCanvas canvas = new Cubes2Renderer();
+				//GLCanvas canvas = new GLCanvas();
 				Cubes2Renderer renderer = new Cubes2Renderer();
-				canvas.addGLEventListener(renderer);
+				renderer.addGLEventListener(renderer);
 
 				// Create a animator that drives canvas' display() at the
 				// specified FPS.
-				FPSAnimator animator = new FPSAnimator(canvas, FPS, true);
+				FPSAnimator animator = new FPSAnimator(renderer, FPS, true);
 
 				// Create the top-level container frame
 				JFrame frame = new JFrame(); // Swing's JFrame or AWT's Frame
-				frame.getContentPane().add(canvas);
+				frame.getContentPane().add(renderer);
 				frame.setUndecorated(true); // no decoration such as title bar
 				frame.setExtendedState(Frame.MAXIMIZED_BOTH); // full screen
 																// mode
