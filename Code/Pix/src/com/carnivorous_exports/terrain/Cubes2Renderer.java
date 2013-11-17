@@ -53,8 +53,8 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 	// for testing rotation
 	float tempRotX;
 	
-	//for stop key auto-repeat
-	private boolean pressedYet;
+	//for stopping key auto-repeat
+	private boolean[] pressedYet = new boolean[5];
 	
 	//for running
 	String moveAxis;
@@ -139,6 +139,10 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 
 	//for user movement
 	public void running() {
+		
+		//	xPos += cos(radians(direction)) * speed;
+		//	yPos += sin(radians(direction)) * speed;
+		
 		if(moveAxis == "movex") {
 				movex += moveDir*.1;
 		} else if(moveAxis == "movez") {
@@ -231,9 +235,8 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 		gl.glRotatef(-view_rotx, 1.0f, 0.0f, 0.0f);
 		gl.glRotatef(-view_roty, 0.0f, 1.0f, 0.0f);
 		gl.glRotatef(-view_rotz, 0.0f, 0.0f, 1.0f);
-
+		
 		// --------- Rendering Code
-
 		for (int i = 0; i < 5; i++) {
 			gl.glPushMatrix();
 
@@ -285,37 +288,51 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 
 		// to move
 		//if (0 == (InputEvent.AUTOREPEAT_MASK & e.getModifiers())) {
-		if(!pressedYet) {
-			pressedYet = true;
-			
-			
-			int kc = e.getKeyCode();
-			if (KeyEvent.VK_LEFT == kc) {
-				moveAxis = "movex";
-				moveDir = -1;
-			} else if (KeyEvent.VK_RIGHT == kc) {
-				moveAxis = "movex";
-				moveDir = +1;
-			} else if (KeyEvent.VK_UP == kc) {
-				moveAxis = "movez";
-				moveDir = +1;
-			} else if (KeyEvent.VK_DOWN == kc) {
-				moveAxis = "movez";
-				moveDir = -1;
-			}
-				
+		
+		if(!pressedYet[1] && keyCode == KeyEvent.VK_LEFT)
+			changeMove(e);
+		if(!pressedYet[2] && keyCode == KeyEvent.VK_RIGHT)
+			changeMove(e);
+		if(!pressedYet[3] && keyCode == KeyEvent.VK_UP) 
+			changeMove(e);
+		if(!pressedYet[4] && keyCode == KeyEvent.VK_DOWN) 
+			changeMove(e);
+		
+	}
+	
+	public void changeMove(KeyEvent e) {	
+		
+		int kc = e.getKeyCode();
+		if (KeyEvent.VK_LEFT == kc) {
+			pressedYet[1] = true;
+			moveAxis = "movex";
+			moveDir = -1;
+		} else if (KeyEvent.VK_RIGHT == kc) {
+			pressedYet[2] = true;
+			moveAxis = "movex";
+			moveDir = +1;
+		} else if (KeyEvent.VK_UP == kc) {
+			pressedYet[3] = true;
+			moveAxis = "movez";
+			moveDir = +1;
+		} else if (KeyEvent.VK_DOWN == kc) {
+			pressedYet[4] = true;
+			moveAxis = "movez";
+			moveDir = -1;
 		}
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e) {
-		if(e.getKeyCode() == KeyEvent.VK_LEFT || 
-				e.getKeyCode() == KeyEvent.VK_RIGHT ||
-				e.getKeyCode() == KeyEvent.VK_UP ||
-				e.getKeyCode() == KeyEvent.VK_DOWN) {
-			pressedYet = false;
+		int kc = e.getKeyCode();
+		if(kc == KeyEvent.VK_LEFT) pressedYet[1] = false; 
+		else if (kc == KeyEvent.VK_RIGHT) pressedYet[2] = false;
+		else if (kc == KeyEvent.VK_UP) pressedYet[3] = false;
+		else if (kc == KeyEvent.VK_DOWN) pressedYet[4] = false;
+		
+		//if no arrow keys are pressed, stop
+		if(!pressedYet[1] && !pressedYet[2] && !pressedYet[3] && !pressedYet[4])
 			moveDir = 0;
-		}
 	}
 
 	@Override
