@@ -16,6 +16,7 @@ import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.glu.GLU;
 
 import com.jogamp.newt.Window;
+import com.jogamp.newt.event.InputEvent;
 import com.jogamp.newt.event.MouseAdapter;
 import com.jogamp.newt.event.awt.AWTKeyAdapter;
 import com.jogamp.newt.event.awt.AWTMouseAdapter;
@@ -43,13 +44,23 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 	private int prevMouseX;
 	private int prevMouseY;
 	private float view_rotx;
-	private float view_roty = 15;
+	private float view_roty;
 	private float view_rotz;
-	
-	//for testing rotation
+	private float movex;
+	private float movey;
+	private float movez;
+
+	// for testing rotation
 	float tempRotX;
 	
-	//final Animator animator = new Animator();
+	//for stop key auto-repeat
+	private boolean pressedYet;
+	
+	//for running
+	String moveAxis;
+	int moveDir;
+
+	// final Animator animator = new Animator();
 
 	private static float[][] boxColors = { // Bright: Red, Orange, Yellow,
 			// Green, Blue
@@ -126,6 +137,16 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 		gl.glEndList();
 	}
 
+	//for user movement
+	public void running() {
+		if(moveAxis == "movex") {
+				movex += moveDir*.1;
+		} else if(moveAxis == "movez") {
+				movez += moveDir*.1;
+		}
+	}
+	
+	
 	// ------ Implement methods declared in GLEventListener ------
 
 	/**
@@ -193,44 +214,44 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 	 */
 	@Override
 	public void display(GLAutoDrawable drawable) {
-		//System.out.println("Display Method Called!");
-		
+		// System.out.println("Display Method Called!");
+
 		GL2 gl = drawable.getGL().getGL2(); // get the OpenGL 2 graphics context
 		gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear color
 																// and depth
-																// buffers 
-		
-		//gl.glLoadIdentity(); // reset the model-view matrix
+																// buffers
+
+		// gl.glLoadIdentity(); // reset the model-view matrix
 		gl.glPushMatrix();
-		
-		//System.out.println("It's decided! roty = " + view_roty + 
-		//		" this " + this);
-		
+
+		// System.out.println("It's decided! roty = " + view_roty +
+		// " this " + this);
+
 		// rotate around wherever the user drags the mouse
-		gl.glRotatef(view_rotx, 1.0f, 0.0f, 0.0f);
-		gl.glRotatef(view_roty, 0.0f, 1.0f, 0.0f);
-		gl.glRotatef(view_rotz, 0.0f, 0.0f, 1.0f);
+		gl.glRotatef(-view_rotx, 1.0f, 0.0f, 0.0f);
+		gl.glRotatef(-view_roty, 0.0f, 1.0f, 0.0f);
+		gl.glRotatef(-view_rotz, 0.0f, 0.0f, 1.0f);
 
 		// --------- Rendering Code
 
 		for (int i = 0; i < 5; i++) {
 			gl.glPushMatrix();
-			
-			gl.glTranslatef(-3.0f + i * 3f, 0.0f, -6.0f); // translate into the
-															// screen
+
+			gl.glTranslatef(-3.0f + i * 3f + movex, 0.0f + movey, -6.0f + movez);
 
 			// gl.glColor3fv(boxColors[2], 0);
-			
-			if(i == 1) {
+
+			if (i == 1) {
 				tempRotX += 2f;
 				gl.glRotatef(tempRotX, 1.0f, 0.0f, 0.0f);
 			}
-			
+
 			gl.glCallList(cubeDList); // draw the cube
 			gl.glPopMatrix();
 		}
 
 		gl.glPopMatrix();
+		running();
 	}
 
 	/**
@@ -243,8 +264,8 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 
 	@Override
 	public void keyPressed(KeyEvent e) {
-		
-		//press esc to quit
+
+		// press esc to quit
 		int keyCode = e.getKeyCode();
 		switch (keyCode) {
 		case KeyEvent.VK_ESCAPE: // quit
@@ -261,31 +282,44 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 			}.start();
 			break;
 		}
-		
-		
-		//to rotate
-		int kc = e.getKeyCode();
-        if(KeyEvent.VK_LEFT == kc) {
-            view_roty -= 10;
-        } else if(KeyEvent.VK_RIGHT == kc) {
-            view_roty += 10;
-        } else if(KeyEvent.VK_UP == kc) {
-            view_rotx -= 10;
-        } else if(KeyEvent.VK_DOWN == kc) {
-            view_rotx += 10;
-        }
-        
+
+		// to move
+		//if (0 == (InputEvent.AUTOREPEAT_MASK & e.getModifiers())) {
+		if(!pressedYet) {
+			pressedYet = true;
+			
+			
+			int kc = e.getKeyCode();
+			if (KeyEvent.VK_LEFT == kc) {
+				moveAxis = "movex";
+				moveDir = -1;
+			} else if (KeyEvent.VK_RIGHT == kc) {
+				moveAxis = "movex";
+				moveDir = +1;
+			} else if (KeyEvent.VK_UP == kc) {
+				moveAxis = "movez";
+				moveDir = +1;
+			} else if (KeyEvent.VK_DOWN == kc) {
+				moveAxis = "movez";
+				moveDir = -1;
+			}
+				
+		}
 	}
 
 	@Override
-	public void keyReleased(KeyEvent arg0) {
-		// TODO Auto-generated method stub
-
+	public void keyReleased(KeyEvent e) {
+		if(e.getKeyCode() == KeyEvent.VK_LEFT || 
+				e.getKeyCode() == KeyEvent.VK_RIGHT ||
+				e.getKeyCode() == KeyEvent.VK_UP ||
+				e.getKeyCode() == KeyEvent.VK_DOWN) {
+			pressedYet = false;
+			moveDir = 0;
+		}
 	}
 
 	@Override
-	public void keyTyped(KeyEvent arg0) {
-		// TODO Auto-generated method stub
+	public void keyTyped(KeyEvent e) {
 
 	}
 
@@ -321,7 +355,11 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 	}
 
 	public void mouseDragged(MouseEvent e) {
-		
+
+	}
+
+	@Override
+	public void mouseMoved(MouseEvent e) {
 		int x = e.getX();
 		int y = e.getY();
 		int width = 0, height = 0;
@@ -347,11 +385,5 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 
 		view_rotx += thetaX;
 		view_roty += thetaY;
-	}
-
-	@Override
-	public void mouseMoved(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
 	}
 }
