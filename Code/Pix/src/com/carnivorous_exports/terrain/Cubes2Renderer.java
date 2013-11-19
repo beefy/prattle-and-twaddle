@@ -52,11 +52,11 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 
 	// for testing rotation
 	float tempRotX;
-	
-	//for stopping key auto-repeat
+
+	// for stopping key auto-repeat
 	private boolean[] pressedYet = new boolean[5];
-	
-	//for running
+
+	// for running
 	String moveAxis;
 	int moveDir;
 
@@ -137,20 +137,20 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 		gl.glEndList();
 	}
 
-	//for user movement
+	// for user movement
 	public void running() {
-		
-		//	xPos += cos(radians(direction)) * speed;
-		//	yPos += sin(radians(direction)) * speed;
-		
-		if(moveAxis == "movex") {
-				movex += moveDir*.1;
-		} else if(moveAxis == "movez") {
-				movez += moveDir*.1;
+
+		if (moveAxis == "movex") {
+			//movex += moveDir * (0.1) * (float) Math.cos(view_roty+90);
+			//movez += moveDir * (0.1) * (float) Math.sin(view_roty+90);
+			movex += moveDir * (0.1);
+		} else if (moveAxis == "movez") {
+			//movex += moveDir * (0.1) * (float) Math.cos(Math.abs(view_rotx));
+			//movez += moveDir * (0.1) * (float) Math.sin(Math.abs(view_rotx));
+			movez += moveDir * (0.1);
 		}
 	}
-	
-	
+
 	// ------ Implement methods declared in GLEventListener ------
 
 	/**
@@ -225,22 +225,28 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 																// and depth
 																// buffers
 
-		// gl.glLoadIdentity(); // reset the model-view matrix
 		gl.glPushMatrix();
 
-		// System.out.println("It's decided! roty = " + view_roty +
-		// " this " + this);
+		//translate before rotate
+		
 
 		// rotate around wherever the user drags the mouse
 		gl.glRotatef(-view_rotx, 1.0f, 0.0f, 0.0f);
 		gl.glRotatef(-view_roty, 0.0f, 1.0f, 0.0f);
 		gl.glRotatef(-view_rotz, 0.0f, 0.0f, 1.0f);
 		
+		gl.glTranslatef(movex, movey, movez);
+
+
+
 		// --------- Rendering Code
 		for (int i = 0; i < 5; i++) {
+
 			gl.glPushMatrix();
 
-			gl.glTranslatef(-3.0f + i * 3f + movex, 0.0f + movey, -6.0f + movez);
+			//Quat4f glRot = new Quat4f();
+			//float rotation = trans.getRotation(glRot);
+			gl.glTranslatef(-3.0f + i * 3f, 0.0f, -6.0f);
 
 			// gl.glColor3fv(boxColors[2], 0);
 
@@ -248,6 +254,8 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 				tempRotX += 2f;
 				gl.glRotatef(tempRotX, 1.0f, 0.0f, 0.0f);
 			}
+			
+			//gl.glTranslatef(-3.0f + i * 3f, 0.0f, -6.0f);
 
 			gl.glCallList(cubeDList); // draw the cube
 			gl.glPopMatrix();
@@ -287,21 +295,21 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 		}
 
 		// to move
-		//if (0 == (InputEvent.AUTOREPEAT_MASK & e.getModifiers())) {
-		
-		if(!pressedYet[1] && keyCode == KeyEvent.VK_LEFT)
+		// if (0 == (InputEvent.AUTOREPEAT_MASK & e.getModifiers())) {
+
+		if (!pressedYet[1] && keyCode == KeyEvent.VK_LEFT)
 			changeMove(e);
-		if(!pressedYet[2] && keyCode == KeyEvent.VK_RIGHT)
+		if (!pressedYet[2] && keyCode == KeyEvent.VK_RIGHT)
 			changeMove(e);
-		if(!pressedYet[3] && keyCode == KeyEvent.VK_UP) 
+		if (!pressedYet[3] && keyCode == KeyEvent.VK_UP)
 			changeMove(e);
-		if(!pressedYet[4] && keyCode == KeyEvent.VK_DOWN) 
+		if (!pressedYet[4] && keyCode == KeyEvent.VK_DOWN)
 			changeMove(e);
-		
+
 	}
-	
-	public void changeMove(KeyEvent e) {	
-		
+
+	public void changeMove(KeyEvent e) {
+
 		int kc = e.getKeyCode();
 		if (KeyEvent.VK_LEFT == kc) {
 			pressedYet[1] = true;
@@ -325,13 +333,18 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 	@Override
 	public void keyReleased(KeyEvent e) {
 		int kc = e.getKeyCode();
-		if(kc == KeyEvent.VK_LEFT) pressedYet[1] = false; 
-		else if (kc == KeyEvent.VK_RIGHT) pressedYet[2] = false;
-		else if (kc == KeyEvent.VK_UP) pressedYet[3] = false;
-		else if (kc == KeyEvent.VK_DOWN) pressedYet[4] = false;
-		
-		//if no arrow keys are pressed, stop
-		if(!pressedYet[1] && !pressedYet[2] && !pressedYet[3] && !pressedYet[4])
+		if (kc == KeyEvent.VK_LEFT)
+			pressedYet[1] = false;
+		else if (kc == KeyEvent.VK_RIGHT)
+			pressedYet[2] = false;
+		else if (kc == KeyEvent.VK_UP)
+			pressedYet[3] = false;
+		else if (kc == KeyEvent.VK_DOWN)
+			pressedYet[4] = false;
+
+		// if no arrow keys are pressed, stop
+		if (!pressedYet[1] && !pressedYet[2] && !pressedYet[3]
+				&& !pressedYet[4])
 			moveDir = 0;
 	}
 
