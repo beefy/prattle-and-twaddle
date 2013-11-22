@@ -140,15 +140,32 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 	// for user movement
 	public void running() {
 
+		
+		if(moveAxis == "movez") {
+			if(moveDir > 0) {
+				//going forwards
+				movez += Math.cos(view_roty/360);
+				movex += Math.sin(view_roty/360);
+			} else if(moveDir < 0) {
+				//going backwards
+				movez -= Math.cos(view_roty/360);
+				movex -= Math.sin(view_roty/360);
+			}
+		}
+		
+		/*
+		
 		if (moveAxis == "movex") {
-			//movex += moveDir * (0.1) * (float) Math.cos(view_roty+90);
-			//movez += moveDir * (0.1) * (float) Math.sin(view_roty+90);
+			// movex += moveDir * (0.1) * (float) Math.cos(view_roty+90);
+			// movez += moveDir * (0.1) * (float) Math.sin(view_roty+90);
 			movex += moveDir * (0.1);
 		} else if (moveAxis == "movez") {
-			//movex += moveDir * (0.1) * (float) Math.cos(Math.abs(view_rotx));
-			//movez += moveDir * (0.1) * (float) Math.sin(Math.abs(view_rotx));
+			// movex += moveDir * (0.1) * (float) Math.cos(Math.abs(view_rotx));
+			// movez += moveDir * (0.1) * (float) Math.sin(Math.abs(view_rotx));
 			movez += moveDir * (0.1);
 		}
+		
+		*/
 	}
 
 	// ------ Implement methods declared in GLEventListener ------
@@ -227,35 +244,88 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 
 		gl.glPushMatrix();
 
-		//translate before rotate
-		
+		// translate before rotate
+
+		 //gl.glTranslatef(movex, movey, movez);
 
 		// rotate around wherever the user drags the mouse
 		gl.glRotatef(-view_rotx, 1.0f, 0.0f, 0.0f);
 		gl.glRotatef(-view_roty, 0.0f, 1.0f, 0.0f);
 		gl.glRotatef(-view_rotz, 0.0f, 0.0f, 1.0f);
-		
-		gl.glTranslatef(movex, movey, movez);
 
-
+		//gl.glTranslatef(movex, movey, movez);
 
 		// --------- Rendering Code
 		for (int i = 0; i < 5; i++) {
 
 			gl.glPushMatrix();
 
-			//Quat4f glRot = new Quat4f();
-			//float rotation = trans.getRotation(glRot);
 			gl.glTranslatef(-3.0f + i * 3f, 0.0f, -6.0f);
 
-			// gl.glColor3fv(boxColors[2], 0);
+			//rotate the cube to face the camera
+				//I don't know if I'm doing this right
+				//I need to investigate what view_rotx, y, z ARE
+			//translate the cube along its axis
+			//rotate the cube back to it's original rotation
+				//I don't know how to access/store an object's rotation
+			
+			
+			
+			
+			gl.glTranslatef(movex, movey, movez);
+			
+		//	gl.glRotatef(-view_rotx, 1.0f, 0.0f, 0.0f);
+		//	gl.glRotatef(-view_roty, 0.0f, 1.0f, 0.0f);
+		//	gl.glRotatef(-view_rotz, 0.0f, 0.0f, 1.0f);
+			
+			
+			//gl.glRotatef(1, 1.0f, 0.0f, 0.0f);
+			//gl.glRotatef(1, 0.0f, 1.0f, 0.0f);
+			//gl.glRotatef(1, 0.0f, 0.0f, 1.0f);
+
+			
+			
+			
+			
+			
+			
+			//gl.glTranslatef(-3.0f + i * 3f, 0.0f, -6.0f);
+			
+////////////////////////////
+		/*	
+			gl.glRotatef(-view_rotx, 1.0f, 0.0f, 0.0f);
+			//gl.glRotatef(-view_roty, 0.0f, 1.0f, 0.0f);
+			gl.glRotatef(-view_rotz, 0.0f, 0.0f, 1.0f);
+
+			gl.glTranslatef(0, movey, 0);
+
+			gl.glRotatef(0, 1.0f, 0.0f, 0.0f);
+			gl.glRotatef(0, 0.0f, 1.0f, 0.0f);
+			gl.glRotatef(0, 0.0f, 0.0f, 1.0f);
+			
+///////////////////////////////
+			
+			//gl.glRotatef(-view_rotx, 1.0f, 0.0f, 0.0f);
+			gl.glRotatef(-view_roty, 0.0f, 1.0f, 0.0f);
+			gl.glRotatef(-view_rotz, 0.0f, 0.0f, 1.0f);
+
+			gl.glTranslatef(movex, 0, 0);
+
+			gl.glRotatef(0, 1.0f, 0.0f, 0.0f);
+			gl.glRotatef(0, 0.0f, 1.0f, 0.0f);
+			gl.glRotatef(0, 0.0f, 0.0f, 1.0f);
+	*/
+
+			 //gl.glTranslatef(-3.0f + i * 3f, 0.0f, -6.0f);
+
+			gl.glColor3fv(boxColors[2], 0);
 
 			if (i == 1) {
 				tempRotX += 2f;
 				gl.glRotatef(tempRotX, 1.0f, 0.0f, 0.0f);
 			}
-			
-			//gl.glTranslatef(-3.0f + i * 3f, 0.0f, -6.0f);
+
+			// gl.glTranslatef(-3.0f + i * 3f, 0.0f, -6.0f);
 
 			gl.glCallList(cubeDList); // draw the cube
 			gl.glPopMatrix();
