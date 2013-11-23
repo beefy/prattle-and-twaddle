@@ -143,7 +143,6 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 		//view_roty = view_roty%360;
 		
 		if (moveAxis == "movez") {
-			//if (view_roty >= 180) {		//when moving to the right
 				if (moveDir > 0) {
 					// going forwards
 					movez -= Math.cos(180-view_roty*(Math.PI/180) + 40) * 0.1;
@@ -153,40 +152,17 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 					movez += Math.cos(180-view_roty*(Math.PI/180) + 40) * 0.1;
 					movex -= Math.sin(180-view_roty*(Math.PI/180) + 40) * 0.1;
 				}
-			//} 
-		
-			/*
-			
-			else {					//when moving to the left
-				if (moveDir > 0) {
-					// going forwards
-					movez += Math.cos(view_roty / 360) * 0.1;
-					movex -= Math.sin(view_roty / 360) * 0.1;
-				} else if (moveDir < 0) {
-					// going backwards
-					movez -= Math.cos(view_roty / 360) * 0.1;
-					movex += Math.sin(view_roty / 360) * 0.1;
-				}
+		} else if(moveAxis == "movex") {
+			if (moveDir > 0) {
+				// moving right
+				movez -= Math.cos(180-view_roty*(Math.PI/180) + 40 + 80.1) * 0.1;
+				movex += Math.sin(180-view_roty*(Math.PI/180) + 40 + 80.1) * 0.1;
+			} else if (moveDir < 0) {
+				// moving left
+				movez -= Math.cos(180-view_roty*(Math.PI/180) + 40 - 80.1) * 0.1;
+				movex += Math.sin(180-view_roty*(Math.PI/180) + 40 - 80.1) * 0.1;
 			}
-			//make many cases for the angle of view_roty
-						//and move accordingly?
-					
-			*/
 		}
-		
-		
-
-		
-
-		/*
-		 * 
-		 * if (moveAxis == "movex") { // movex += moveDir * (0.1) * (float)
-		 * Math.cos(view_roty+90); // movez += moveDir * (0.1) * (float)
-		 * Math.sin(view_roty+90); movex += moveDir * (0.1); } else if (moveAxis
-		 * == "movez") { // movex += moveDir * (0.1) * (float)
-		 * Math.cos(Math.abs(view_rotx)); // movez += moveDir * (0.1) * (float)
-		 * Math.sin(Math.abs(view_rotx)); movez += moveDir * (0.1); }
-		 */
 	}
 
 	// ------ Implement methods declared in GLEventListener ------
@@ -375,14 +351,7 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 		}
 
 		// to move
-		// if (0 == (InputEvent.AUTOREPEAT_MASK & e.getModifiers())) {
-
 		if (!pressedYet[1] && keyCode == KeyEvent.VK_LEFT)
-			
-			System.out.println("view_roty = " + view_roty + "      movex = " + 
-					movex + "      movez = " + movez + "\ncos(180-view_roty) = " + 
-					Math.cos(180-view_roty) + "      sin(180-view_roty) = " + Math.sin(180-view_roty) +"\n\n\n");
-			
 			changeMove(e);
 		if (!pressedYet[2] && keyCode == KeyEvent.VK_RIGHT)
 			changeMove(e);
