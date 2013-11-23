@@ -17,7 +17,8 @@ public class Cubes2Main extends JFrame {
 	//private static final int CANVAS_WIDTH = 640; // width of the drawable
 	//private static final int CANVAS_HEIGHT = 480; // height of the drawable
 	private static final int FPS = 60; // animator's target frames per second
-
+	private boolean debugMode = false; //false for full screen, true for not full screen
+	
 	/** Constructor to setup the top-level container and animator */
 	public Cubes2Main() {
 		// Run the GUI codes in the event-dispatching thread for thread safety
@@ -25,7 +26,8 @@ public class Cubes2Main extends JFrame {
 			@Override
 			public void run() {
 				// Create the OpenGL rendering canvas
-				//GLCanvas canvas = new GLCanvas();
+				// 		The renderer is also the canvas because
+				// 		the rendering class extends GLCanvas
 				Cubes2Renderer renderer = new Cubes2Renderer();
 				renderer.addGLEventListener(renderer);
 
@@ -33,15 +35,15 @@ public class Cubes2Main extends JFrame {
 				// specified FPS.
 				FPSAnimator animator = new FPSAnimator(renderer, FPS, true);
 
-				renderer.setPreferredSize(new Dimension(500, 500)); //for not full screen
+				if(debugMode) renderer.setPreferredSize(new Dimension(500, 500));
 				// Create the top-level container frame
 				JFrame frame = new JFrame(); // Swing's JFrame or AWT's Frame
 				frame.getContentPane().add(renderer);
 				frame.setUndecorated(true); // no decoration such as title bar
-				//frame.setExtendedState(Frame.MAXIMIZED_BOTH); // full screen
+				if(!debugMode) frame.setExtendedState(Frame.MAXIMIZED_BOTH); // full screen
 																// mode
-				frame.setTitle("Pix"); //for not fullscreen mode
-	            frame.pack();		   //for not fullscreen mode
+				if(debugMode) frame.setTitle("Pix"); 
+	            if(debugMode) frame.pack();		  
 				frame.setVisible(true);
 				animator.start(); // start the animation loop
 			}
