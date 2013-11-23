@@ -1,6 +1,7 @@
 package com.carnivorous_exports.terrain;
 
 import java.awt.*;
+
 import javax.swing.*;
 import javax.media.opengl.awt.GLCanvas;
 import com.jogamp.opengl.util.FPSAnimator;
@@ -32,12 +33,15 @@ public class Cubes2Main extends JFrame {
 				// specified FPS.
 				FPSAnimator animator = new FPSAnimator(renderer, FPS, true);
 
+				renderer.setPreferredSize(new Dimension(500, 500)); //for not full screen
 				// Create the top-level container frame
 				JFrame frame = new JFrame(); // Swing's JFrame or AWT's Frame
 				frame.getContentPane().add(renderer);
 				frame.setUndecorated(true); // no decoration such as title bar
-				frame.setExtendedState(Frame.MAXIMIZED_BOTH); // full screen
+				//frame.setExtendedState(Frame.MAXIMIZED_BOTH); // full screen
 																// mode
+				frame.setTitle("Pix"); //for not fullscreen mode
+	            frame.pack();		   //for not fullscreen mode
 				frame.setVisible(true);
 				animator.start(); // start the animation loop
 			}
