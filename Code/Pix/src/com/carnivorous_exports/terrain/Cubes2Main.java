@@ -1,6 +1,7 @@
 package com.carnivorous_exports.terrain;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 import javax.swing.*;
 import javax.media.opengl.awt.GLCanvas;
@@ -17,7 +18,8 @@ public class Cubes2Main extends JFrame {
 	//private static final int CANVAS_WIDTH = 640; // width of the drawable
 	//private static final int CANVAS_HEIGHT = 480; // height of the drawable
 	private static final int FPS = 60; // animator's target frames per second
-	private boolean debugMode = false; //false for full screen, true for not full screen
+	private boolean fullScreen = true;
+	private boolean cursorVisible = true;
 	
 	/** Constructor to setup the top-level container and animator */
 	public Cubes2Main() {
@@ -35,15 +37,23 @@ public class Cubes2Main extends JFrame {
 				// specified FPS.
 				FPSAnimator animator = new FPSAnimator(renderer, FPS, true);
 
-				if(debugMode) renderer.setPreferredSize(new Dimension(500, 500));
+				if(!fullScreen) renderer.setPreferredSize(new Dimension(500, 500));
+				
+				//make cursor disappear
+				Toolkit t = Toolkit.getDefaultToolkit();
+				Image i = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+				Cursor noCursor = t.createCustomCursor(i, new Point(0, 0), "none");
+				
+				
 				// Create the top-level container frame
 				JFrame frame = new JFrame(); // Swing's JFrame or AWT's Frame
+				if(!cursorVisible) frame.setCursor(noCursor);
 				frame.getContentPane().add(renderer);
 				frame.setUndecorated(true); // no decoration such as title bar
-				if(!debugMode) frame.setExtendedState(Frame.MAXIMIZED_BOTH); // full screen
+				if(fullScreen) frame.setExtendedState(Frame.MAXIMIZED_BOTH); // full screen
 																// mode
-				if(debugMode) frame.setTitle("Pix"); 
-	            if(debugMode) frame.pack();		  
+				if(!fullScreen) frame.setTitle("Pix"); 
+	            if(!fullScreen) frame.pack();		  
 				frame.setVisible(true);
 				animator.start(); // start the animation loop
 			}

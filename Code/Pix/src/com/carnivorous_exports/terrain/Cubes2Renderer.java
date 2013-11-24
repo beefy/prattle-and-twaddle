@@ -7,6 +7,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.text.MessageFormat;
 
+import javax.media.nativewindow.util.Point;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLAnimatorControl;
 import javax.media.opengl.GLAutoDrawable;
@@ -41,8 +42,11 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 	private int cubeDList; // display list for cube
 
 	private boolean mouseRButtonDown;
+	private boolean mouseInMiddle = false;
 	private int prevMouseX;
 	private int prevMouseY;
+	private int mouseX;
+	private int mouseY;
 	private float view_rotx;
 	private float view_roty;
 	private float view_rotz;
@@ -50,15 +54,24 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 	private float movey;
 	private float movez;
 
+	// the width and height of the screen
+	private int width;
+	private int height;
+
+	// for (arrow) key movement
+	private boolean upPressed;
+	private boolean downPressed;
+	private boolean rightPressed;
+	private boolean leftPressed;
+	private boolean moving;
+
+	private boolean forwardMove;
+	private boolean strifeMove;
+	int moveDirForward;
+	int moveDirStrife;
+	
 	// for testing rotation
 	float tempRotX;
-
-	// for stopping key auto-repeat
-	private boolean[] pressedYet = new boolean[5];
-
-	// for running
-	String moveAxis;
-	int moveDir;
 
 	// final Animator animator = new Animator();
 
@@ -140,27 +153,20 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 	// for user movement
 	public void running() {
 
-		//view_roty = view_roty%360;
-		
-		if (moveAxis == "movez") {
-				if (moveDir > 0) {
-					// going forwards
-					movez -= Math.cos(180-view_roty*(Math.PI/180) + 40) * 0.1;
-					movex += Math.sin(180-view_roty*(Math.PI/180) + 40) * 0.1;
-				} else if (moveDir < 0) {
-					// going backwards
-					movez += Math.cos(180-view_roty*(Math.PI/180) + 40) * 0.1;
-					movex -= Math.sin(180-view_roty*(Math.PI/180) + 40) * 0.1;
-				}
-		} else if(moveAxis == "movex") {
-			if (moveDir > 0) {
-				// moving right
-				movez -= Math.cos(180-view_roty*(Math.PI/180) + 40 + 80.1) * 0.1;
-				movex += Math.sin(180-view_roty*(Math.PI/180) + 40 + 80.1) * 0.1;
-			} else if (moveDir < 0) {
-				// moving left
-				movez -= Math.cos(180-view_roty*(Math.PI/180) + 40 - 80.1) * 0.1;
-				movex += Math.sin(180-view_roty*(Math.PI/180) + 40 - 80.1) * 0.1;
+		// view_roty = view_roty%360;
+		if (moving) {
+			if (forwardMove) { // moving forward or back
+				movez -= Math.cos(180 - view_roty * (Math.PI / 180) + 40) * 0.1
+						* -moveDirForward;
+				movex += Math.sin(180 - view_roty * (Math.PI / 180) + 40) * 0.1
+						* -moveDirForward;
+			}
+			
+			if (strifeMove) { // moving right or left
+				movez -= Math.cos(180 - view_roty * (Math.PI / 180) + 40 + 80.1
+						* -moveDirStrife) * 0.1;
+				movex += Math.sin(180 - view_roty * (Math.PI / 180) + 40 + 80.1
+						* -moveDirStrife) * 0.1;
 			}
 		}
 	}
@@ -244,9 +250,8 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 		gl.glRotatef(-view_rotx, 1.0f, 0.0f, 0.0f);
 		gl.glRotatef(-view_roty, 0.0f, 1.0f, 0.0f);
 		gl.glRotatef(-view_rotz, 0.0f, 0.0f, 1.0f);
-		
-		gl.glTranslatef(movex, movey, movez);
 
+		gl.glTranslatef(movex, movey, movez);
 
 		// --------- Rendering Code
 		for (int i = 0; i < 5; i++) {
@@ -300,36 +305,33 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 		}
 
 		// to move
-		if (!pressedYet[1] && keyCode == KeyEvent.VK_LEFT)
-			changeMove(e);
-		if (!pressedYet[2] && keyCode == KeyEvent.VK_RIGHT)
-			changeMove(e);
-		if (!pressedYet[3] && keyCode == KeyEvent.VK_UP)
-			changeMove(e);
-		if (!pressedYet[4] && keyCode == KeyEvent.VK_DOWN)
-			changeMove(e);
+		if (keyCode == KeyEvent.VK_LEFT)
+			leftPressed = true;
+		if (keyCode == KeyEvent.VK_RIGHT)
+			rightPressed = true;
+		if (keyCode == KeyEvent.VK_UP)
+			upPressed = true;
+		if (keyCode == KeyEvent.VK_DOWN)
+			downPressed = true;
 
-	}
-
-	public void changeMove(KeyEvent e) {
-
-		int kc = e.getKeyCode();
-		if (KeyEvent.VK_LEFT == kc) {
-			pressedYet[1] = true;
-			moveAxis = "movex";
-			moveDir = -1;
-		} else if (KeyEvent.VK_RIGHT == kc) {
-			pressedYet[2] = true;
-			moveAxis = "movex";
-			moveDir = +1;
-		} else if (KeyEvent.VK_UP == kc) {
-			pressedYet[3] = true;
-			moveAxis = "movez";
-			moveDir = +1;
-		} else if (KeyEvent.VK_DOWN == kc) {
-			pressedYet[4] = true;
-			moveAxis = "movez";
-			moveDir = -1;
+		if(upPressed || downPressed || rightPressed || leftPressed) {
+			moving = true;
+		}
+		
+		if (leftPressed) {
+			strifeMove = true;
+			moveDirStrife = +1;
+		} else if(rightPressed) {
+			strifeMove = true;
+			moveDirStrife = -1;
+		}
+		
+		if(upPressed) {
+			forwardMove = true;
+			moveDirForward = -1;
+		} else if(downPressed) {
+			forwardMove = true;
+			moveDirForward = +1;
 		}
 	}
 
@@ -337,18 +339,20 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 	public void keyReleased(KeyEvent e) {
 		int kc = e.getKeyCode();
 		if (kc == KeyEvent.VK_LEFT)
-			pressedYet[1] = false;
+			leftPressed = false;
 		else if (kc == KeyEvent.VK_RIGHT)
-			pressedYet[2] = false;
+			rightPressed = false;
 		else if (kc == KeyEvent.VK_UP)
-			pressedYet[3] = false;
+			upPressed = false;
 		else if (kc == KeyEvent.VK_DOWN)
-			pressedYet[4] = false;
+			downPressed = false;
 
 		// if no arrow keys are pressed, stop
-		if (!pressedYet[1] && !pressedYet[2] && !pressedYet[3]
-				&& !pressedYet[4])
-			moveDir = 0;
+		if (!leftPressed && !rightPressed && !upPressed && !downPressed) {
+			moving = false;
+			strifeMove = false;
+			forwardMove = false;
+		}
 	}
 
 	@Override
@@ -374,17 +378,17 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 	}
 
 	public void mousePressed(MouseEvent e) {
-		prevMouseX = e.getX();
-		prevMouseY = e.getY();
-		if ((e.getModifiers() & e.BUTTON3_MASK) != 0) {
-			mouseRButtonDown = true;
-		}
+		// prevMouseX = e.getX();
+		// prevMouseY = e.getY();
+		// if ((e.getModifiers() & e.BUTTON3_MASK) != 0) {
+		// mouseRButtonDown = true;
+		// }
 	}
 
 	public void mouseReleased(MouseEvent e) {
-		if ((e.getModifiers() & e.BUTTON3_MASK) != 0) {
-			mouseRButtonDown = false;
-		}
+		// if ((e.getModifiers() & e.BUTTON3_MASK) != 0) {
+		// mouseRButtonDown = false;
+		// }
 	}
 
 	public void mouseDragged(MouseEvent e) {
@@ -393,10 +397,28 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
-		int x = e.getX();
-		int y = e.getY();
-		int width = 0, height = 0;
+		/**
+		 * To prevent the mouse from hitting the edge of the screen we have to
+		 * move the mouse to the center of the screen every other iteration and
+		 * keep track of the mouse position ourselves
+		 * 
+		 * mouseInMiddle == true when we are iterating just to keep the mouse in
+		 * the middle
+		 */
+
+		if (!mouseInMiddle) {
+			mouseY += e.getY() - prevMouseY;
+			mouseX += e.getX() - prevMouseX;
+			System.out.println("(" + e.getX() + "," + e.getY() + ")");
+		}
+
+		int x = mouseX;
+		int y = mouseY;
+		// int width = 0, height = 0;
+
 		Object source = e.getSource();
+
+		// to declare the variables width and height
 		if (source instanceof Window) {
 			Window window = (Window) source;
 			width = window.getWidth();
@@ -410,13 +432,25 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 			throw new RuntimeException(
 					"Event source neither Window nor Component: " + source);
 		}
+
 		float thetaY = 360.0f * ((float) (x - prevMouseX) / (float) width);
 		float thetaX = 360.0f * ((float) (prevMouseY - y) / (float) height);
-
 		prevMouseX = x;
 		prevMouseY = y;
 
-		view_rotx += thetaX;
-		view_roty += thetaY;
+		if (!mouseInMiddle) {
+			// change the camera rotation
+			view_rotx += thetaX;
+			view_roty += thetaY;
+
+			mouseInMiddle = true;
+
+			// move the mouse to the middle of the screen
+			mouseMoved(new MouseEvent(e.getComponent(), e.getID(), e.getWhen(),
+					e.getModifiers(), (int) 0.5 * width, (int) 0.5 * height,
+					e.getClickCount(), false, e.getButton()));
+
+			mouseInMiddle = false;
+		}
 	}
 }
