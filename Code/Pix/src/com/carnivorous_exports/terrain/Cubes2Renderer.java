@@ -63,13 +63,12 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 	private boolean downPressed;
 	private boolean rightPressed;
 	private boolean leftPressed;
-	private boolean moving;
 
 	private boolean forwardMove;
 	private boolean strifeMove;
 	int moveDirForward;
 	int moveDirStrife;
-	
+
 	// for testing rotation
 	float tempRotX;
 
@@ -154,20 +153,18 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 	public void running() {
 
 		// view_roty = view_roty%360;
-		if (moving) {
-			if (forwardMove) { // moving forward or back
-				movez -= Math.cos(180 - view_roty * (Math.PI / 180) + 40) * 0.1
-						* -moveDirForward;
-				movex += Math.sin(180 - view_roty * (Math.PI / 180) + 40) * 0.1
-						* -moveDirForward;
-			}
-			
-			if (strifeMove) { // moving right or left
-				movez -= Math.cos(180 - view_roty * (Math.PI / 180) + 40 + 80.1
-						* -moveDirStrife) * 0.1;
-				movex += Math.sin(180 - view_roty * (Math.PI / 180) + 40 + 80.1
-						* -moveDirStrife) * 0.1;
-			}
+		if (forwardMove) { // moving forward or back
+			movez -= Math.cos(180 - view_roty * (Math.PI / 180) + 40) * 0.1
+					* -moveDirForward;
+			movex += Math.sin(180 - view_roty * (Math.PI / 180) + 40) * 0.1
+					* -moveDirForward;
+		}
+
+		if (strifeMove) { // moving right or left
+			movez -= Math.cos(180 - view_roty * (Math.PI / 180) + 40 + 80.1
+					* -moveDirStrife) * 0.1;
+			movex += Math.sin(180 - view_roty * (Math.PI / 180) + 40 + 80.1
+					* -moveDirStrife) * 0.1;
 		}
 	}
 
@@ -313,30 +310,13 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 			upPressed = true;
 		if (keyCode == KeyEvent.VK_DOWN)
 			downPressed = true;
-
-		if(upPressed || downPressed || rightPressed || leftPressed) {
-			moving = true;
-		}
 		
-		if (leftPressed) {
-			strifeMove = true;
-			moveDirStrife = +1;
-		} else if(rightPressed) {
-			strifeMove = true;
-			moveDirStrife = -1;
-		}
-		
-		if(upPressed) {
-			forwardMove = true;
-			moveDirForward = -1;
-		} else if(downPressed) {
-			forwardMove = true;
-			moveDirForward = +1;
-		}
+		checkKeysPressed();
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e) {
+		
 		int kc = e.getKeyCode();
 		if (kc == KeyEvent.VK_LEFT)
 			leftPressed = false;
@@ -346,15 +326,49 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 			upPressed = false;
 		else if (kc == KeyEvent.VK_DOWN)
 			downPressed = false;
-
-		// if no arrow keys are pressed, stop
-		if (!leftPressed && !rightPressed && !upPressed && !downPressed) {
-			moving = false;
-			strifeMove = false;
-			forwardMove = false;
-		}
+		
+		checkKeysPressed();
 	}
 
+	public void checkKeysPressed() {
+		
+		if (upPressed && !downPressed) {
+			moveDirForward = -1;
+		} else if (downPressed && !upPressed) {
+			moveDirForward = +1;
+		}
+		
+		if (leftPressed && !rightPressed) {
+			moveDirStrife = +1;
+		} else if (rightPressed && !leftPressed) {
+			moveDirStrife = -1;
+		}
+		
+		if (!leftPressed && !rightPressed) {
+			strifeMove = false;
+		}
+
+		if (!upPressed && !downPressed) {
+			forwardMove = false;
+		}
+		
+		if (upPressed || downPressed) {
+			forwardMove = true;
+		}
+		
+		if(rightPressed || leftPressed) {
+			strifeMove = true;
+		}
+		
+		if(upPressed && downPressed) {
+			forwardMove = false;
+		}
+		
+		if(rightPressed && leftPressed) {
+			strifeMove = false;
+		}
+	}
+	
 	@Override
 	public void keyTyped(KeyEvent e) {
 
