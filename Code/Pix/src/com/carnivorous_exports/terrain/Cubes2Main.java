@@ -14,12 +14,12 @@ import com.jogamp.opengl.util.FPSAnimator;
 @SuppressWarnings("serial")
 public class Cubes2Main extends JFrame {
 	// Define constants for the top-level container
-	//private static String TITLE = "JOGL 2.0 Setup (GLCanvas)"; // window's title
-	//private static final int CANVAS_WIDTH = 640; // width of the drawable
-	//private static final int CANVAS_HEIGHT = 480; // height of the drawable
+	private static String TITLE = "Pix"; // window's title
+	private static final int CANVAS_WIDTH = 640; // width of the drawable
+	private static final int CANVAS_HEIGHT = 480; // height of the drawable
 	private static final int FPS = 60; // animator's target frames per second
 	private boolean fullScreen = true;
-	private boolean cursorVisible = true;
+	private boolean cursorVisible = false;
 	
 	/** Constructor to setup the top-level container and animator */
 	public Cubes2Main() {
@@ -37,7 +37,7 @@ public class Cubes2Main extends JFrame {
 				// specified FPS.
 				FPSAnimator animator = new FPSAnimator(renderer, FPS, true);
 
-				if(!fullScreen) renderer.setPreferredSize(new Dimension(500, 500));
+				if(!fullScreen) renderer.setPreferredSize(new Dimension(CANVAS_WIDTH, CANVAS_HEIGHT));
 				
 				//make cursor disappear
 				Toolkit t = Toolkit.getDefaultToolkit();
@@ -52,8 +52,9 @@ public class Cubes2Main extends JFrame {
 				frame.setUndecorated(true); // no decoration such as title bar
 				if(fullScreen) frame.setExtendedState(Frame.MAXIMIZED_BOTH); // full screen
 																// mode
-				if(!fullScreen) frame.setTitle("Pix"); 
-	            if(!fullScreen) frame.pack();		  
+				//GLWindow glw = new GLWindow();
+				if(!fullScreen) frame.setTitle(TITLE); 
+	            if(!fullScreen) frame.pack();
 				frame.setVisible(true);
 				animator.start(); // start the animation loop
 			}

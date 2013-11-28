@@ -6,7 +6,15 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.text.MessageFormat;
+import java.util.List;
 
+import javax.media.nativewindow.CapabilitiesChooser;
+import javax.media.nativewindow.CapabilitiesImmutable;
+import javax.media.nativewindow.NativeSurface;
+import javax.media.nativewindow.NativeWindow;
+import javax.media.nativewindow.NativeWindowException;
+import javax.media.nativewindow.SurfaceUpdatedListener;
+import javax.media.nativewindow.util.InsetsImmutable;
 import javax.media.nativewindow.util.Point;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLAnimatorControl;
@@ -16,11 +24,18 @@ import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.glu.GLU;
 
+import com.jogamp.newt.MonitorDevice;
+import com.jogamp.newt.Screen;
 import com.jogamp.newt.Window;
+import com.jogamp.newt.event.GestureHandler;
+import com.jogamp.newt.event.GestureHandler.GestureListener;
 import com.jogamp.newt.event.InputEvent;
 import com.jogamp.newt.event.MouseAdapter;
+import com.jogamp.newt.event.NEWTEvent;
+import com.jogamp.newt.event.WindowListener;
 import com.jogamp.newt.event.awt.AWTKeyAdapter;
 import com.jogamp.newt.event.awt.AWTMouseAdapter;
+import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.util.Animator;
 
 import static javax.media.opengl.GL.*; // GL constants
@@ -36,7 +51,7 @@ import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_LIGHT0;
  */
 @SuppressWarnings("serial")
 public class Cubes2Renderer extends GLCanvas implements GLEventListener,
-		KeyListener, MouseListener, MouseMotionListener {
+		KeyListener, MouseListener, MouseMotionListener { //Window {
 
 	private GLU glu; // for the GL Utility
 	private int cubeDList; // display list for cube
@@ -53,6 +68,8 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 	private float movex;
 	private float movey;
 	private float movez;
+	private float mouseSensitivity = 1f; //doesn't work yet, get moving mouse off
+										 //screen to work first
 
 	// the width and height of the screen
 	private int width;
@@ -442,6 +459,7 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 			java.awt.Component comp = (java.awt.Component) source;
 			width = comp.getWidth();
 			height = comp.getHeight();
+			//System.out.println("used");
 		} else {
 			throw new RuntimeException(
 					"Event source neither Window nor Component: " + source);
@@ -454,15 +472,22 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 
 		if (!mouseInMiddle) {
 			// change the camera rotation
-			view_rotx += thetaX;
-			view_roty += thetaY;
+			view_rotx += thetaX * mouseSensitivity;
+			view_roty += thetaY * mouseSensitivity;
 
 			mouseInMiddle = true;
 
 			// move the mouse to the middle of the screen
+			/*
 			mouseMoved(new MouseEvent(e.getComponent(), e.getID(), e.getWhen(),
 					e.getModifiers(), (int) 0.5 * width, (int) 0.5 * height,
 					e.getClickCount(), false, e.getButton()));
+			*/
+			
+			//GLWindow glw = new GLWindow();
+			
+			//glw.warpPointer(0, 0);
+			//GLWindow.this.warpPointer(0, 0);
 
 			mouseInMiddle = false;
 		}
