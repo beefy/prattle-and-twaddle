@@ -1,5 +1,7 @@
 package com.carnivorous_exports.terrain;
 
+import java.awt.AWTException;
+import java.awt.Robot;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -54,14 +56,15 @@ import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_LIGHT0;
 public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 		KeyListener, MouseListener, MouseMotionListener { //Window {
 
-	GLWindow glWindow;
+	//GLWindow glWindow;
 	
 	private GLU glu; // for the GL Utility
 	private int cubeDList; // display list for cube
 	
-	GLWindow glw;
+	//GLWindow glw;
+	Robot robot;
 
-	public boolean initialized;
+	//public boolean initialized;
 	private int centeredX = -1;
     private int centeredY = -1;
 	private boolean mouseRButtonDown;
@@ -201,6 +204,18 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 	 */
 	@Override
 	public void init(GLAutoDrawable drawable) {
+		
+		//glw.warpPointer(0, 0);
+		
+		//move the mouse to the center
+		try {
+			robot = new Robot();
+		} catch (AWTException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		robot.mouseMove(getWidth() / 2,getHeight() / 2);
+		mouseInMiddle = true;
 		
 		//glWindow = display.getGLDrawable();
 		
@@ -495,7 +510,7 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 			view_rotx += thetaX * mouseSensitivity;
 			view_roty += thetaY * mouseSensitivity;
 
-			mouseInMiddle = true;
+			//mouseInMiddle = true;
 
 			// move the mouse to the middle of the screen
 			/*
@@ -503,6 +518,8 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 					e.getModifiers(), (int) 0.5 * width, (int) 0.5 * height,
 					e.getClickCount(), false, e.getButton()));
 			*/
+			
+			/*
 			
 			if(!initialized) {
 				return;
@@ -517,12 +534,21 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 			
 			//if(initialized && glw == Cubes2Main.glWindow) 
 			
-			centeredX = glw.getWidth() / 2;
-		    centeredY = glw.getHeight() / 2;
-			glw.warpPointer(centeredX, centeredY);
+			
+			System.out.println(glw.getWidth() / 2);
+		    System.out.println(glw.getHeight() / 2);
+			glw.warpPointer(glw.getWidth() / 2, glw.getHeight() / 2);
 		    //glw.confinePointer(false);
 		    System.out.println("Warped Pointer!   (" + e.getX() + "," + e.getY() + ")");
 			mouseInMiddle = false;
+			
+			*/
 		//}
+			
+		if(mouseInMiddle) {
+			mouseInMiddle = false;
+			robot.mouseMove(getWidth() / 2,getHeight() / 2);
+			mouseInMiddle = true;
+		}
 	}
 }
