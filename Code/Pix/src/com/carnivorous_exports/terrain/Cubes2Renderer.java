@@ -78,9 +78,7 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 	private float movex;
 	private float movey;
 	private float movez;
-	private float mouseSensitivity = 1f; // doesn't work yet, get moving mouse
-											// off
-											// screen to work first
+	private float mouseSensitivity = 0.75f;
 
 	// for (arrow) key movement
 	private boolean upPressed;
@@ -470,8 +468,8 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 		prevMouseX = mouseX;
 		prevMouseY = mouseY;
 
-		view_rotx += thetaX; // * mouseSensitivity;
-		view_roty += thetaY; // * mouseSensitivity;
+		view_rotx += thetaX * mouseSensitivity;
+		view_roty += thetaY * mouseSensitivity;
 
 		view_roty = view_roty%360;
 		 

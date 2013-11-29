@@ -23,7 +23,7 @@ public class Cubes2Main extends JFrame {
 	private static final int CANVAS_HEIGHT = 480; // height of the drawable
 	private static final int FPS = 60; // animator's target frames per second
 	private boolean fullScreen = true;
-	private boolean cursorVisible = true;
+	private boolean cursorVisible = false;
 	
 	/** Constructor to setup the top-level container and animator */
 	public Cubes2Main() {
