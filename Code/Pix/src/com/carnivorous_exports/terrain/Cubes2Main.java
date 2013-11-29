@@ -67,11 +67,11 @@ public class Cubes2Main extends JFrame {
 				//initiate the GLWindow
 				GLCapabilities caps = new GLCapabilities(GLProfile.get(GLProfile.GL2GL3));
 		        caps.setBackgroundOpaque(false);
-		        glWindow = GLWindow.create(caps);
-		        renderer.initialized = true;
-		        glWindow.addGLEventListener(renderer);
+		        //glWindow = GLWindow.create(caps);
+		        //renderer.initialized = true;
+		        //glWindow.addGLEventListener(renderer);
 				
-				animator.add(glWindow);
+				//animator.add(glWindow);
 				animator.start(); // start the animation loop
 			}
 		});
