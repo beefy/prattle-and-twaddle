@@ -24,7 +24,6 @@ public class Cubes2Main extends JFrame {
 	private static final int FPS = 60; // animator's target frames per second
 	private boolean fullScreen = true;
 	private boolean cursorVisible = true;
-	static GLWindow glWindow;
 	
 	/** Constructor to setup the top-level container and animator */
 	public Cubes2Main() {
@@ -59,7 +58,6 @@ public class Cubes2Main extends JFrame {
 				frame.setUndecorated(true); // no decoration such as title bar
 				if(fullScreen) frame.setExtendedState(Frame.MAXIMIZED_BOTH); // full screen
 																// mode
-				//GLWindow glw = new GLWindow();
 				if(!fullScreen) frame.setTitle(TITLE); 
 	            if(!fullScreen) frame.pack();
 				frame.setVisible(true);
@@ -67,11 +65,7 @@ public class Cubes2Main extends JFrame {
 				//initiate the GLWindow
 				GLCapabilities caps = new GLCapabilities(GLProfile.get(GLProfile.GL2GL3));
 		        caps.setBackgroundOpaque(false);
-		        //glWindow = GLWindow.create(caps);
-		        //renderer.initialized = true;
-		        //glWindow.addGLEventListener(renderer);
-				
-				//animator.add(glWindow);
+		        
 				animator.start(); // start the animation loop
 			}
 		});

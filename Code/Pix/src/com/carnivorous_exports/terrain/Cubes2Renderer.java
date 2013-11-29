@@ -54,19 +54,18 @@ import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_LIGHT0;
  */
 @SuppressWarnings("serial")
 public class Cubes2Renderer extends GLCanvas implements GLEventListener,
-		KeyListener, MouseListener, MouseMotionListener { //Window {
+		KeyListener, MouseListener, MouseMotionListener {
 
-	//GLWindow glWindow;
-	
 	private GLU glu; // for the GL Utility
 	private int cubeDList; // display list for cube
-	
-	//GLWindow glw;
-	Robot robot;
 
-	//public boolean initialized;
+	Robot robot;
+	int width;
+	int height;
+
+	// public boolean initialized;
 	private int centeredX = -1;
-    private int centeredY = -1;
+	private int centeredY = -1;
 	private boolean mouseRButtonDown;
 	private boolean mouseInMiddle = false;
 	private int prevMouseX;
@@ -79,12 +78,9 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 	private float movex;
 	private float movey;
 	private float movez;
-	private float mouseSensitivity = 1f; //doesn't work yet, get moving mouse off
-										 //screen to work first
-
-	// the width and height of the screen
-	private int width;
-	private int height;
+	private float mouseSensitivity = 1f; // doesn't work yet, get moving mouse
+											// off
+											// screen to work first
 
 	// for (arrow) key movement
 	private boolean upPressed;
@@ -99,8 +95,6 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 
 	// for testing rotation
 	float tempRotX;
-
-	// final Animator animator = new Animator();
 
 	private static float[][] boxColors = { // Bright: Red, Orange, Yellow,
 			// Green, Blue
@@ -121,7 +115,6 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 	public void buildDisplayList(GL2 gl) {
 		// Build two lists, and returns handle for the first list
 		// create one display list
-		// GLuint index = glGenLists(1);
 
 		int base = gl.glGenLists(1);
 
@@ -179,12 +172,11 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 
 	// for user movement
 	public void running() {
-
-		// view_roty = view_roty%360;
+		
 		if (forwardMove) { // moving forward or back
-			movez -= Math.cos(180 - view_roty * (Math.PI / 180) + 40) * 0.1
+			movez += Math.cos(180 - view_roty * (Math.PI / 180) + 40) * 0.1
 					* -moveDirForward;
-			movex += Math.sin(180 - view_roty * (Math.PI / 180) + 40) * 0.1
+			movex -= Math.sin(180 - view_roty * (Math.PI / 180) + 40) * 0.1
 					* -moveDirForward;
 		}
 
@@ -204,32 +196,21 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 	 */
 	@Override
 	public void init(GLAutoDrawable drawable) {
-		
-		//glw.warpPointer(0, 0);
-		
-		//move the mouse to the center
+
+		width = getWidth();
+		height = getHeight();
+
+		// move the mouse to the center
 		try {
 			robot = new Robot();
 		} catch (AWTException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		robot.mouseMove(getWidth() / 2,getHeight() / 2);
+		robot.mouseMove(getWidth() / 2, getHeight() / 2);
 		mouseInMiddle = true;
 		
-		//glWindow = display.getGLDrawable();
-		
-		//initiate the GLWindow
-		//GLCapabilities caps = new GLCapabilities(GLProfile.get(GLProfile.GL2GL3));
-        //caps.setBackgroundOpaque(false);
-        //glWindow = GLWindow.create(caps);
-        //glWindow.addGLEventListener(this);
-        
-        //GLAnimatorControl animator = getAnimator();
-        //animator.add(glWindow);
-		
-        //initialized = true;
-		
+
 		GL2 gl = drawable.getGL().getGL2(); // get the OpenGL graphics context
 		glu = new GLU(); // get GL Utilities
 		gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // set background (clear) color
@@ -362,13 +343,13 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 			upPressed = true;
 		if (keyCode == KeyEvent.VK_DOWN)
 			downPressed = true;
-		
+
 		checkKeysPressed();
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e) {
-		
+
 		int kc = e.getKeyCode();
 		if (kc == KeyEvent.VK_LEFT)
 			leftPressed = false;
@@ -378,24 +359,24 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 			upPressed = false;
 		else if (kc == KeyEvent.VK_DOWN)
 			downPressed = false;
-		
+
 		checkKeysPressed();
 	}
 
 	public void checkKeysPressed() {
-		
+
 		if (upPressed && !downPressed) {
 			moveDirForward = -1;
 		} else if (downPressed && !upPressed) {
 			moveDirForward = +1;
 		}
-		
+
 		if (leftPressed && !rightPressed) {
 			moveDirStrife = +1;
 		} else if (rightPressed && !leftPressed) {
 			moveDirStrife = -1;
 		}
-		
+
 		if (!leftPressed && !rightPressed) {
 			strifeMove = false;
 		}
@@ -403,24 +384,24 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 		if (!upPressed && !downPressed) {
 			forwardMove = false;
 		}
-		
+
 		if (upPressed || downPressed) {
 			forwardMove = true;
 		}
-		
-		if(rightPressed || leftPressed) {
+
+		if (rightPressed || leftPressed) {
 			strifeMove = true;
 		}
-		
-		if(upPressed && downPressed) {
+
+		if (upPressed && downPressed) {
 			forwardMove = false;
 		}
-		
-		if(rightPressed && leftPressed) {
+
+		if (rightPressed && leftPressed) {
 			strifeMove = false;
 		}
 	}
-	
+
 	@Override
 	public void keyTyped(KeyEvent e) {
 
@@ -468,87 +449,41 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 		 * move the mouse to the center of the screen every other iteration and
 		 * keep track of the mouse position ourselves
 		 * 
-		 * mouseInMiddle == true when we are iterating just to keep the mouse in
-		 * the middle
+		 * mouseInMiddle == false when we are iterating just to keep the mouse
+		 * in the middle
 		 */
 
-		//if (!mouseInMiddle) {
-			mouseY += e.getY() - prevMouseY;
-			mouseX += e.getX() - prevMouseX;
-			System.out.println("(" + e.getX() + "," + e.getY() + ")");
-		//}
+		if (!mouseInMiddle) return;
+		
+		prevMouseY = height/2;		//because the mouse is always in the middle of
+		prevMouseX = width/2;		//the screen, the prevMouseX/Y is also always
+									//the middle of the screen
+		float thetaY;
+		float thetaX;
 
-		int x = mouseX;
-		int y = mouseY;
-		// int width = 0, height = 0;
+		mouseY = prevMouseY - e.getY();
+		mouseX = prevMouseX - e.getX();
 
-		Object source = e.getSource();
+		thetaY = 360.0f * ((float) (mouseX) / (float) width);
+		thetaX = 360.0f * ((float) (mouseY) / (float) height);
 
-		// to declare the variables width and height
-		if (source instanceof Window) {
-			Window window = (Window) source;
-			width = window.getWidth();
-			height = window.getHeight();
-		} else if (GLProfile.isAWTAvailable()
-				&& source instanceof java.awt.Component) {
-			java.awt.Component comp = (java.awt.Component) source;
-			width = comp.getWidth();
-			height = comp.getHeight();
-			//System.out.println("used");
-		} else {
-			throw new RuntimeException(
-					"Event source neither Window nor Component: " + source);
+		prevMouseX = mouseX;
+		prevMouseY = mouseY;
+
+		view_rotx += thetaX; // * mouseSensitivity;
+		view_roty += thetaY; // * mouseSensitivity;
+
+		view_roty = view_roty%360;
+		 
+		//restricting x rotation movement to make physical sense
+		if(view_rotx >= 180) {
+			view_rotx = 180;
+		} else if(view_rotx <= -180) {
+			view_rotx = -180;
 		}
 
-		float thetaY = 360.0f * ((float) (x - prevMouseX) / (float) width);
-		float thetaX = 360.0f * ((float) (prevMouseY - y) / (float) height);
-		prevMouseX = x;
-		prevMouseY = y;
-
-		//if (!mouseInMiddle) {
-			// change the camera rotation
-			view_rotx += thetaX * mouseSensitivity;
-			view_roty += thetaY * mouseSensitivity;
-
-			//mouseInMiddle = true;
-
-			// move the mouse to the middle of the screen
-			/*
-			mouseMoved(new MouseEvent(e.getComponent(), e.getID(), e.getWhen(),
-					e.getModifiers(), (int) 0.5 * width, (int) 0.5 * height,
-					e.getClickCount(), false, e.getButton()));
-			*/
-			
-			/*
-			
-			if(!initialized) {
-				return;
-			} else if(glw != Cubes2Main.glWindow) {
-				glw = Cubes2Main.glWindow;
-			}
-			
-			if(glw == null) {
-				System.out.println("glw is null!");
-				return;
-			}
-			
-			//if(initialized && glw == Cubes2Main.glWindow) 
-			
-			
-			System.out.println(glw.getWidth() / 2);
-		    System.out.println(glw.getHeight() / 2);
-			glw.warpPointer(glw.getWidth() / 2, glw.getHeight() / 2);
-		    //glw.confinePointer(false);
-		    System.out.println("Warped Pointer!   (" + e.getX() + "," + e.getY() + ")");
-			mouseInMiddle = false;
-			
-			*/
-		//}
-			
-		if(mouseInMiddle) {
-			mouseInMiddle = false;
-			robot.mouseMove(getWidth() / 2,getHeight() / 2);
-			mouseInMiddle = true;
-		}
+		mouseInMiddle = false;
+		robot.mouseMove(width / 2, height / 2);
+		mouseInMiddle = true;
 	}
 }
