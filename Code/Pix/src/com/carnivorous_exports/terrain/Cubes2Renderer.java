@@ -19,6 +19,7 @@ import javax.media.nativewindow.util.Point;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLAnimatorControl;
 import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
@@ -53,9 +54,16 @@ import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_LIGHT0;
 public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 		KeyListener, MouseListener, MouseMotionListener { //Window {
 
+	GLWindow glWindow;
+	
 	private GLU glu; // for the GL Utility
 	private int cubeDList; // display list for cube
+	
+	GLWindow glw;
 
+	public boolean initialized;
+	private int centeredX = -1;
+    private int centeredY = -1;
 	private boolean mouseRButtonDown;
 	private boolean mouseInMiddle = false;
 	private int prevMouseX;
@@ -193,7 +201,20 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 	 */
 	@Override
 	public void init(GLAutoDrawable drawable) {
-
+		
+		//glWindow = display.getGLDrawable();
+		
+		//initiate the GLWindow
+		//GLCapabilities caps = new GLCapabilities(GLProfile.get(GLProfile.GL2GL3));
+        //caps.setBackgroundOpaque(false);
+        //glWindow = GLWindow.create(caps);
+        //glWindow.addGLEventListener(this);
+        
+        //GLAnimatorControl animator = getAnimator();
+        //animator.add(glWindow);
+		
+        //initialized = true;
+		
 		GL2 gl = drawable.getGL().getGL2(); // get the OpenGL graphics context
 		glu = new GLU(); // get GL Utilities
 		gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // set background (clear) color
@@ -252,7 +273,6 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 	 */
 	@Override
 	public void display(GLAutoDrawable drawable) {
-
 		GL2 gl = drawable.getGL().getGL2(); // get the OpenGL 2 graphics context
 		gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear color
 																// and depth
@@ -437,11 +457,11 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 		 * the middle
 		 */
 
-		if (!mouseInMiddle) {
+		//if (!mouseInMiddle) {
 			mouseY += e.getY() - prevMouseY;
 			mouseX += e.getX() - prevMouseX;
 			System.out.println("(" + e.getX() + "," + e.getY() + ")");
-		}
+		//}
 
 		int x = mouseX;
 		int y = mouseY;
@@ -470,7 +490,7 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 		prevMouseX = x;
 		prevMouseY = y;
 
-		if (!mouseInMiddle) {
+		//if (!mouseInMiddle) {
 			// change the camera rotation
 			view_rotx += thetaX * mouseSensitivity;
 			view_roty += thetaY * mouseSensitivity;
@@ -484,12 +504,25 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 					e.getClickCount(), false, e.getButton()));
 			*/
 			
-			//GLWindow glw = new GLWindow();
+			if(!initialized) {
+				return;
+			} else if(glw != Cubes2Main.glWindow) {
+				glw = Cubes2Main.glWindow;
+			}
 			
-			//glw.warpPointer(0, 0);
-			//GLWindow.this.warpPointer(0, 0);
-
+			if(glw == null) {
+				System.out.println("glw is null!");
+				return;
+			}
+			
+			//if(initialized && glw == Cubes2Main.glWindow) 
+			
+			centeredX = glw.getWidth() / 2;
+		    centeredY = glw.getHeight() / 2;
+			glw.warpPointer(centeredX, centeredY);
+		    //glw.confinePointer(false);
+		    System.out.println("Warped Pointer!   (" + e.getX() + "," + e.getY() + ")");
 			mouseInMiddle = false;
-		}
+		//}
 	}
 }

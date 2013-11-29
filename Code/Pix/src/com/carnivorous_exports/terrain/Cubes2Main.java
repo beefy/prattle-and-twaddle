@@ -4,7 +4,11 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 import javax.swing.*;
+import javax.media.opengl.GLCapabilities;
+import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
+
+import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.util.FPSAnimator;
 
 /**
@@ -19,14 +23,17 @@ public class Cubes2Main extends JFrame {
 	private static final int CANVAS_HEIGHT = 480; // height of the drawable
 	private static final int FPS = 60; // animator's target frames per second
 	private boolean fullScreen = true;
-	private boolean cursorVisible = false;
+	private boolean cursorVisible = true;
+	static GLWindow glWindow;
 	
 	/** Constructor to setup the top-level container and animator */
 	public Cubes2Main() {
+	
 		// Run the GUI codes in the event-dispatching thread for thread safety
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
+				
 				// Create the OpenGL rendering canvas
 				// 		The renderer is also the canvas because
 				// 		the rendering class extends GLCanvas
@@ -56,12 +63,23 @@ public class Cubes2Main extends JFrame {
 				if(!fullScreen) frame.setTitle(TITLE); 
 	            if(!fullScreen) frame.pack();
 				frame.setVisible(true);
+				
+				//initiate the GLWindow
+				GLCapabilities caps = new GLCapabilities(GLProfile.get(GLProfile.GL2GL3));
+		        caps.setBackgroundOpaque(false);
+		        glWindow = GLWindow.create(caps);
+		        renderer.initialized = true;
+		        glWindow.addGLEventListener(renderer);
+				
+				animator.add(glWindow);
 				animator.start(); // start the animation loop
 			}
 		});
 	}
 
 	public static void main(String[] args) {
+		
+		
 		// Run the GUI codes in the event-dispatching thread for thread safety
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
