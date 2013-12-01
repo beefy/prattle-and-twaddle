@@ -1,4 +1,4 @@
-package com.carnivorous_exports.terrain;
+package com.carnivorous_exports.pix;
 
 import java.awt.AWTException;
 import java.awt.Robot;
@@ -47,13 +47,13 @@ import static javax.media.opengl.GL2ES1.GL_PERSPECTIVE_CORRECTION_HINT;
 import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_COLOR_MATERIAL;
 import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_LIGHT0;
 
-
 @SuppressWarnings("serial")
-public class Cubes2Renderer extends GLCanvas implements GLEventListener,
-		KeyListener, MouseListener, MouseMotionListener {
+public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
+		MouseListener, MouseMotionListener {
 
 	private GLU glu; // for the GL Utility
 	private int cubeDList; // display list for cube
+	private Terrain terrain = new Terrain();
 
 	Robot robot;
 	int width;
@@ -94,7 +94,7 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 			{ 0.0f, 1.0f, 0.0f }, { 0.0f, 1.0f, 1.0f } };
 
 	/** Constructor to setup the GUI for this Component */
-	public Cubes2Renderer() {
+	public Renderer() {
 
 		this.addGLEventListener(this);
 		this.addKeyListener(this); // for Handling KeyEvents
@@ -164,7 +164,7 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 
 	// for user movement
 	public void running() {
-		
+
 		if (forwardMove) { // moving forward or back
 			movez += Math.cos(180 - view_roty * (Math.PI / 180) + 40) * 0.1
 					* -moveDirForward;
@@ -201,7 +201,6 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 		}
 		robot.mouseMove(getWidth() / 2, getHeight() / 2);
 		mouseInMiddle = true;
-		
 
 		GL2 gl = drawable.getGL().getGL2(); // get the OpenGL graphics context
 		glu = new GLU(); // get GL Utilities
@@ -226,7 +225,8 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 		gl.glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
 		// ----- Your OpenGL initialization code here -----
-		buildDisplayList(gl);
+		//buildDisplayList(gl);
+		cubeDList = terrain.getCubeList(gl);
 	}
 
 	/**
@@ -445,11 +445,12 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 		 * in the middle
 		 */
 
-		if (!mouseInMiddle) return;
-		
-		prevMouseY = height/2;		//because the mouse is always in the middle of
-		prevMouseX = width/2;		//the screen, the prevMouseX/Y is also always
-									//the middle of the screen
+		if (!mouseInMiddle)
+			return;
+
+		prevMouseY = height / 2; // because the mouse is always in the middle of
+		prevMouseX = width / 2; // the screen, the prevMouseX/Y is also always
+								// the middle of the screen
 		float thetaY;
 		float thetaX;
 
@@ -465,12 +466,12 @@ public class Cubes2Renderer extends GLCanvas implements GLEventListener,
 		view_rotx += thetaX * mouseSensitivity;
 		view_roty += thetaY * mouseSensitivity;
 
-		view_roty = view_roty%360;
-		 
-		//restricting x rotation movement to make physical sense
-		if(view_rotx >= 180) {
+		view_roty = view_roty % 360;
+
+		// restricting x rotation movement to make physical sense
+		if (view_rotx >= 180) {
 			view_rotx = 180;
-		} else if(view_rotx <= -180) {
+		} else if (view_rotx <= -180) {
 			view_rotx = -180;
 		}
 
