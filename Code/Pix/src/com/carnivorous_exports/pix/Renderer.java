@@ -52,7 +52,7 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 		MouseListener, MouseMotionListener {
 
 	private GLU glu; // for the GL Utility
-	private int cubeDList; // display list for cube
+	private int [] cubeList; // display list for cube
 	private Terrain terrain = new Terrain();
 
 	Robot robot;
@@ -159,7 +159,14 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 		gl.glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
 		// ----- Your OpenGL initialization code here -----
-		cubeDList = terrain.getCubeList(gl);
+		cubeList = new int[7];
+		cubeList [0] = terrain.getCubeList(gl, "terrainTextures/Layer Rock.jpeg", ".jpeg");
+		cubeList [1] = terrain.getCubeList(gl, "terrainTextures/MMud Texture.jpeg", ".jpeg");
+		cubeList [2] = terrain.getCubeList(gl, "terrainTextures/Night Sky-.jpeg", ".jpeg");
+		cubeList [3] = terrain.getCubeList(gl, "terrainTextures/Rock Texture-.jpeg", ".jpeg");
+		cubeList [4] = terrain.getCubeList(gl, "terrainTextures/Sand Texture 1.jpeg", ".jpeg");
+		cubeList [5] = terrain.getCubeList(gl, "terrainTextures/Water Texture 1.jpeg", ".jpeg");
+		cubeList [6] = terrain.getCubeList(gl, "terrainTextures/White Water Texture.jpeg", ".jpeg");
 	}
 
 	/**
@@ -210,7 +217,7 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 		gl.glTranslatef(movex, movey, movez);
 
 		// --------- Rendering Code
-		terrain.buildTerrain(gl, cubeDList);
+		terrain.buildTerrain(gl, cubeList);
 
 		gl.glPopMatrix();
 		running();
