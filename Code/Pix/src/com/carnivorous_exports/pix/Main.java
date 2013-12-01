@@ -1,4 +1,4 @@
-package com.carnivorous_exports.terrain;
+package com.carnivorous_exports.pix;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -13,7 +13,7 @@ import com.jogamp.opengl.util.FPSAnimator;
 
 
 @SuppressWarnings("serial")
-public class Cubes2Main extends JFrame {
+public class Main extends JFrame {
 	// Define constants for the top-level container
 	private static String TITLE = "Pix"; // window's title
 	private static final int CANVAS_WIDTH = 640; // width of the drawable
@@ -23,7 +23,7 @@ public class Cubes2Main extends JFrame {
 	private boolean cursorVisible = false;
 	
 	/** Constructor to setup the top-level container and animator */
-	public Cubes2Main() {
+	public Main() {
 	
 		// Run the GUI codes in the event-dispatching thread for thread safety
 		SwingUtilities.invokeLater(new Runnable() {
@@ -33,7 +33,7 @@ public class Cubes2Main extends JFrame {
 				// Create the OpenGL rendering canvas
 				// 		The renderer is also the canvas because
 				// 		the rendering class extends GLCanvas
-				Cubes2Renderer renderer = new Cubes2Renderer();
+				Renderer renderer = new Renderer();
 				renderer.addGLEventListener(renderer);
 
 				// Create a animator that drives canvas' display() at the
@@ -75,7 +75,7 @@ public class Cubes2Main extends JFrame {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				new Cubes2Main(); // run the constructor
+				new Main(); // run the constructor
 			}
 		});
 	}
