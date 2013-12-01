@@ -85,14 +85,6 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 	int moveDirForward;
 	int moveDirStrife;
 
-	// for testing rotation
-	float tempRotX;
-
-	private static float[][] boxColors = { // Bright: Red, Orange, Yellow,
-			// Green, Blue
-			{ 1.0f, 0.0f, 0.0f }, { 1.0f, 0.5f, 0.0f }, { 1.0f, 1.0f, 0.0f },
-			{ 0.0f, 1.0f, 0.0f }, { 0.0f, 1.0f, 1.0f } };
-
 	/** Constructor to setup the GUI for this Component */
 	public Renderer() {
 
@@ -102,64 +94,6 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 		this.addMouseMotionListener(this);
 		this.setFocusable(true);
 		this.requestFocus();
-	}
-
-	public void buildDisplayList(GL2 gl) {
-		// Build two lists, and returns handle for the first list
-		// create one display list
-
-		int base = gl.glGenLists(1);
-
-		// Create a new list for box (with open-top), pre-compile for efficiency
-		cubeDList = base;
-
-		gl.glNewList(cubeDList, GL_COMPILE);
-		gl.glBegin(GL_QUADS);
-
-		// Top-face
-		gl.glColor3f(0.0f, 1.0f, 0.0f); // green
-		gl.glVertex3f(1.0f, 1.0f, -1.0f);
-		gl.glVertex3f(-1.0f, 1.0f, -1.0f);
-		gl.glVertex3f(-1.0f, 1.0f, 1.0f);
-		gl.glVertex3f(1.0f, 1.0f, 1.0f);
-
-		// Bottom-face
-		gl.glColor3f(1.0f, 0.5f, 0.0f); // orange
-		gl.glVertex3f(1.0f, -1.0f, 1.0f);
-		gl.glVertex3f(-1.0f, -1.0f, 1.0f);
-		gl.glVertex3f(-1.0f, -1.0f, -1.0f);
-		gl.glVertex3f(1.0f, -1.0f, -1.0f);
-
-		// Front-face
-		gl.glColor3f(1.0f, 0.0f, 0.0f); // red
-		gl.glVertex3f(1.0f, 1.0f, 1.0f);
-		gl.glVertex3f(-1.0f, 1.0f, 1.0f);
-		gl.glVertex3f(-1.0f, -1.0f, 1.0f);
-		gl.glVertex3f(1.0f, -1.0f, 1.0f);
-
-		// Back-face
-		gl.glColor3f(1.0f, 1.0f, 0.0f); // yellow
-		gl.glVertex3f(1.0f, -1.0f, -1.0f);
-		gl.glVertex3f(-1.0f, -1.0f, -1.0f);
-		gl.glVertex3f(-1.0f, 1.0f, -1.0f);
-		gl.glVertex3f(1.0f, 1.0f, -1.0f);
-
-		// Left-face
-		gl.glColor3f(0.0f, 0.0f, 1.0f); // blue
-		gl.glVertex3f(-1.0f, 1.0f, 1.0f);
-		gl.glVertex3f(-1.0f, 1.0f, -1.0f);
-		gl.glVertex3f(-1.0f, -1.0f, -1.0f);
-		gl.glVertex3f(-1.0f, -1.0f, 1.0f);
-
-		// Right-face
-		gl.glColor3f(1.0f, 0.0f, 1.0f); // magenta
-		gl.glVertex3f(1.0f, 1.0f, -1.0f);
-		gl.glVertex3f(1.0f, 1.0f, 1.0f);
-		gl.glVertex3f(1.0f, -1.0f, 1.0f);
-		gl.glVertex3f(1.0f, -1.0f, -1.0f);
-
-		gl.glEnd();
-		gl.glEndList();
 	}
 
 	// for user movement
@@ -225,7 +159,6 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 		gl.glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
 		// ----- Your OpenGL initialization code here -----
-		//buildDisplayList(gl);
 		cubeDList = terrain.getCubeList(gl);
 	}
 
@@ -261,6 +194,7 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 	 */
 	@Override
 	public void display(GLAutoDrawable drawable) {
+		
 		GL2 gl = drawable.getGL().getGL2(); // get the OpenGL 2 graphics context
 		gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear color
 																// and depth
@@ -268,7 +202,7 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 
 		gl.glPushMatrix();
 
-		// rotate around wherever the user drags the mouse
+		// rotate around wherever the user points the mouse
 		gl.glRotatef(-view_rotx, 1.0f, 0.0f, 0.0f);
 		gl.glRotatef(-view_roty, 0.0f, 1.0f, 0.0f);
 		gl.glRotatef(-view_rotz, 0.0f, 0.0f, 1.0f);
@@ -276,22 +210,7 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 		gl.glTranslatef(movex, movey, movez);
 
 		// --------- Rendering Code
-		for (int i = 0; i < 5; i++) {
-
-			gl.glPushMatrix();
-
-			gl.glTranslatef(i * 3f, 0.0f, -6.0f);
-
-			gl.glColor3fv(boxColors[2], 0);
-
-			if (i == 1) {
-				tempRotX += 2f;
-				gl.glRotatef(tempRotX, 1.0f, 0.0f, 0.0f);
-			}
-
-			gl.glCallList(cubeDList); // draw the cube
-			gl.glPopMatrix();
-		}
+		terrain.buildTerrain(gl, cubeDList);
 
 		gl.glPopMatrix();
 		running();
