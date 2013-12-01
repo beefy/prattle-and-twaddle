@@ -30,17 +30,17 @@ public class Terrain {
 	private float textureLeft;
 	private float textureRight;
 
-	private String textureFileName = "images/nehe.png";
-	private String textureFileType = ".png";
+	private String textureFileName;
+	private String textureFileType;
 
 	private static float[][] boxColors = { // Bright: Red, Orange, Yellow,
 			// Green, Blue
 			{ 1.0f, 0.0f, 0.0f }, { 1.0f, 0.5f, 0.0f }, { 1.0f, 1.0f, 0.0f },
 			{ 0.0f, 1.0f, 0.0f }, { 0.0f, 1.0f, 1.0f } };
 
-	public int getCubeList(GL2 gl) {
-		// Build two lists, and returns handle for the first list
-		// create one display list
+	public int getCubeList(GL2 gl, String textureFileName, String textureFileType) {
+		this.textureFileName = textureFileName;
+		this.textureFileType = textureFileType;
 
 		loadTexture(gl);
 
@@ -162,22 +162,23 @@ public class Terrain {
 		}
 	}
 
-	public void buildTerrain(GL2 gl, int displayList) {
+	public void buildTerrain(GL2 gl, int [] displayList) {
 
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < displayList.length - 1; i++) {
 
 			gl.glPushMatrix();
 
 			gl.glTranslatef(i * 3f, 0.0f, -6.0f);
 
-			gl.glColor3fv(boxColors[2], 0);
+			//gl.glColor3fv(boxColors[2], 0);
 
+			//spins the second cube
 			if (i == 1) {
-				tempRotX += 2f;
-				gl.glRotatef(tempRotX, 1.0f, 0.0f, 0.0f);
+				//tempRotX += 2f;
+				//gl.glRotatef(tempRotX, 1.0f, 0.0f, 0.0f);
 			}
 
-			gl.glCallList(displayList); // draw the cube
+			gl.glCallList(displayList[i]); // draw the cube
 			gl.glPopMatrix();
 		}
 	}
