@@ -217,7 +217,7 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 		gl.glTranslatef(movex, movey, movez);
 
 		// --------- Rendering Code
-		terrain.buildTerrain(gl, cubeList);
+		terrain.buildTerrain(gl, cubeList, "checkFitting");
 
 		gl.glPopMatrix();
 		running();
@@ -389,17 +389,16 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 		prevMouseX = mouseX;
 		prevMouseY = mouseY;
 
-		view_rotx += thetaX * mouseSensitivity;
+		//restricting x rotation movement to make physical sense
+			//DOESNT WORK
+		if(view_rotx + thetaX*mouseSensitivity < 180 && 
+				view_rotx + thetaX*mouseSensitivity > -180) {
+			view_rotx += thetaX * mouseSensitivity;
+		}
+		
 		view_roty += thetaY * mouseSensitivity;
 
 		view_roty = view_roty % 360;
-
-		// restricting x rotation movement to make physical sense
-		if (view_rotx >= 180) {
-			view_rotx = 180;
-		} else if (view_rotx <= -180) {
-			view_rotx = -180;
-		}
 
 		mouseInMiddle = false;
 		robot.mouseMove(width / 2, height / 2);

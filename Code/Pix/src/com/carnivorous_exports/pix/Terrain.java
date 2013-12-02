@@ -38,7 +38,11 @@ public class Terrain {
 			{ 1.0f, 0.0f, 0.0f }, { 1.0f, 0.5f, 0.0f }, { 1.0f, 1.0f, 0.0f },
 			{ 0.0f, 1.0f, 0.0f }, { 0.0f, 1.0f, 1.0f } };
 
-	public int getCubeList(GL2 gl, String textureFileName, String textureFileType) {
+	private static float[][] greyTones = { { 0.1f, 0.1f, 0.1f },
+			{ 0.2f, 0.2f, 0.2f }, { 0.3f, 0.3f, 0.3f }, { 0f, 0f, 0f } };
+
+	public int getCubeList(GL2 gl, String textureFileName,
+			String textureFileType) {
 		this.textureFileName = textureFileName;
 		this.textureFileType = textureFileType;
 
@@ -55,7 +59,7 @@ public class Terrain {
 		texture.enable(gl); // same as gl.glEnable(texture.getTarget());
 		// gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE,
 		// GL.GL_REPLACE);
-		
+
 		// Binds this texture to the current GL context.
 		texture.bind(gl); // same as gl.glBindTexture(texture.getTarget(),
 							// texture.getTextureObject());
@@ -162,24 +166,83 @@ public class Terrain {
 		}
 	}
 
-	public void buildTerrain(GL2 gl, int [] displayList) {
+	public void buildTerrain(GL2 gl, int[] displayList, String scene) {
 
-		for (int i = 0; i < displayList.length - 1; i++) {
+		if (scene == "checkTextures") {
+			for (int i = 0; i < displayList.length; i++) {
 
-			gl.glPushMatrix();
+				gl.glPushMatrix();
 
-			gl.glTranslatef(i * 3f, 0.0f, -6.0f);
+				gl.glTranslatef(i * 3f, 0.0f, -6.0f);
 
-			//gl.glColor3fv(boxColors[2], 0);
+				// gl.glColor3fv(boxColors[2], 0);
 
-			//spins the second cube
-			if (i == 1) {
-				//tempRotX += 2f;
-				//gl.glRotatef(tempRotX, 1.0f, 0.0f, 0.0f);
+				gl.glCallList(displayList[i]); // draw the cube
+				gl.glPopMatrix();
 			}
+		} else if (scene == "checkShading") {
+			for (int i = 0; i < 5; i++) {
 
-			gl.glCallList(displayList[i]); // draw the cube
-			gl.glPopMatrix();
+				gl.glPushMatrix();
+
+				gl.glTranslatef(i * 3f, 0.0f, -6.0f);
+
+				// if(i < 3) gl.glColor3fv(greyTones[i], 1);
+
+				gl.glCallList(displayList[1]); // draw the cube
+				gl.glPopMatrix();
+			}
+		} else if (scene == "checkFitting") {
+
+			boolean[][] doesntFit = new boolean[12][12];
+
+			for (int i = 4; i > 1; i--) { // loop for each box size
+				for (int x = 0; x < 11; x++) {	//x coords
+					for (int y = 0; y < 11; y++) {	//y coords
+
+						gl.glPushMatrix();
+
+						boolean doesFit = true;
+						
+						//to check for fitting
+						//x2 and y2 are the width and height of the cube
+						for(int x2 = i; x2 >= 0; x2--) {
+							for(int y2 = i; y2 >= 0; y2--) {
+								if(x+x2 < 12 && y+y2 < 12) {
+									if(doesntFit[x+x2][y+y2]) doesFit = false;
+								} else doesFit = false;
+								//if(y+y2 < 12) {
+								//	if(doesntFit[x][y+y2]) doesFit = false;
+								//} else doesFit = false;
+							}
+						}
+						
+						
+						
+						
+						
+						gl.glScalef(0.25f * (i-1), 0.25f * (i-1), 0.25f * (i-1));
+
+						if(doesFit) {
+							
+							//move to the coordinate
+							gl.glTranslatef(0.25f * x, 0.25f * y, -6.0f - i);
+							
+							//draw the cube
+							gl.glCallList(displayList[i]);
+							
+							//declare that area as occupied
+							for(int x2 = i; x2 >= 0; x2--) {
+								for(int y2 = i; y2 >= 0; y2--) {
+									doesntFit[x+x2][y+y2] = true;
+									//doesntFit[x][y+y2] = true;
+								}
+							}
+						}
+						gl.glPopMatrix();
+					}
+				}
+			}
 		}
 	}
 }
