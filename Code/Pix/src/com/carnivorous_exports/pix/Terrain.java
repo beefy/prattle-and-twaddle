@@ -23,6 +23,8 @@ public class Terrain {
 
 	Texture texture;
 
+	private float [][] randArr;
+	
 	// Texture image flips vertically. Shall use TextureCoords class to retrieve
 	// the top, bottom, left and right coordinates.
 	private float textureTop;
@@ -193,55 +195,98 @@ public class Terrain {
 				gl.glPopMatrix();
 			}
 		} else if (scene == "checkFitting") {
+			
+			if(randArr == null) randArrInit();
 
-			boolean[][] doesntFit = new boolean[12][12];
+			boolean[][] doesFit = new boolean[12][12];
 
-			for (int i = 4; i > 1; i--) { // loop for each box size
-				for (int x = 0; x < 11; x++) {	//x coords
-					for (int y = 0; y < 11; y++) {	//y coords
+			for (int i = 4; i >= 1; i--) { // loop for each box size
+				for (int x = 0; x < 12; x++) {		//x coords
+					for (int y = 0; y < 12; y++) {	//y coords
 
-						gl.glPushMatrix();
-
-						boolean doesFit = true;
+						boolean fitting = true;
 						
 						//to check for fitting
 						//x2 and y2 are the width and height of the cube
-						for(int x2 = i; x2 >= 0; x2--) {
-							for(int y2 = i; y2 >= 0; y2--) {
-								if(x+x2 < 12 && y+y2 < 12) {
-									if(doesntFit[x+x2][y+y2]) doesFit = false;
-								} else doesFit = false;
-								//if(y+y2 < 12) {
-								//	if(doesntFit[x][y+y2]) doesFit = false;
-								//} else doesFit = false;
+						for(int x2 = (i-1) + x; x2 >= x; x2--) {
+							for(int y2 = (i-1) + y; y2 >= y; y2--) {
+								if(x2 < 12 && y2 < 12) {
+									
+									//determines if area is occupied
+									if(doesFit[x2][y2]) fitting = false;
+									
+									//randomizes
+									//if(i != 1 && randArr[x2][y2] < 0.2) fitting = false;
+								} else fitting = false;
 							}
 						}
 						
-						
-						
-						
-						
-						gl.glScalef(0.25f * (i-1), 0.25f * (i-1), 0.25f * (i-1));
+						if(fitting) {
+							
+							gl.glPushMatrix();
 
-						if(doesFit) {
+							gl.glScalef(0.25f * i, 0.25f * i, 0.25f * i);
 							
 							//move to the coordinate
-							gl.glTranslatef(0.25f * x, 0.25f * y, -6.0f - i);
+							//gl.glTranslatef(0.25f * x, 0.25f * y, -6.0f - i);
+							//gl.glTranslatef(((6-i)* 0.25f) * x, ((6-i)* 0.25f) * y, -6.0f);
+							if(i == 4) {
+								gl.glTranslatef(.5f * x, .5f * y, -6.0f - i);
+							} else if(i == 3) {
+								//IDK
+								gl.glTranslatef(0.25f * x, 0.25f * y, -6.0f - i);
+							} else if(i == 2) {
+								gl.glTranslatef(1f * x, 1f * y, -6.0f - i);
+							} else if(i == 1) {
+								//IDK
+								gl.glTranslatef(0.25f * x, 0.25f * y, -6.0f - i);
+							}
 							
 							//draw the cube
 							gl.glCallList(displayList[i]);
 							
+							
 							//declare that area as occupied
-							for(int x2 = i; x2 >= 0; x2--) {
-								for(int y2 = i; y2 >= 0; y2--) {
-									doesntFit[x+x2][y+y2] = true;
-									//doesntFit[x][y+y2] = true;
+							for(int x2 = (i-1) + x; x2 >= x; x2--) {
+								for(int y2 = (i-1) + y; y2 >= y; y2--) {
+									doesFit[x2][y2] = true;
 								}
 							}
+							
+							
+							gl.glPopMatrix();
 						}
-						gl.glPopMatrix();
 					}
 				}
+			
+				//reset doesFit, for debugging
+				for(int x = 0; x < 12; x++) {
+					for(int y = 0; y < 12; y++) {
+						doesFit[x][y] = false;
+					}
+				}
+				
+			}
+			
+			/*
+			//debugging
+			System.out.println("\n\nFitting: \n");
+			for(int x = 0; x < 12; x++) {
+				for(int y = 0; y < 12; y++) {
+					System.out.print("(" + x + "," + y + ") = " + doesFit[x][y] + ", ");
+				}
+				System.out.println();
+			}
+			*/
+		}
+	}
+	
+	public void randArrInit() {
+		
+		randArr = new float[12][12];
+		for(int x = 0; x < 12; x++) {
+			for(int y = 0; y < 12; y++) {
+				randArr[x][y] = (float) Math.random();
 			}
 		}
 	}
