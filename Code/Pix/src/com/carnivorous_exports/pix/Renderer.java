@@ -52,7 +52,7 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 		MouseListener, MouseMotionListener {
 
 	private GLU glu; // for the GL Utility
-	private int [] cubeList; // display list for cube
+	private int[] cubeList; // display list for cube
 	private Terrain terrain = new Terrain();
 
 	Robot robot;
@@ -80,8 +80,15 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 	private boolean rightPressed;
 	private boolean leftPressed;
 
+	private boolean flyUpPressed;
+	private boolean flyDownPressed;
+
 	private boolean forwardMove;
 	private boolean strifeMove;
+	
+	private boolean flyUpMove;
+	private boolean flyDownMove;
+	
 	int moveDirForward;
 	int moveDirStrife;
 
@@ -112,6 +119,9 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 			movex += Math.sin(180 - view_roty * (Math.PI / 180) + 40 + 80.1
 					* -moveDirStrife) * 0.1;
 		}
+		
+		if(flyUpMove) movey -= 0.1;
+		if(flyDownMove) movey += 0.1;
 	}
 
 	// ------ Implement methods declared in GLEventListener ------
@@ -160,13 +170,20 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 
 		// ----- Your OpenGL initialization code here -----
 		cubeList = new int[7];
-		cubeList [0] = terrain.getCubeList(gl, "terrainTextures/Layer Rock.jpeg", ".jpeg");
-		cubeList [1] = terrain.getCubeList(gl, "terrainTextures/MMud Texture.jpeg", ".jpeg");
-		cubeList [2] = terrain.getCubeList(gl, "terrainTextures/Night Sky-.jpeg", ".jpeg");
-		cubeList [3] = terrain.getCubeList(gl, "terrainTextures/Rock Texture-.jpeg", ".jpeg");
-		cubeList [4] = terrain.getCubeList(gl, "terrainTextures/Sand Texture 1.jpeg", ".jpeg");
-		cubeList [5] = terrain.getCubeList(gl, "terrainTextures/Water Texture 1.jpeg", ".jpeg");
-		cubeList [6] = terrain.getCubeList(gl, "terrainTextures/White Water Texture.jpeg", ".jpeg");
+		cubeList[0] = terrain.getCubeList(gl,
+				"terrainTextures/Layer Rock.jpeg", ".jpeg");
+		cubeList[1] = terrain.getCubeList(gl,
+				"terrainTextures/MMud Texture.jpeg", ".jpeg");
+		cubeList[2] = terrain.getCubeList(gl,
+				"terrainTextures/Night Sky-.jpeg", ".jpeg");
+		cubeList[3] = terrain.getCubeList(gl,
+				"terrainTextures/Rock Texture-.jpeg", ".jpeg");
+		cubeList[4] = terrain.getCubeList(gl,
+				"terrainTextures/Sand Texture 1.jpeg", ".jpeg");
+		cubeList[5] = terrain.getCubeList(gl,
+				"terrainTextures/Water Texture 1.jpeg", ".jpeg");
+		cubeList[6] = terrain.getCubeList(gl,
+				"terrainTextures/White Water Texture.jpeg", ".jpeg");
 	}
 
 	/**
@@ -201,7 +218,7 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 	 */
 	@Override
 	public void display(GLAutoDrawable drawable) {
-		
+
 		GL2 gl = drawable.getGL().getGL2(); // get the OpenGL 2 graphics context
 		gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear color
 																// and depth
@@ -217,7 +234,7 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 		gl.glTranslatef(movex, movey, movez);
 
 		// --------- Rendering Code
-		terrain.buildTerrain(gl, cubeList, "checkFitting");
+		terrain.buildTerrain(gl, cubeList, "checkQuad");
 
 		gl.glPopMatrix();
 		running();
@@ -262,6 +279,15 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 		if (keyCode == KeyEvent.VK_DOWN)
 			downPressed = true;
 
+		// flying up and down (for debugging)
+		if (keyCode == KeyEvent.VK_SHIFT) {
+			flyUpPressed = true;
+		}
+
+		if (keyCode == KeyEvent.VK_CONTROL) {
+			flyDownPressed = true;
+		}
+
 		checkKeysPressed();
 	}
 
@@ -277,6 +303,13 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 			upPressed = false;
 		else if (kc == KeyEvent.VK_DOWN)
 			downPressed = false;
+
+		// flying up and down (for debugging)
+		if (kc == KeyEvent.VK_SHIFT) {
+			flyUpPressed = false;
+		} else if (kc == KeyEvent.VK_CONTROL) {
+			flyDownPressed = false;
+		}
 
 		checkKeysPressed();
 	}
@@ -317,6 +350,22 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 
 		if (rightPressed && leftPressed) {
 			strifeMove = false;
+		}
+		
+		if(flyUpPressed && !flyDownPressed) {
+			flyUpMove = true;
+		}
+		
+		if(flyDownPressed && !flyUpPressed) {
+			flyDownMove = true;
+		}
+		
+		if(!flyUpPressed) {
+			flyUpMove = false;
+		}
+		
+		if(!flyDownPressed) {
+			flyDownMove = false;
 		}
 	}
 
@@ -389,13 +438,13 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 		prevMouseX = mouseX;
 		prevMouseY = mouseY;
 
-		//restricting x rotation movement to make physical sense
-			//DOESNT WORK
-		if(view_rotx + thetaX*mouseSensitivity < 180 && 
-				view_rotx + thetaX*mouseSensitivity > -180) {
+		// restricting x rotation movement to make physical sense
+		// DOESNT WORK
+		if (view_rotx + thetaX * mouseSensitivity < 180
+				&& view_rotx + thetaX * mouseSensitivity > -180) {
 			view_rotx += thetaX * mouseSensitivity;
 		}
-		
+
 		view_roty += thetaY * mouseSensitivity;
 
 		view_roty = view_roty % 360;
