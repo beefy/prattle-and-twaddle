@@ -226,11 +226,11 @@ public class Terrain {
 							if(i == 4) {
 								gl.glTranslatef(.5f * x, .5f * y, -6.0f);
 							} else if(i == 3) {
-								gl.glTranslatef(0.5f * x - 0.25f - 0.1f, 0.6f * y + 0.25f, -6.0f + 0.25f);
+								gl.glTranslatef(0.666f * x - 0.33f, 0.666f * y - 0.33f, -6.0f + 0.25f);
 							} else if(i == 2) {
-								gl.glTranslatef(1f * x - .5f - 0.50f, 1f * y - 1f, -6.0f + .5f - .65f);
+								gl.glTranslatef(1f * x - 1f, 1f * y - 1f, -6.0f - 0.15f);
 							} else if(i == 1) {
-								gl.glTranslatef(2f * x - .75f - 2.25f, 2f * y - 3f, -6.0f - 3.3f);
+								gl.glTranslatef(2f * x - 3f, 2f * y - 3f, -6.0f - 3.3f);
 							}
 							
 							//draw the cube
@@ -280,7 +280,7 @@ public class Terrain {
 									if(doesFit[x2][y2]) fitting = false;
 									
 									//randomizes
-									if(i != 1 && randArr[x2][y2] < 0.2) fitting = false;
+									if(i != 1 && randArr[x2][y2] < 0.1) fitting = false;
 								} else fitting = false;
 							}
 						}
@@ -295,7 +295,7 @@ public class Terrain {
 							if(i == 4) {
 								gl.glTranslatef(.5f * x, .5f * y, -6.0f);
 							} else if(i == 3) {
-								gl.glTranslatef(0.5f * x - 0.25f - 0.1f, 0.6f * y + 0.25f, -6.0f + 0.25f);
+								gl.glTranslatef(0.666f * x - 0.33f, 0.666f * y - 0.33f, -6.0f + 0.25f);
 							} else if(i == 2) {
 								gl.glTranslatef(1f * x - .5f - 0.50f, 1f * y - 1f, -6.0f + .5f - .65f);
 							} else if(i == 1) {
