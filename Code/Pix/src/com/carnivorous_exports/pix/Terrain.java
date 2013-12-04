@@ -295,15 +295,15 @@ public class Terrain {
 							if(i == 4) {
 								gl.glTranslatef(.5f * x, .5f * y, -6.0f);
 							} else if(i == 3) {
-								gl.glTranslatef(0.666f * x - 0.33f, 0.666f * y - 0.33f, -6.0f + 0.25f);
+								gl.glTranslatef(0.666f * x - 0.33f, 0.666f * y - 0.33f, -8.333f);
 							} else if(i == 2) {
-								gl.glTranslatef(1f * x - .5f - 0.50f, 1f * y - 1f, -6.0f + .5f - .65f);
+								gl.glTranslatef(1f * x - .5f - 0.50f, 1f * y - 1f, -13.0f);
 							} else if(i == 1) {
-								gl.glTranslatef(2f * x - .75f - 2.25f, 2f * y - 3f, -6.0f - 3.3f);
+								gl.glTranslatef(2f * x - .75f - 2.25f, 2f * y - 3f, -27.0f);
 							}
 							
 							//draw the cube
-							gl.glCallList(displayList[i]);
+							gl.glCallList(displayList[0]);
 							
 							
 							//declare that area as occupied
