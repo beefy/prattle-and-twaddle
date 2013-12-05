@@ -234,7 +234,7 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 		gl.glTranslatef(movex, movey, movez);
 
 		// --------- Rendering Code
-		terrain.buildTerrain(gl, cubeList, "checkQuad");
+		terrain.buildTerrain(gl, cubeList, "checkQuad3D");
 
 		gl.glPopMatrix();
 		running();
