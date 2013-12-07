@@ -24,7 +24,12 @@ public class Terrain {
 	Texture texture;
 
 	private float[][] randArr;
-	private float[][][] randArr2;
+	private float[][][][] randArr2;
+	private boolean[][][][][] sizeArr = new boolean[10][4][12][12][12];
+
+	private float[] treeSize;
+
+	private boolean positionRecorded = false;
 
 	// Texture image flips vertically. Shall use TextureCoords class to retrieve
 	// the top, bottom, left and right coordinates.
@@ -40,9 +45,6 @@ public class Terrain {
 			// Green, Blue
 			{ 1.0f, 0.0f, 0.0f }, { 1.0f, 0.5f, 0.0f }, { 1.0f, 1.0f, 0.0f },
 			{ 0.0f, 1.0f, 0.0f }, { 0.0f, 1.0f, 1.0f } };
-
-	private static float[][] greyTones = { { 0.1f, 0.1f, 0.1f },
-			{ 0.2f, 0.2f, 0.2f }, { 0.3f, 0.3f, 0.3f }, { 0f, 0f, 0f } };
 
 	public int getCubeList(GL2 gl, String textureFileName,
 			String textureFileType) {
@@ -320,79 +322,26 @@ public class Terrain {
 			}
 		} else if (scene == "checkQuad3D") {
 
-			if (randArr2 == null)
-				randArrInit();
+			randArrInit();
+			sizeArrInit(9, 1, gl, displayList, 12f, 0f, -24f, 12, 6, 12);
 
-			boolean[][][] doesFit = new boolean[12][12][12];
+			buildQuad(0, gl, displayList, 12f, 0f, -24f, 12, 6, 12);
 
-			for (int i = 4; i >= 1; i--) { // loop for each box size
-				for (int x = 0; x < 12; x++) { // x coords
-					for (int y = 0; y < 12; y++) { // y coords
-						for (int z = 0; z < 12; z++) { // z coords
+			buildQuad(1, gl, displayList, -12f, 0f, -24f, 12, 6, 12);
+			buildQuad(2, gl, displayList, 0f, 0f, -24f, 12, 6, 12);
 
-							boolean fitting = true;
+			buildQuad(3, gl, displayList, 12f, 0f, -12f, 12, 6, 12);
+			buildQuad(4, gl, displayList, -12f, 0f, -12f, 12, 6, 12);
+			buildQuad(5, gl, displayList, 0f, 0f, -12f, 12, 6, 12);
 
-							// to check for fitting
-							// x2 is the width of the cube
-							// y2 is the height of the cube
-							// z2 is the length of the cube
-							for (int x2 = (i - 1) + x; x2 >= x; x2--) {
-								for (int y2 = (i - 1) + y; y2 >= y; y2--) {
-									for (int z2 = (i - 1) + z; z2 >= z; z2--) {
-										if (x2 < 12 && y2 < 12 && z2 < 12) {
+			buildQuad(6, gl, displayList, 12f, 0f, -36f, 12, 6, 12);
+			buildQuad(7, gl, displayList, -12f, 0f, -36f, 12, 6, 12);
+			buildQuad(8, gl, displayList, 0f, 0f, -36f, 12, 6, 12);
 
-											// determines if area is occupied
-											if (doesFit[x2][y2][z2])
-												fitting = false;
+		} else if (scene == "checkTree") {
 
-											// randomizes
-											if (i != 1
-													&& randArr2[x2][y2][z2] < 0.05)
-												fitting = false;
-										} else
-											fitting = false;
-									}
-								}
-							}
+			makeTree(gl, displayList, 0.2, 0f, 0f, -6f);
 
-							if (fitting) {
-
-								gl.glPushMatrix();
-
-								gl.glScalef(0.25f * i, 0.25f * i, 0.25f * i);
-
-								// move to the coordinate
-								if (i == 4) {
-									gl.glTranslatef(.5f * x, .5f * y, .5f * z);
-								} else if (i == 3) {
-									gl.glTranslatef(0.666f * x - 0.33f,
-											0.666f * y - 0.33f, 0.666f * z - 0.33f);
-								} else if (i == 2) {
-									gl.glTranslatef(1f * x - 1f,
-											1f * y - 1f, 1f * z - 1f);
-								} else if (i == 1) {
-									gl.glTranslatef(2f * x - 3f,
-											2f * y - 3f, 2f * z - 3f);
-								}
-
-								// draw the cube
-								gl.glCallList(displayList[0]);
-
-								// declare that area as occupied
-								for (int x2 = (i - 1) + x; x2 >= x; x2--) {
-									for (int y2 = (i - 1) + y; y2 >= y; y2--) {
-										for(int z2 = (i - 1) + z; z2 >= z; z2--) {
-											doesFit[x2][y2][z2] = true;
-										}
-									}
-								}
-
-								gl.glPopMatrix();
-							}
-						}
-					}
-				}
-			}
 		}
 	}
 
@@ -405,13 +354,146 @@ public class Terrain {
 			}
 		}
 
-		randArr2 = new float[12][12][12];
-		for (int x = 0; x < 12; x++) {
-			for (int y = 0; y < 12; y++) {
-				for (int z = 0; z < 12; z++) {
-					randArr2[x][y][z] = (float) Math.random();
+		randArr2 = new float[9][12][12][12];
+		for (int pos = 0; pos < 9; pos++) {
+			for (int x = 0; x < 12; x++) {
+				for (int y = 0; y < 12; y++) {
+					for (int z = 0; z < 12; z++) {
+						randArr2[pos][x][y][z] = (float) Math.random();
+					}
 				}
 			}
+		}
+	}
+
+	public void buildQuad(int posNum, GL2 gl, int[] displayList, float posX,
+			float posY, float posZ, int topX, int topY, int topZ) {
+		// when topX,Y,Z are all 12, it is a large cube (made of cubes)
+
+		boolean[][][] doesFit = new boolean[12][12][12];
+
+		for (int i = 4; i >= 1; i--) { // loop for each box size
+			for (int x = 0; x < topX; x++) { // x coords
+				for (int y = 0; y < topY; y++) { // y coords
+					for (int z = 0; z < topZ; z++) { // z coords
+
+						if (sizeArr[posNum][i - 1][x][y][z]) {
+
+							gl.glPushMatrix();
+
+							gl.glScalef(0.25f * i, 0.25f * i, 0.25f * i);
+
+							// move to the coordinate
+							if (i == 4) {
+								gl.glTranslatef(.5f * (x + posX),
+										.5f * (y + posY), .5f * (z + posZ));
+							} else if (i == 3) {
+								gl.glTranslatef(0.666f * (x + posX) - 0.33f,
+										0.666f * (y + posY) - 0.33f,
+										0.666f * (z + posZ) - 0.33f);
+							} else if (i == 2) {
+								gl.glTranslatef(1f * (x + posX) - 1f,
+										1f * (y + posY) - 1f,
+										1f * (z + posZ) - 1f);
+							} else if (i == 1) {
+								gl.glTranslatef(2f * (x + posX) - 3f,
+										2f * (y + posY) - 3f,
+										2f * (z + posZ) - 3f);
+							}
+
+							// draw the cube
+							gl.glCallList(displayList[0]);
+
+							gl.glPopMatrix();
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// remove posNum if numArrays works
+	public void sizeArrInit(int numArrays, int posNum, GL2 gl,
+			int[] displayList, float posX, float posY, float posZ, int topX,
+			int topY, int topZ) {
+
+		boolean[][][] doesFit = new boolean[12][12][12];
+
+		for (int i = 4; i >= 1; i--) { // loop for each box size
+			for (int x = 0; x < topX; x++) { // x coords
+				for (int y = 0; y < topY; y++) { // y coords
+					for (int z = 0; z < topZ; z++) { // z coords
+
+						if (!positionRecorded) { // if the cubes are not
+													// initialized
+
+							boolean fitting = true;
+
+							// to check for fitting
+							// x2 is the width of the cube
+							// y2 is the height of the cube
+							// z2 is the length of the cube
+
+							for (int n = numArrays; n > 0; n--) {
+								for (int x2 = (i - 1) + x; x2 >= x; x2--) {
+									for (int y2 = (i - 1) + y; y2 >= y; y2--) {
+										for (int z2 = (i - 1) + z; z2 >= z; z2--) {
+											if (x2 < 12 && y2 < 12 && z2 < 12) {
+
+												// determines if area is
+												// occupied
+												if (doesFit[x2][y2][z2])
+													fitting = false;
+
+												// randomizes
+												if (i != 1
+														&& randArr2[n][x2][y2][z2] < 0.05)
+													fitting = false;
+											} else
+												fitting = false;
+										}
+									}
+								}
+								// record the position
+								if (fitting)
+									sizeArr[n][i - 1][x][y][z] = true;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	public void makeTree(GL2 gl, int[] displayList, double branchOdds, float x,
+			float y, float z) {
+		if (treeSize == null) {
+			treeSize = new float[1];
+			treeSize[0] = (float) Math.random() * 5f + 5f;
+		}
+
+		for (y = y; y < treeSize[0]; y++) {
+
+			if (Math.random() < branchOdds)
+				makeTree(gl, displayList, branchOdds - 0.1, x - 2f - 3f, y, z);
+			if (Math.random() < branchOdds)
+				makeTree(gl, displayList, branchOdds - 0.1, x + 2f - 3f, y, z);
+			if (Math.random() < branchOdds)
+				makeTree(gl, displayList, branchOdds - 0.1, x, y, z - 2f - 3f);
+			if (Math.random() < branchOdds)
+				makeTree(gl, displayList, branchOdds - 0.1, x, y, z + 2f - 3f);
+
+			gl.glPushMatrix();
+
+			gl.glScalef(0.25f, 0.25f, 0.25f);
+
+			gl.glTranslatef(x, y + 2f * y - 3f, z);
+
+			// draw the cube
+			gl.glCallList(displayList[0]);
+
+			gl.glPopMatrix();
+
 		}
 	}
 }
