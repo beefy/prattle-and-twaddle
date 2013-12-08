@@ -23,14 +23,9 @@ public class Terrain {
 
 	Texture texture;
 
-	private float[][] randArr;
-	private float[][][][] randArr2;
-	private boolean[][][][][] sizeArr = new boolean[10][4][12][12][12];
 	private boolean[][][][] placement = new boolean[4][12][12][12];
 
 	private float[] treeSize;
-
-	private boolean positionRecorded = false;
 
 	// Texture image flips vertically. Shall use TextureCoords class to retrieve
 	// the top, bottom, left and right coordinates.
@@ -171,162 +166,6 @@ public class Terrain {
 			e.printStackTrace();
 		}
 	}
-
-	public void buildTerrain(GL2 gl, int[] displayList, String scene) {
-
-		if (scene == "checkTextures") {
-			for (int i = 0; i < displayList.length; i++) {
-
-				gl.glPushMatrix();
-
-				gl.glTranslatef(i * 3f, 0.0f, -6.0f);
-
-				// gl.glColor3fv(boxColors[2], 0);
-
-				gl.glCallList(displayList[i]); // draw the cube
-				gl.glPopMatrix();
-			}
-		} else if (scene == "checkFitting") {
-
-			boolean[][] doesFit = new boolean[12][12];
-
-			for (int i = 4; i >= 1; i--) { // loop for each box size
-				for (int x = 0; x < 12; x++) { // x coords
-					for (int y = 0; y < 12; y++) { // y coords
-
-						boolean fitting = true;
-
-						// to check for fitting
-						// x2 and y2 are the width and height of the cube
-						for (int x2 = (i - 1) + x; x2 >= x; x2--) {
-							for (int y2 = (i - 1) + y; y2 >= y; y2--) {
-								if (x2 < 12 && y2 < 12) {
-									if (doesFit[x2][y2])
-										fitting = false;
-								} else
-									fitting = false;
-							}
-						}
-
-						if (fitting) {
-
-							gl.glPushMatrix();
-
-							gl.glScalef(0.25f * i, 0.25f * i, 0.25f * i);
-
-							// move to the coordinate
-							// old attempts:
-							// gl.glTranslatef(0.25f * x, 0.25f * y, -6.0f - i);
-							// gl.glTranslatef(((6-i)* 0.25f) * x, ((6-i)*
-							// 0.25f) * y, -6.0f);
-							if (i == 4) {
-								gl.glTranslatef(.5f * x, .5f * y, -6.0f);
-							} else if (i == 3) {
-								gl.glTranslatef(0.666f * x - 0.33f,
-										0.666f * y - 0.33f, -6.0f + 0.25f);
-							} else if (i == 2) {
-								gl.glTranslatef(1f * x - 1f, 1f * y - 1f,
-										-6.0f - 0.15f);
-							} else if (i == 1) {
-								gl.glTranslatef(2f * x - 3f, 2f * y - 3f,
-										-6.0f - 3.3f);
-							}
-
-							// draw the cube
-							gl.glCallList(displayList[i]);
-
-							// declare that area as occupied
-							for (int x2 = (i - 1) + x; x2 >= x; x2--) {
-								for (int y2 = (i - 1) + y; y2 >= y; y2--) {
-									doesFit[x2][y2] = true;
-								}
-							}
-
-							gl.glPopMatrix();
-						}
-					}
-				}
-
-				// reset doesFit, to check for fitting
-				for (int x = 0; x < 12; x++) {
-					for (int y = 0; y < 12; y++) {
-						doesFit[x][y] = false;
-					}
-				}
-
-			}
-		} else if (scene == "checkQuad2D") {
-
-			if (randArr == null);
-				//randArrInit();
-
-			boolean[][] doesFit = new boolean[12][12];
-
-			for (int i = 4; i >= 1; i--) { // loop for each box size
-				for (int x = 0; x < 12; x++) { // x coords
-					for (int y = 0; y < 12; y++) { // y coords
-
-						boolean fitting = true;
-
-						// to check for fitting
-						// x2 and y2 are the width and height of the cube
-						for (int x2 = (i - 1) + x; x2 >= x; x2--) {
-							for (int y2 = (i - 1) + y; y2 >= y; y2--) {
-								if (x2 < 12 && y2 < 12) {
-
-									// determines if area is occupied
-									if (doesFit[x2][y2])
-										fitting = false;
-
-									// randomizes
-									if (i != 1 && randArr[x2][y2] < 0.1)
-										fitting = false;
-								} else
-									fitting = false;
-							}
-						}
-
-						if (fitting) {
-
-							gl.glPushMatrix();
-
-							gl.glScalef(0.25f * i, 0.25f * i, 0.25f * i);
-
-							// move to the coordinate
-							if (i == 4) {
-								gl.glTranslatef(.5f * x, .5f * y, -6.0f);
-							} else if (i == 3) {
-								gl.glTranslatef(0.666f * x - 0.33f,
-										0.666f * y - 0.33f, -8.333f);
-							} else if (i == 2) {
-								gl.glTranslatef(1f * x - .5f - 0.50f,
-										1f * y - 1f, -13.0f);
-							} else if (i == 1) {
-								gl.glTranslatef(2f * x - .75f - 2.25f,
-										2f * y - 3f, -27.0f);
-							}
-
-							// draw the cube
-							gl.glCallList(displayList[0]);
-
-							// declare that area as occupied
-							for (int x2 = (i - 1) + x; x2 >= x; x2--) {
-								for (int y2 = (i - 1) + y; y2 >= y; y2--) {
-									doesFit[x2][y2] = true;
-								}
-							}
-
-							gl.glPopMatrix();
-						}
-					}
-				}
-			}
-		} else if (scene == "checkTree") {
-
-			makeTree(gl, displayList, 0.2, 0f, 0f, -6f);
-
-		}
-	}
 	
 	public void initTerrain(GL2 gl, int[] displayList) {
 		
@@ -418,52 +257,6 @@ public class Terrain {
 				}
 			}
 		}	
-	}
-
-	public void buildQuad(int posNum, GL2 gl, int[] displayList, float posX,
-			float posY, float posZ, int topX, int topY, int topZ) {
-		// when topX,Y,Z are all 12, it is a large cube (made of cubes)
-
-		boolean[][][] doesFit = new boolean[12][12][12];
-
-		for (int i = 4; i >= 1; i--) { // loop for each box size
-			for (int x = 0; x < topX; x++) { // x coords
-				for (int y = 0; y < topY; y++) { // y coords
-					for (int z = 0; z < topZ; z++) { // z coords
-
-						if (sizeArr[posNum][i - 1][x][y][z]) {
-
-							gl.glPushMatrix();
-
-							gl.glScalef(0.25f * i, 0.25f * i, 0.25f * i);
-
-							// move to the coordinate
-							if (i == 4) {
-								gl.glTranslatef(.5f * (x + posX),
-										.5f * (y + posY), .5f * (z + posZ));
-							} else if (i == 3) {
-								gl.glTranslatef(0.666f * (x + posX) - 0.33f,
-										0.666f * (y + posY) - 0.33f,
-										0.666f * (z + posZ) - 0.33f);
-							} else if (i == 2) {
-								gl.glTranslatef(1f * (x + posX) - 1f,
-										1f * (y + posY) - 1f,
-										1f * (z + posZ) - 1f);
-							} else if (i == 1) {
-								gl.glTranslatef(2f * (x + posX) - 3f,
-										2f * (y + posY) - 3f,
-										2f * (z + posZ) - 3f);
-							}
-
-							// draw the cube
-							gl.glCallList(displayList[0]);
-
-							gl.glPopMatrix();
-						}
-					}
-				}
-			}
-		}
 	}
 
 	// remove posNum if numArrays works
