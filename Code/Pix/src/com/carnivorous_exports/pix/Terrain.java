@@ -27,6 +27,10 @@ public class Terrain {
 														// [x][y][z] space is
 														// occupied
 	private boolean[][][][] placement = new boolean[4][12][12][12];
+	
+	boolean[][][][] place1 = initQuad(12, 8, 12, 0.8f);
+	boolean[][][][] place2 = initQuad(12, 8, 12, 0.8f);
+	boolean[][][][] place3 = initQuad(12, 8, 12, 0.8f);
 
 	private float[] treeSize;
 
@@ -170,13 +174,34 @@ public class Terrain {
 		}
 	}
 
-	public void initTerrain() {
+	public void buildTerrain() {
 
+		
+	}
+
+	public void refreshTerrain(GL2 gl, int[] displayList) {
+
+		refreshQuad(gl, displayList, place1, 12, 8, 12, 0, 0, -24);
+		refreshQuad(gl, displayList, place2, 12, 8, 12, 12, 0, -24);
+		refreshQuad(gl, displayList, place3, 12, 8, 12, -12, 0, -24);
+		
+		/*
+		refreshQuad(gl, displayList, place1, 12, 8, 12, 0, 0, -12);
+		refreshQuad(gl, displayList, place2, 12, 8, 12, 12, 0, -12);
+		refreshQuad(gl, displayList, place3, 12, 8, 12, -12, 0, -12);
+		
+		refreshQuad(gl, displayList, place1, 12, 8, 12, 0, 0, -36);
+		refreshQuad(gl, displayList, place2, 12, 8, 12, 12, 0, -36);
+		refreshQuad(gl, displayList, place3, 12, 8, 12, -12, 0, -36);
+		*/
+	}
+	
+	public boolean[][][][] initQuad(int topX, int topY, int topZ, float variety) {
+		//topX, Y, and Z are the boundaries of the quad, when they are 12 it is a cube
+		//variety is the variety of cube sizes: 
+		//		0.0 is entirely size 1 cubes, 1.0 is entirely size 4 cubes
+		
 		boolean fitting = true; // is true when the block will be placed
-
-		int topX = 12;
-		int topY = 8;
-		int topZ = 12;
 
 		for (int i = 4; i >= 1; i--) { // loop for each box size
 			for (int x = 0; x < topX; x++) { // x coords
@@ -184,7 +209,7 @@ public class Terrain {
 					for (int z = 0; z < topZ; z++) { // z coords
 
 						// randomize
-						if (i != 1 && (float) Math.random() < 0.8) {
+						if (i != 1 && (float) Math.random() < variety) {
 							fitting = false;
 						} else {
 
@@ -228,17 +253,12 @@ public class Terrain {
 				}
 			}
 		}
+		
+		return placement;
 	}
-
-	public void refreshTerrain(GL2 gl, int[] displayList) {
-
-		int posX = 0;
-		int posY = 0;
-		int posZ = 0;
-
-		int topX = 12;
-		int topY = 12;
-		int topZ = 12;
+	
+	public void refreshQuad(GL2 gl, int[] displayList, boolean[][][][] placement, 
+			int topX, int topY, int topZ, int posX, int posY, int posZ) {
 
 		for (int i = 4; i >= 1; i--) { // loop for each box size
 			for (int x = 0; x < topX; x++) { // x coords

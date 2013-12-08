@@ -185,7 +185,7 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 		cubeList[6] = terrain.getCubeList(gl,
 				"terrainTextures/White Water Texture.jpeg", ".jpeg");
 		
-		terrain.initTerrain();
+		terrain.buildTerrain();
 	}
 
 	/**
