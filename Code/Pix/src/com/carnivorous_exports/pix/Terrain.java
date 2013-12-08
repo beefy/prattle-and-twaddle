@@ -23,6 +23,9 @@ public class Terrain {
 
 	Texture texture;
 
+	boolean[][][] doesNotFit = new boolean[12][12][12]; // is false when
+														// [x][y][z] space is
+														// occupied
 	private boolean[][][][] placement = new boolean[4][12][12][12];
 
 	private float[] treeSize;
@@ -166,29 +169,46 @@ public class Terrain {
 			e.printStackTrace();
 		}
 	}
-	
-	public void initTerrain(GL2 gl, int[] displayList) {
-		
-		boolean[][][] doesNotFit = new boolean[12][12][12];	//is false when a space is occupied
-		
+
+	public void initTerrain() {
+
+		boolean fitting = true; // is true when the block will be placed
+
 		int topX = 12;
-		int topY = 12;
+		int topY = 8;
 		int topZ = 12;
 
 		for (int i = 4; i >= 1; i--) { // loop for each box size
-			for (int x = 0; x < topX - (i-1); x++) { // x coords
-				for (int y = 0; y < topY - (i-1); y++) { // y coords
-					for (int z = 0; z < topZ - (i-1); z++) { // z coords
-						
-						boolean fitting = true;	//is true when the block will be placed
+			for (int x = 0; x < topX; x++) { // x coords
+				for (int y = 0; y < topY; y++) { // y coords
+					for (int z = 0; z < topZ; z++) { // z coords
 
-						//randomize
-						if(i != 1 && Math.random() < 0.1) {
+						// randomize
+						if (i != 1 && (float) Math.random() < 0.8) {
 							fitting = false;
+						} else {
+
+							// determine if that area is occupied
+							for (int x2 = (i - 1) + x; x2 >= x; x2--) {
+								for (int y2 = (i - 1) + y; y2 >= y; y2--) {
+									for (int z2 = (i - 1) + z; z2 >= z; z2--) {
+
+										// this if statement lets some blocks
+										// pop out of the top
+										if (x2 < 12 && y2 < 12 && z2 < 12) {
+											if (doesNotFit[x2][y2][z2])
+												fitting = false;
+
+										} else
+											fitting = false;
+									}
+								}
+							}
+
 						}
-						
-						if (fitting && !doesNotFit[x][y][z]) {
-							
+
+						if (fitting) {
+
 							// declare that area as occupied
 							for (int x2 = (i - 1) + x; x2 >= x; x2--) {
 								for (int y2 = (i - 1) + y; y2 >= y; y2--) {
@@ -197,22 +217,25 @@ public class Terrain {
 									}
 								}
 							}
-							
-							//remember placement
-							placement[i-1][x][y][z] = true;
+
+							// remember placement
+							placement[i - 1][x][y][z] = true;
 						}
+
+						// reset fitting
+						fitting = true;
 					}
 				}
 			}
 		}
 	}
-	
+
 	public void refreshTerrain(GL2 gl, int[] displayList) {
-		
+
 		int posX = 0;
 		int posY = 0;
 		int posZ = 0;
-		
+
 		int topX = 12;
 		int topY = 12;
 		int topZ = 12;
@@ -221,11 +244,11 @@ public class Terrain {
 			for (int x = 0; x < topX; x++) { // x coords
 				for (int y = 0; y < topY; y++) { // y coords
 					for (int z = 0; z < topZ; z++) { // z coords
-						
-						//if a box is placed there
-						if(placement[i-1][x][y][z]) {
-							
-							//draw the box
+
+						// if a box is placed there
+						if (placement[i - 1][x][y][z]) {
+
+							// draw the box
 							gl.glPushMatrix();
 
 							gl.glScalef(0.25f * i, 0.25f * i, 0.25f * i);
@@ -235,9 +258,9 @@ public class Terrain {
 								gl.glTranslatef(.5f * (x + posX),
 										.5f * (y + posY), .5f * (z + posZ));
 							} else if (i == 3) {
-								gl.glTranslatef(0.666f * (x + posX) - 0.33f,
-										0.666f * (y + posY) - 0.33f,
-										0.666f * (z + posZ) - 0.33f);
+								gl.glTranslatef(0.6666f * (x + posX) - 0.3333f,
+										0.6666f * (y + posY) - 0.3333f,
+										0.6666f * (z + posZ) - 0.3333f);
 							} else if (i == 2) {
 								gl.glTranslatef(1f * (x + posX) - 1f,
 										1f * (y + posY) - 1f,
@@ -249,14 +272,14 @@ public class Terrain {
 							}
 
 							// draw the cube
-							gl.glCallList(displayList[0]);
+							gl.glCallList(displayList[i - 1]);
 
 							gl.glPopMatrix();
 						}
 					}
 				}
 			}
-		}	
+		}
 	}
 
 	// remove posNum if numArrays works
