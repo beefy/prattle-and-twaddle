@@ -185,7 +185,7 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 		cubeList[6] = terrain.getCubeList(gl,
 				"terrainTextures/White Water Texture.jpeg", ".jpeg");
 		
-		terrain.initTerrain(gl, cubeList);
+		terrain.initTerrain();
 	}
 
 	/**
@@ -236,7 +236,6 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 		gl.glTranslatef(movex, movey, movez);
 
 		// --------- Rendering Code
-		//terrain.buildTerrain(gl, cubeList, "checkQuad3D");
 		terrain.refreshTerrain(gl, cubeList);
 		
 		gl.glPopMatrix();
