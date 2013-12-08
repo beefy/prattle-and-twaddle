@@ -26,6 +26,7 @@ public class Terrain {
 	private float[][] randArr;
 	private float[][][][] randArr2;
 	private boolean[][][][][] sizeArr = new boolean[10][4][12][12][12];
+	private boolean[][][][] placement = new boolean[4][12][12][12];
 
 	private float[] treeSize;
 
@@ -256,8 +257,8 @@ public class Terrain {
 			}
 		} else if (scene == "checkQuad2D") {
 
-			if (randArr == null)
-				randArrInit();
+			if (randArr == null);
+				//randArrInit();
 
 			boolean[][] doesFit = new boolean[12][12];
 
@@ -320,50 +321,103 @@ public class Terrain {
 					}
 				}
 			}
-		} else if (scene == "checkQuad3D") {
-
-			randArrInit();
-			sizeArrInit(9, 1, gl, displayList, 12f, 0f, -24f, 12, 6, 12);
-
-			buildQuad(0, gl, displayList, 12f, 0f, -24f, 12, 6, 12);
-
-			buildQuad(1, gl, displayList, -12f, 0f, -24f, 12, 6, 12);
-			buildQuad(2, gl, displayList, 0f, 0f, -24f, 12, 6, 12);
-
-			buildQuad(3, gl, displayList, 12f, 0f, -12f, 12, 6, 12);
-			buildQuad(4, gl, displayList, -12f, 0f, -12f, 12, 6, 12);
-			buildQuad(5, gl, displayList, 0f, 0f, -12f, 12, 6, 12);
-
-			buildQuad(6, gl, displayList, 12f, 0f, -36f, 12, 6, 12);
-			buildQuad(7, gl, displayList, -12f, 0f, -36f, 12, 6, 12);
-			buildQuad(8, gl, displayList, 0f, 0f, -36f, 12, 6, 12);
-
 		} else if (scene == "checkTree") {
 
 			makeTree(gl, displayList, 0.2, 0f, 0f, -6f);
 
 		}
 	}
+	
+	public void initTerrain(GL2 gl, int[] displayList) {
+		
+		boolean[][][] doesNotFit = new boolean[12][12][12];	//is false when a space is occupied
+		
+		int topX = 12;
+		int topY = 12;
+		int topZ = 12;
 
-	public void randArrInit() {
+		for (int i = 4; i >= 1; i--) { // loop for each box size
+			for (int x = 0; x < topX - (i-1); x++) { // x coords
+				for (int y = 0; y < topY - (i-1); y++) { // y coords
+					for (int z = 0; z < topZ - (i-1); z++) { // z coords
+						
+						boolean fitting = true;	//is true when the block will be placed
 
-		randArr = new float[12][12];
-		for (int x = 0; x < 12; x++) {
-			for (int y = 0; y < 12; y++) {
-				randArr[x][y] = (float) Math.random();
-			}
-		}
-
-		randArr2 = new float[9][12][12][12];
-		for (int pos = 0; pos < 9; pos++) {
-			for (int x = 0; x < 12; x++) {
-				for (int y = 0; y < 12; y++) {
-					for (int z = 0; z < 12; z++) {
-						randArr2[pos][x][y][z] = (float) Math.random();
+						//randomize
+						if(i != 1 && Math.random() < 0.1) {
+							fitting = false;
+						}
+						
+						if (fitting && !doesNotFit[x][y][z]) {
+							
+							// declare that area as occupied
+							for (int x2 = (i - 1) + x; x2 >= x; x2--) {
+								for (int y2 = (i - 1) + y; y2 >= y; y2--) {
+									for (int z2 = (i - 1) + z; z2 >= z; z2--) {
+										doesNotFit[x2][y2][z2] = true;
+									}
+								}
+							}
+							
+							//remember placement
+							placement[i-1][x][y][z] = true;
+						}
 					}
 				}
 			}
 		}
+	}
+	
+	public void refreshTerrain(GL2 gl, int[] displayList) {
+		
+		int posX = 0;
+		int posY = 0;
+		int posZ = 0;
+		
+		int topX = 12;
+		int topY = 12;
+		int topZ = 12;
+
+		for (int i = 4; i >= 1; i--) { // loop for each box size
+			for (int x = 0; x < topX; x++) { // x coords
+				for (int y = 0; y < topY; y++) { // y coords
+					for (int z = 0; z < topZ; z++) { // z coords
+						
+						//if a box is placed there
+						if(placement[i-1][x][y][z]) {
+							
+							//draw the box
+							gl.glPushMatrix();
+
+							gl.glScalef(0.25f * i, 0.25f * i, 0.25f * i);
+
+							// move to the coordinate
+							if (i == 4) {
+								gl.glTranslatef(.5f * (x + posX),
+										.5f * (y + posY), .5f * (z + posZ));
+							} else if (i == 3) {
+								gl.glTranslatef(0.666f * (x + posX) - 0.33f,
+										0.666f * (y + posY) - 0.33f,
+										0.666f * (z + posZ) - 0.33f);
+							} else if (i == 2) {
+								gl.glTranslatef(1f * (x + posX) - 1f,
+										1f * (y + posY) - 1f,
+										1f * (z + posZ) - 1f);
+							} else if (i == 1) {
+								gl.glTranslatef(2f * (x + posX) - 3f,
+										2f * (y + posY) - 3f,
+										2f * (z + posZ) - 3f);
+							}
+
+							// draw the cube
+							gl.glCallList(displayList[0]);
+
+							gl.glPopMatrix();
+						}
+					}
+				}
+			}
+		}	
 	}
 
 	public void buildQuad(int posNum, GL2 gl, int[] displayList, float posX,
@@ -413,58 +467,6 @@ public class Terrain {
 	}
 
 	// remove posNum if numArrays works
-	public void sizeArrInit(int numArrays, int posNum, GL2 gl,
-			int[] displayList, float posX, float posY, float posZ, int topX,
-			int topY, int topZ) {
-
-		boolean[][][] doesFit = new boolean[12][12][12];
-
-		for (int i = 4; i >= 1; i--) { // loop for each box size
-			for (int x = 0; x < topX; x++) { // x coords
-				for (int y = 0; y < topY; y++) { // y coords
-					for (int z = 0; z < topZ; z++) { // z coords
-
-						if (!positionRecorded) { // if the cubes are not
-													// initialized
-
-							boolean fitting = true;
-
-							// to check for fitting
-							// x2 is the width of the cube
-							// y2 is the height of the cube
-							// z2 is the length of the cube
-
-							for (int n = numArrays; n > 0; n--) {
-								for (int x2 = (i - 1) + x; x2 >= x; x2--) {
-									for (int y2 = (i - 1) + y; y2 >= y; y2--) {
-										for (int z2 = (i - 1) + z; z2 >= z; z2--) {
-											if (x2 < 12 && y2 < 12 && z2 < 12) {
-
-												// determines if area is
-												// occupied
-												if (doesFit[x2][y2][z2])
-													fitting = false;
-
-												// randomizes
-												if (i != 1
-														&& randArr2[n][x2][y2][z2] < 0.05)
-													fitting = false;
-											} else
-												fitting = false;
-										}
-									}
-								}
-								// record the position
-								if (fitting)
-									sizeArr[n][i - 1][x][y][z] = true;
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
 	public void makeTree(GL2 gl, int[] displayList, double branchOdds, float x,
 			float y, float z) {
 		if (treeSize == null) {
