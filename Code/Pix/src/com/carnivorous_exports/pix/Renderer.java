@@ -54,7 +54,8 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 	private GLU glu; // for the GL Utility
 	private int[] cubeList; // display list for cube
 	private Terrain terrain = new Terrain();
-
+	private boolean initiated = false;
+	
 	Robot robot;
 	int width;
 	int height;
@@ -185,7 +186,8 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 		cubeList[6] = terrain.getCubeList(gl,
 				"terrainTextures/White Water Texture.jpeg", ".jpeg");
 		
-		terrain.buildTerrain();
+		if(initiated) terrain.buildTerrain();
+		initiated = true;
 	}
 
 	/**

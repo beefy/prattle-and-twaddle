@@ -8,6 +8,7 @@ import static javax.media.opengl.GL2.GL_COMPILE;
 import static javax.media.opengl.GL2GL3.GL_QUADS;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLException;
@@ -23,14 +24,15 @@ public class Terrain {
 
 	Texture texture;
 
-	boolean[][][] doesNotFit = new boolean[12][12][12]; // is false when
+	//boolean[][][] doesNotFit = new boolean[12][12][12]; // is false when
 														// [x][y][z] space is
 														// occupied
-	private boolean[][][][] placement = new boolean[4][12][12][12];
+	//private boolean[][][][] placement = new boolean[4][12][12][12];
+	private ArrayList[][] coords = new ArrayList[3][3];
 	
-	boolean[][][][] place1 = initQuad(12, 8, 12, 0.8f);
-	boolean[][][][] place2 = initQuad(12, 8, 12, 0.8f);
-	boolean[][][][] place3 = initQuad(12, 8, 12, 0.8f);
+	boolean[][][][] place1;
+	boolean[][][][] place2;
+	boolean[][][][] place3;
 
 	private float[] treeSize;
 
@@ -176,11 +178,31 @@ public class Terrain {
 
 	public void buildTerrain() {
 
+		/*
+		for(int x = 0; x < 3; x++) {
+			for(int y = 0; y < 3; y++) {
+				coords[x][y].add(initQuad(12, 8, 12, 0.8f));
+			}
+		}
+		*/
+		
+			place1 = (initQuad(12, 8, 12, 0.8f, new boolean[12][12][12]));
+			place2 = (initQuad(12, 8, 12, 0.8f, new boolean[12][12][12]));
+			place3 = (initQuad(12, 8, 12, 0.8f, new boolean[12][12][12]));
 		
 	}
 
 	public void refreshTerrain(GL2 gl, int[] displayList) {
 
+		/*
+		for(int x = 0; x < 3; x++) {
+			for(int y = 0; y < 3; y++) {
+				refreshQuad(gl, displayList, coords.toArray(), 12, 8, 12 * x, 0, 0, 12 * y);
+			}
+		}
+		*/
+		
+		
 		refreshQuad(gl, displayList, place1, 12, 8, 12, 0, 0, -24);
 		refreshQuad(gl, displayList, place2, 12, 8, 12, 12, 0, -24);
 		refreshQuad(gl, displayList, place3, 12, 8, 12, -12, 0, -24);
@@ -194,12 +216,20 @@ public class Terrain {
 		refreshQuad(gl, displayList, place2, 12, 8, 12, 12, 0, -36);
 		refreshQuad(gl, displayList, place3, 12, 8, 12, -12, 0, -36);
 		*/
+		
+		
 	}
 	
-	public boolean[][][][] initQuad(int topX, int topY, int topZ, float variety) {
+	public boolean[][][][] initQuad(int topX, int topY, int topZ, float variety, boolean[][][] doesNotFit) {
 		//topX, Y, and Z are the boundaries of the quad, when they are 12 it is a cube
 		//variety is the variety of cube sizes: 
 		//		0.0 is entirely size 1 cubes, 1.0 is entirely size 4 cubes
+		
+		//boolean[][][] doesNotFit = new boolean[12][12][12]; 	// is false when
+												// [x][y][z] space is
+												// occupied
+		
+		boolean[][][][] placement = new boolean[4][12][12][12];
 		
 		boolean fitting = true; // is true when the block will be placed
 
@@ -245,7 +275,7 @@ public class Terrain {
 
 							// remember placement
 							placement[i - 1][x][y][z] = true;
-						}
+						} //else placement[i - 1][x][y][z] = false;
 
 						// reset fitting
 						fitting = true;
@@ -257,7 +287,7 @@ public class Terrain {
 		return placement;
 	}
 	
-	public void refreshQuad(GL2 gl, int[] displayList, boolean[][][][] placement, 
+	public void refreshQuad(GL2 gl, int[] displayList, boolean[][][][] place, 
 			int topX, int topY, int topZ, int posX, int posY, int posZ) {
 
 		for (int i = 4; i >= 1; i--) { // loop for each box size
@@ -266,7 +296,7 @@ public class Terrain {
 					for (int z = 0; z < topZ; z++) { // z coords
 
 						// if a box is placed there
-						if (placement[i - 1][x][y][z]) {
+						if (place[i - 1][x][y][z]) {
 
 							// draw the box
 							gl.glPushMatrix();
@@ -292,7 +322,7 @@ public class Terrain {
 							}
 
 							// draw the cube
-							gl.glCallList(displayList[i - 1]);
+							gl.glCallList(displayList[0]);
 
 							gl.glPopMatrix();
 						}
@@ -310,22 +340,22 @@ public class Terrain {
 			treeSize[0] = (float) Math.random() * 5f + 5f;
 		}
 
-		for (y = y; y < treeSize[0]; y++) {
+		for (int y2 = (int) y; y2 < treeSize[0]; y2++) {
 
 			if (Math.random() < branchOdds)
-				makeTree(gl, displayList, branchOdds - 0.1, x - 2f - 3f, y, z);
+				makeTree(gl, displayList, branchOdds - 0.1, x - 2f - 3f, y2, z);
 			if (Math.random() < branchOdds)
-				makeTree(gl, displayList, branchOdds - 0.1, x + 2f - 3f, y, z);
+				makeTree(gl, displayList, branchOdds - 0.1, x + 2f - 3f, y2, z);
 			if (Math.random() < branchOdds)
-				makeTree(gl, displayList, branchOdds - 0.1, x, y, z - 2f - 3f);
+				makeTree(gl, displayList, branchOdds - 0.1, x, y2, z - 2f - 3f);
 			if (Math.random() < branchOdds)
-				makeTree(gl, displayList, branchOdds - 0.1, x, y, z + 2f - 3f);
+				makeTree(gl, displayList, branchOdds - 0.1, x, y2, z + 2f - 3f);
 
 			gl.glPushMatrix();
 
 			gl.glScalef(0.25f, 0.25f, 0.25f);
 
-			gl.glTranslatef(x, y + 2f * y - 3f, z);
+			gl.glTranslatef(x, y + 2f * y2 - 3f, z);
 
 			// draw the cube
 			gl.glCallList(displayList[0]);
