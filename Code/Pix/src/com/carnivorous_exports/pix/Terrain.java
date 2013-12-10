@@ -186,9 +186,9 @@ public class Terrain {
 		}
 		*/
 		
-			place1 = (initQuad(12, 8, 12, 0.8f, new boolean[12][12][12]));
-			place2 = (initQuad(12, 8, 12, 0.8f, new boolean[12][12][12]));
-			place3 = (initQuad(12, 8, 12, 0.8f, new boolean[12][12][12]));
+			place1 = (initQuad(12, 8, 12, 0.3f));
+			place2 = (initQuad(12, 8, 12, 0.3f));
+			place3 = (initQuad(12, 8, 12, 0.3f));
 		
 	}
 
@@ -203,8 +203,8 @@ public class Terrain {
 		*/
 		
 		
-		refreshQuad(gl, displayList, place1, 12, 8, 12, 0, 0, -24);
-		refreshQuad(gl, displayList, place2, 12, 8, 12, 12, 0, -24);
+		refreshQuad(gl, displayList, place1, 12, 8, 12, 12, 0, -24);
+		refreshQuad(gl, displayList, place2, 12, 8, 12, 0, 0, -24);
 		refreshQuad(gl, displayList, place3, 12, 8, 12, -12, 0, -24);
 		
 		/*
@@ -220,7 +220,7 @@ public class Terrain {
 		
 	}
 	
-	public boolean[][][][] initQuad(int topX, int topY, int topZ, float variety, boolean[][][] doesNotFit) {
+	public boolean[][][][] initQuad(int topX, int topY, int topZ, float variety) {
 		//topX, Y, and Z are the boundaries of the quad, when they are 12 it is a cube
 		//variety is the variety of cube sizes: 
 		//		0.0 is entirely size 1 cubes, 1.0 is entirely size 4 cubes
@@ -230,6 +230,7 @@ public class Terrain {
 												// occupied
 		
 		boolean[][][][] placement = new boolean[4][12][12][12];
+		boolean[][][] doesNotFit = new boolean[12][12][12];
 		
 		boolean fitting = true; // is true when the block will be placed
 
