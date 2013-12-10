@@ -56,6 +56,8 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 	private Terrain terrain = new Terrain();
 	private boolean initiated = false;
 	
+	float cameraPos[] = { 5.0f, 5.0f, 10.0f, 0.0f };
+	
 	Robot robot;
 	int width;
 	int height;
@@ -151,6 +153,14 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 		glu = new GLU(); // get GL Utilities
 		gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // set background (clear) color
 		gl.glClearDepth(1.0f); // set clear depth value to farthest
+		
+		//for lighting
+		//gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, cameraPos, 0);
+		gl.glLightf(0, GL_SPOT_EXPONENT, 0);
+		gl.glEnable(GL2.GL_CULL_FACE);
+		gl.glEnable(GL2.GL_LIGHTING);
+		gl.glEnable(GL2.GL_LIGHT0);
+		
 		gl.glEnable(GL_DEPTH_TEST); // enables depth testing
 		gl.glDepthFunc(GL_LEQUAL); // the type of depth test to do
 		gl.glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST); // best
