@@ -44,8 +44,12 @@ import com.jogamp.opengl.util.Animator;
 import static javax.media.opengl.GL.*; // GL constants
 import static javax.media.opengl.GL2.*; // GL2 constants
 import static javax.media.opengl.GL2ES1.GL_PERSPECTIVE_CORRECTION_HINT;
+import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_AMBIENT;
 import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_COLOR_MATERIAL;
+import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_DIFFUSE;
 import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_LIGHT0;
+import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_LIGHT1;
+import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_POSITION;
 
 @SuppressWarnings("serial")
 public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
@@ -55,6 +59,11 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 	private int[] cubeList; // display list for cube
 	private Terrain terrain = new Terrain();
 	private boolean initiated = false;
+	
+	//for lighting
+			float[] lightPos = { 2000,3000,2000,1 };        // light position
+			float[] noAmbient = { 0.2f, 0.2f, 0.2f, 1f };     // low ambient light
+			float[] diffuse = { 1f, 1f, 1f, 1f };        // full diffuse colour
 	
 	float cameraPos[] = { 5.0f, 5.0f, 10.0f, 0.0f };
 	
@@ -114,6 +123,13 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 					* -moveDirForward;
 			movex -= Math.sin(180 - view_roty * (Math.PI / 180) + 40) * 0.1
 					* -moveDirForward;
+			
+			
+			//lightPos[2] -= Math.cos(180 - view_roty * (Math.PI / 180) + 40) * 0.1
+			//		* -moveDirForward;
+			//lightPos[0] += Math.sin(180 - view_roty * (Math.PI / 180) + 40) * 0.1
+			//		* -moveDirForward;
+			
 		}
 
 		if (strifeMove) { // moving right or left
@@ -121,10 +137,21 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 					* -moveDirStrife) * 0.1;
 			movex += Math.sin(180 - view_roty * (Math.PI / 180) + 40 + 80.1
 					* -moveDirStrife) * 0.1;
+			
+			//lightPos[2] += Math.cos(180 - view_roty * (Math.PI / 180) + 40 + 80.1
+			//		* -moveDirStrife) * 0.1;
+			
+			//lightPos[0] -= Math.sin(180 - view_roty * (Math.PI / 180) + 40 + 80.1
+			//		* -moveDirStrife) * 0.1;
 		}
 		
 		if(flyUpMove) movey -= 0.1;
 		if(flyDownMove) movey += 0.1;
+		
+		for(int i = 0; i < 3; i++) {
+			System.out.print(lightPos[i] + " ");
+		}
+		System.out.println();
 	}
 
 	// ------ Implement methods declared in GLEventListener ------
@@ -155,8 +182,27 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 		gl.glClearDepth(1.0f); // set clear depth value to farthest
 		
 		//for lighting
+		 // Set up the lighting for Light-1
+	      // Ambient light does not come from a particular direction. Need some ambient
+	      // light to light up the scene. Ambient's value in RGBA
+	      //float[] lightAmbientValue = {0.5f, 0.5f, 0.5f, 1.0f};
+	      // Diffuse light comes from a particular location. Diffuse's value in RGBA
+	      //float[] lightDiffuseValue = {1.0f, 1.0f, 1.0f, 1.0f};
+	      // Diffuse light location xyz (in front of the screen).
+	      //float lightDiffusePosition[] = {0.0f, 0.0f, 2.0f, 1.0f};
+		
 		//gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, cameraPos, 0);
-		gl.glLightf(0, GL_SPOT_EXPONENT, 0);
+		//gl.glLightf(0, GL_SPOT_EXPONENT, 0);
+		//gl.glLightfv(GL_LIGHT1, GL_AMBIENT, lightAmbientValue, 0);
+		//gl.glLightfv(GL_LIGHT1, GL_DIFFUSE, lightDiffuseValue, 0);
+	      //gl.glLightfv(GL_LIGHT1, GL_POSITION, lightDiffusePosition, 0);
+
+		gl.glEnable(GL_LIGHTING);
+		gl.glEnable(GL_LIGHT0);
+		gl.glLightfv(GL_LIGHT0, GL_AMBIENT, noAmbient, 0);
+		gl.glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse, 0);
+		gl.glLightfv(GL_LIGHT0, GL_POSITION,lightPos, 0);
+		
 		gl.glEnable(GL2.GL_CULL_FACE);
 		gl.glEnable(GL2.GL_LIGHTING);
 		gl.glEnable(GL2.GL_LIGHT0);
@@ -238,6 +284,11 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 																// and depth
 																// buffers
 
+		//lightPos[0] += view_rotx;
+		//lightPos[1] += view_roty;
+		//lightPos[2] += view_rotz;
+		gl.glLightfv(GL_LIGHT0, GL_POSITION,lightPos, 0);
+		
 		gl.glPushMatrix();
 
 		// rotate around wherever the user points the mouse
