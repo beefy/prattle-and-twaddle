@@ -1,77 +1,120 @@
 package com.carnivorous_exports.pix;
 
+import static javax.media.opengl.GL.GL_COLOR_BUFFER_BIT;
+import static javax.media.opengl.GL.GL_DEPTH_BUFFER_BIT;
+
 import javax.media.opengl.GL2;
+import javax.media.opengl.GLAutoDrawable;
 
 public class Quad {
 	
-	private boolean[][][][] placement = new boolean[4][12][12][12];
-
-	public Quad(int topX, int topY, int topZ, float variety) {
-			//topX, Y, and Z are the boundaries of the quad, when they are 12 it is a cube
-			//variety is the variety of cube sizes: 
-			//		0.0 is entirely size 1 cubes, 1.0 is entirely size 4 cubes
+	private boolean [][][][] placement = new boolean[4][12][12][12];
+	int[] displayList;
+	int coordX;
+	int coordY;
+	
+	//for initQuad
+	int topX;
+	int topY;
+	int topZ;
+	float variety;
+	
+	//for refreshQuad
+	int posX;
+	int posY;
+	int posZ;
+	
+	Renderer renderer;
+	GLAutoDrawable drawable;
+	
+	public Quad(GLAutoDrawable drawable, Renderer renderer, int topX, int topY, int topZ, float variety, GL2 gl, int[] displayList, int coordX, int coordY) {
+		
+			this.topX = topX;
+			this.topY = topY;
+			this.topZ = topZ;
 			
-			boolean[][][] doesNotFit = new boolean[12][12][12]; // is false when
-																// [x][y][z] space is
-																// occupied
+			this.variety = variety;
+			this.drawable = drawable;
+			this.displayList = displayList;
 			
-			boolean fitting = true; // is true when the block will be placed
+			this.coordX = coordX;
+			this.coordY = coordY;
+			
+			//position of the Quad
+			posX = 12 * coordY;
+			posY = 2 * coordX + 2 * coordY;	//to make a hill
+			posZ = 12 * coordX;
+			
+			this.renderer = renderer;
+			
+			initQuad();
+	}
+	
+	public void initQuad() {
+		//topX, Y, and Z are the boundaries of the quad, when they are 12 it is a cube
+		//variety is the variety of cube sizes: 
+		//		0.0 is entirely size 1 cubes, 1.0 is entirely size 4 cubes
+		
+		boolean[][][] doesNotFit = new boolean[12][12][12]; // is false when
+															// [x][y][z] space is
+															// occupied
+		
+		boolean fitting = true; // is true when the block will be placed
 
-			for (int i = 4; i >= 1; i--) { // loop for each box size
-				for (int x = 0; x < topX; x++) { // x coords
-					for (int y = 0; y < topY; y++) { // y coords
-						for (int z = 0; z < topZ; z++) { // z coords
+		for (int i = 4; i >= 1; i--) { // loop for each box size
+			for (int x = 0; x < topX; x++) { // x coords
+				for (int y = 0; y < topY; y++) { // y coords
+					for (int z = 0; z < topZ; z++) { // z coords
 
-							// randomize
-							if (i != 1 && (float) Math.random() < variety) {
-								fitting = false;
-							} else {
+						// randomize
+						if (i != 1 && (float) Math.random() < variety) {
+							fitting = false;
+						}// else {
 
-								// determine if that area is occupied
-								for (int x2 = (i - 1) + x; x2 >= x; x2--) {
-									for (int y2 = (i - 1) + y; y2 >= y; y2--) {
-										for (int z2 = (i - 1) + z; z2 >= z; z2--) {
+							// determine if that area is occupied
+							for (int x2 = (i - 1) + x; x2 >= x; x2--) {
+								for (int y2 = (i - 1) + y; y2 >= y; y2--) {
+									for (int z2 = (i - 1) + z; z2 >= z; z2--) {
 
-											// this if statement lets some blocks
-											// pop out of the top
-											if (x2 < 12 && y2 < 12 && z2 < 12) {
-												if (doesNotFit[x2][y2][z2])
-													fitting = false;
-
-											} else
+										// this if statement lets some blocks
+										// pop out of the top
+										if (x2 < 12 && y2 < 12 && z2 < 12) {
+											if (doesNotFit[x2][y2][z2])
 												fitting = false;
-										}
+
+										} else
+											fitting = false;
 									}
 								}
-
 							}
 
-							if (fitting) {
+						//}
 
-								// declare that area as occupied
-								for (int x2 = (i - 1) + x; x2 >= x; x2--) {
-									for (int y2 = (i - 1) + y; y2 >= y; y2--) {
-										for (int z2 = (i - 1) + z; z2 >= z; z2--) {
-											doesNotFit[x2][y2][z2] = true;
-										}
+						if (fitting) {
+
+							// declare that area as occupied
+							for (int x2 = (i - 1) + x; x2 >= x; x2--) {
+								for (int y2 = (i - 1) + y; y2 >= y; y2--) {
+									for (int z2 = (i - 1) + z; z2 >= z; z2--) {
+										doesNotFit[x2][y2][z2] = true;
 									}
 								}
+							}
 
-								// remember placement
-								placement[i - 1][x][y][z] = true;
-							} //else placement[i - 1][x][y][z] = false;
+							// remember placement
+							placement[i - 1][x][y][z] = true;
+						} //else placement[i - 1][x][y][z] = false;
 
-							// reset fitting
-							fitting = true;
-						}
+						// reset fitting
+						fitting = true;
 					}
 				}
 			}
-	}
-	
-	public void refreshQuad(GL2 gl, int[] displayList,
-			int topX, int topY, int topZ, int posX, int posY, int posZ) {
-
+		}
+	}	
+		
+	public void refreshQuad(GL2 gl) {
+		
 		for (int i = 4; i >= 1; i--) { // loop for each box size
 			for (int x = 0; x < topX; x++) { // x coords
 				for (int y = 0; y < topY; y++) { // y coords
@@ -112,6 +155,5 @@ public class Quad {
 				}
 			}
 		}
-
 	}
 }
