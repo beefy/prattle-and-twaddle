@@ -11,14 +11,20 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.media.opengl.GL2;
+import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLException;
+import javax.media.opengl.GLRunnable;
 
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureCoords;
 import com.jogamp.opengl.util.texture.TextureIO;
 
 public class Terrain {
-
+ 
+	GL2 gl;
+	int[] displayList;
+	boolean terrainBuilt;
+	
 	// for testing rotation
 	float tempRotX;
 
@@ -28,11 +34,9 @@ public class Terrain {
 														// [x][y][z] space is
 														// occupied
 	//private boolean[][][][] placement = new boolean[4][12][12][12];
-	private ArrayList[][] coords = new ArrayList[3][3];
-	
-	Quad place1;
-	Quad place2;
-	Quad place3;
+	private int xLength = 3;
+	private int yLength = 3;
+	private Quad[][] coords = new Quad[xLength][yLength];
 
 	private float[] treeSize;
 
@@ -176,51 +180,29 @@ public class Terrain {
 		}
 	}
 
-	public void buildTerrain() {
-
-		/*
-		for(int x = 0; x < 3; x++) {
-			for(int y = 0; y < 3; y++) {
-				coords[x][y].add(initQuad(12, 8, 12, 0.8f));
+	public void buildTerrain(GLAutoDrawable drawable, Renderer renderer, GL2 gl, int[] displayList) {
+		
+		this.gl = gl;
+		this.displayList = displayList;
+		
+		for(int x = 0; x < xLength; x++) {
+			for(int y = 0; y < yLength; y++) {
+				coords[x][y] = new Quad(drawable, renderer, 12, 8, 12, 0.5f, gl, displayList, x, y);
 			}
 		}
-		*/
 		
-		place1 = new Quad(12, 8, 12, 0.5f);
-		place2 = new Quad(12, 8, 12, 0.5f);
-		place3 = new Quad(12, 8, 12, 0.5f);
-		
+		//terrainBuilt = true;
+		System.out.println("terrainBuild");
 	}
-
-	public void refreshTerrain(GL2 gl, int[] displayList) {
-
-		/*
-		for(int x = 0; x < 3; x++) {
-			for(int y = 0; y < 3; y++) {
-				refreshQuad(gl, displayList, coords.toArray(), 12, 8, 12 * x, 0, 0, 12 * y);
+	
+	public void refreshTerrain(GL2 gl) {
+		for(int x = 0; x < xLength; x++) {
+			for(int y = 0; y < yLength; y++) {
+				coords[x][y].refreshQuad(gl);
 			}
 		}
-		*/
-		
-		
-		place1.refreshQuad(gl, displayList, 12, 8, 12, 12, 0, -24);
-		place2.refreshQuad(gl, displayList, 12, 8, 12, 0, 0, -24);
-		place3.refreshQuad(gl, displayList, 12, 8, 12, -12, 0, -24);
-		
-		/*
-		refreshQuad(gl, displayList, place1, 12, 8, 12, 0, 0, -12);
-		refreshQuad(gl, displayList, place2, 12, 8, 12, 12, 0, -12);
-		refreshQuad(gl, displayList, place3, 12, 8, 12, -12, 0, -12);
-		
-		refreshQuad(gl, displayList, place1, 12, 8, 12, 0, 0, -36);
-		refreshQuad(gl, displayList, place2, 12, 8, 12, 12, 0, -36);
-		refreshQuad(gl, displayList, place3, 12, 8, 12, -12, 0, -36);
-		*/
-		
-		
 	}
 
-	// remove posNum if numArrays works
 	public void makeTree(GL2 gl, int[] displayList, double branchOdds, float x,
 			float y, float z) {
 		if (treeSize == null) {

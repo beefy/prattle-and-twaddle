@@ -24,6 +24,7 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLProfile;
+import javax.media.opengl.GLRunnable;
 import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.glu.GLU;
 
@@ -59,6 +60,7 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 	private int[] cubeList; // display list for cube
 	private Terrain terrain = new Terrain();
 	private boolean initiated = false;
+	GLAutoDrawable drawable;
 	
 	//for lighting
 			float[] lightPos = { 2000,3000,2000,1 };        // light position
@@ -78,12 +80,12 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 	private int prevMouseY;
 	private int mouseX;
 	private int mouseY;
-	private float view_rotx;
-	private float view_roty;
-	private float view_rotz;
-	private float movex;
-	private float movey;
-	private float movez;
+	public float view_rotx;
+	public float view_roty;
+	public float view_rotz;
+	public float movex;
+	public float movey;
+	public float movez;
 	private float mouseSensitivity = 0.75f;
 
 	// for (arrow) key movement
@@ -148,10 +150,11 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 		if(flyUpMove) movey -= 0.1;
 		if(flyDownMove) movey += 0.1;
 		
-		for(int i = 0; i < 3; i++) {
-			System.out.print(lightPos[i] + " ");
-		}
-		System.out.println();
+		//light debugging
+		//for(int i = 0; i < 3; i++) {
+		//	System.out.print(lightPos[i] + " ");
+		//}
+		//System.out.println();
 	}
 
 	// ------ Implement methods declared in GLEventListener ------
@@ -197,15 +200,15 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 		//gl.glLightfv(GL_LIGHT1, GL_DIFFUSE, lightDiffuseValue, 0);
 	      //gl.glLightfv(GL_LIGHT1, GL_POSITION, lightDiffusePosition, 0);
 
-		gl.glEnable(GL_LIGHTING);
-		gl.glEnable(GL_LIGHT0);
-		gl.glLightfv(GL_LIGHT0, GL_AMBIENT, noAmbient, 0);
-		gl.glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse, 0);
-		gl.glLightfv(GL_LIGHT0, GL_POSITION,lightPos, 0);
+		//gl.glEnable(GL_LIGHTING);
+		//gl.glEnable(GL_LIGHT0);
+		//gl.glLightfv(GL_LIGHT0, GL_AMBIENT, noAmbient, 0);
+		//gl.glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse, 0);
+		//gl.glLightfv(GL_LIGHT0, GL_POSITION,lightPos, 0);
 		
-		gl.glEnable(GL2.GL_CULL_FACE);
-		gl.glEnable(GL2.GL_LIGHTING);
-		gl.glEnable(GL2.GL_LIGHT0);
+		//gl.glEnable(GL2.GL_CULL_FACE);
+		//gl.glEnable(GL2.GL_LIGHTING);
+		//gl.glEnable(GL2.GL_LIGHT0);
 		
 		gl.glEnable(GL_DEPTH_TEST); // enables depth testing
 		gl.glDepthFunc(GL_LEQUAL); // the type of depth test to do
@@ -242,7 +245,12 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 		cubeList[6] = terrain.getCubeList(gl,
 				"terrainTextures/White Water Texture.jpeg", ".jpeg");
 		
-		if(initiated) terrain.buildTerrain();
+		
+		//start the terrain thread: refresh the terrain once it's built
+		//if(!initiatedThread) terrain.t.start();
+		//initiatedThread = true;
+		
+		if(!initiated) terrain.buildTerrain(drawable, this, gl, cubeList);
 		initiated = true;
 	}
 
@@ -279,15 +287,16 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 	@Override
 	public void display(GLAutoDrawable drawable) {
 
-		GL2 gl = drawable.getGL().getGL2(); // get the OpenGL 2 graphics context
-		gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear color
-																// and depth
-																// buffers
+		this.drawable = drawable;
 
 		//lightPos[0] += view_rotx;
 		//lightPos[1] += view_roty;
 		//lightPos[2] += view_rotz;
-		gl.glLightfv(GL_LIGHT0, GL_POSITION,lightPos, 0);
+		//gl.glLightfv(GL_LIGHT0, GL_POSITION,lightPos, 0);
+		GL2 gl = drawable.getGL().getGL2(); // get the OpenGL 2 graphics context
+		gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear color
+																// and depth
+																// buffers
 		
 		gl.glPushMatrix();
 
@@ -298,10 +307,14 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 
 		gl.glTranslatef(movex, movey, movez);
 
+	
+		
 		// --------- Rendering Code
-		terrain.refreshTerrain(gl, cubeList);
+		terrain.refreshTerrain(gl);
 		
 		gl.glPopMatrix();
+		
+		//gl.glPopMatrix();
 		running();
 	}
 
