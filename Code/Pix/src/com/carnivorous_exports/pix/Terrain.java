@@ -20,20 +20,16 @@ import com.jogamp.opengl.util.texture.TextureCoords;
 import com.jogamp.opengl.util.texture.TextureIO;
 
 public class Terrain {
- 
+
 	GL2 gl;
 	int[] displayList;
 	boolean terrainBuilt;
-	
+
 	// for testing rotation
 	float tempRotX;
 
 	Texture texture;
 
-	//boolean[][][] doesNotFit = new boolean[12][12][12]; // is false when
-														// [x][y][z] space is
-														// occupied
-	//private boolean[][][][] placement = new boolean[4][12][12][12];
 	private int xLength = 3;
 	private int yLength = 3;
 	private Quad[][] coords = new Quad[xLength][yLength];
@@ -180,27 +176,37 @@ public class Terrain {
 		}
 	}
 
-	public void buildTerrain(GLAutoDrawable drawable, Renderer renderer, GL2 gl, int[] displayList) {
-		
+	public void buildTerrain(GLAutoDrawable drawable, Renderer renderer,
+			GL2 gl, int[] displayList) {
+
 		this.gl = gl;
 		this.displayList = displayList;
-		
-		for(int x = 0; x < xLength; x++) {
-			for(int y = 0; y < yLength; y++) {
-				coords[x][y] = new Quad(drawable, renderer, 12, 8, 12, 0.5f, gl, displayList, x, y);
+
+		for (int x = 0; x < xLength; x++) {
+			for (int y = 0; y < yLength; y++) {
+				coords[x][y] = new Quad(drawable, renderer, 12, 8, 12, 0.5f,
+						gl, displayList, x, y);
 			}
 		}
-		
-		//terrainBuilt = true;
+
+		// terrainBuilt = true;
 		System.out.println("terrainBuild");
 	}
-	
-	public void refreshTerrain(GL2 gl) {
-		for(int x = 0; x < xLength; x++) {
-			for(int y = 0; y < yLength; y++) {
+
+	public void refreshTerrain(GL2 gl, float[] lightPos) {
+		for (int x = 0; x < xLength; x++) {
+			for (int y = 0; y < yLength; y++) {
 				coords[x][y].refreshQuad(gl);
 			}
 		}
+
+		// draw a cube where the light is
+		gl.glPushMatrix();
+
+		gl.glTranslatef(lightPos[0], lightPos[1], lightPos[2]);
+		gl.glCallList(displayList[0]);
+
+		gl.glPopMatrix();
 	}
 
 	public void makeTree(GL2 gl, int[] displayList, double branchOdds, float x,
