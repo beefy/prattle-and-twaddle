@@ -63,7 +63,7 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 	GLAutoDrawable drawable;
 	
 	//for lighting
-			float[] lightPos = { 2000,3000,2000,1 };        // light position
+			float[] lightPos = { 20,30,20,1 };        // light position
 			float[] noAmbient = { 0.2f, 0.2f, 0.2f, 1f };     // low ambient light
 			float[] diffuse = { 1f, 1f, 1f, 1f };        // full diffuse colour
 	
@@ -139,12 +139,6 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 					* -moveDirStrife) * 0.1;
 			movex += Math.sin(180 - view_roty * (Math.PI / 180) + 40 + 80.1
 					* -moveDirStrife) * 0.1;
-			
-			//lightPos[2] += Math.cos(180 - view_roty * (Math.PI / 180) + 40 + 80.1
-			//		* -moveDirStrife) * 0.1;
-			
-			//lightPos[0] -= Math.sin(180 - view_roty * (Math.PI / 180) + 40 + 80.1
-			//		* -moveDirStrife) * 0.1;
 		}
 		
 		if(flyUpMove) movey -= 0.1;
@@ -155,6 +149,12 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 		//	System.out.print(lightPos[i] + " ");
 		//}
 		//System.out.println();
+	}
+	
+	public void lightRefresh() {
+		//lightPos[2] -= Math.cos(180 - view_roty * (Math.PI / 180) + 40 + 80.1);
+		
+		//lightPos[0] += Math.sin(180 - view_roty * (Math.PI / 180) + 40 + 80.1);
 	}
 
 	// ------ Implement methods declared in GLEventListener ------
@@ -220,7 +220,7 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 
 		// Enable LIGHT0, which is pre-defined on most video cards.
 		gl.glEnable(GL_LIGHT0);
-		// gl.glEnable(GL_LIGHTING);
+		gl.glEnable(GL_LIGHTING);
 
 		// Add colors to texture maps, so that glColor3f(r,g,b) takes effect.
 		gl.glEnable(GL_COLOR_MATERIAL);
@@ -289,14 +289,15 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 
 		this.drawable = drawable;
 
-		//lightPos[0] += view_rotx;
-		//lightPos[1] += view_roty;
-		//lightPos[2] += view_rotz;
-		//gl.glLightfv(GL_LIGHT0, GL_POSITION,lightPos, 0);
 		GL2 gl = drawable.getGL().getGL2(); // get the OpenGL 2 graphics context
 		gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear color
 																// and depth
 																// buffers
+		
+		//lightPos[0] += view_rotx;
+		//lightPos[1] += view_roty;
+		//lightPos[2] += view_rotz;
+		gl.glLightfv(GL_LIGHT0, GL_POSITION,lightPos, 0);
 		
 		gl.glPushMatrix();
 
@@ -306,16 +307,15 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 		gl.glRotatef(-view_rotz, 0.0f, 0.0f, 1.0f);
 
 		gl.glTranslatef(movex, movey, movez);
-
-	
 		
 		// --------- Rendering Code
-		terrain.refreshTerrain(gl);
+		terrain.refreshTerrain(gl, lightPos);
 		
 		gl.glPopMatrix();
 		
 		//gl.glPopMatrix();
 		running();
+		//lightRefresh();
 	}
 
 	/**
@@ -530,5 +530,8 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 		mouseInMiddle = false;
 		robot.mouseMove(width / 2, height / 2);
 		mouseInMiddle = true;
+		
+		//lightPos[2] += view_roty;
+		//lightPos[0] += view_rotx;
 	}
 }

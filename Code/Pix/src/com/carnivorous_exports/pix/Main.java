@@ -11,6 +11,16 @@ import javax.media.opengl.awt.GLCanvas;
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.util.FPSAnimator;
 
+import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLEventListener;
+import javax.media.opengl.GLProfile;
+import javax.media.opengl.GLCapabilities;
+import javax.media.opengl.awt.GLCanvas;
+
+import java.awt.Frame;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
 
 @SuppressWarnings("serial")
 public class Main extends JFrame {
@@ -25,6 +35,11 @@ public class Main extends JFrame {
 	/** Constructor to setup the top-level container and animator */
 	public Main() {
 	
+		//for GLWindow
+		GLProfile glprofile = GLProfile.getDefault();
+        GLCapabilities glcapabilities = new GLCapabilities( glprofile );
+        final GLCanvas glcanvas = new GLCanvas( glcapabilities );
+		
 		// Run the GUI codes in the event-dispatching thread for thread safety
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
@@ -50,6 +65,7 @@ public class Main extends JFrame {
 				
 				// Create the top-level container frame
 				JFrame frame = new JFrame(); // Swing's JFrame or AWT's Frame
+				frame.add( glcanvas );
 				if(!cursorVisible) frame.setCursor(noCursor);
 				frame.getContentPane().add(renderer);
 				frame.setUndecorated(true); // no decoration such as title bar
