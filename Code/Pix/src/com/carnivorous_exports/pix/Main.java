@@ -23,7 +23,7 @@ import java.awt.event.WindowEvent;
 
 
 @SuppressWarnings("serial")
-public class Main extends JFrame {
+public class Main extends Frame {
 	// Define constants for the top-level container
 	private static String TITLE = "Pix"; // window's title
 	private static final int CANVAS_WIDTH = 640; // width of the drawable
@@ -37,25 +37,42 @@ public class Main extends JFrame {
 	
 		//for GLWindow
 		GLProfile glprofile = GLProfile.getDefault();
-        GLCapabilities glcapabilities = new GLCapabilities( glprofile );
-        final GLCanvas glcanvas = new GLCanvas( glcapabilities );
+		GLProfile.initSingleton();
+		
+        //GLCapabilities glcapabilities = new GLCapabilities( glprofile );
+        //final GLCanvas glcanvas = new GLCanvas( glcapabilities );
 		
 		// Run the GUI codes in the event-dispatching thread for thread safety
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
+		    
 				
 				// Create the OpenGL rendering canvas
 				// 		The renderer is also the canvas because
 				// 		the rendering class extends GLCanvas
-				Renderer renderer = new Renderer();
-				renderer.addGLEventListener(renderer);
+				//GLProfile glp = GLProfile.getDefault();
+				//glp.initSingleton();
+		        //GLCapabilities caps = new GLCapabilities(glp);
+		        //caps.setBackgroundOpaque(false);
+				
+				GLProfile glp = GLProfile.getDefault();
+				//glp.initSingleton();
+		        GLCapabilities caps = new GLCapabilities(glp);
+		        caps.setBackgroundOpaque(false);
+				
+				GLWindow window = GLWindow.create(caps);
+				
+				Renderer renderer = new Renderer(window);
+				
+				
+				window.addGLEventListener(renderer);
 
 				// Create a animator that drives canvas' display() at the
 				// specified FPS.
-				FPSAnimator animator = new FPSAnimator(renderer, FPS, true);
+				FPSAnimator animator = new FPSAnimator(window, FPS, true);
 
-				if(!fullScreen) renderer.setPreferredSize(new Dimension(CANVAS_WIDTH, CANVAS_HEIGHT));
+				//if(!fullScreen) renderer.setPreferredSize(new Dimension(CANVAS_WIDTH, CANVAS_HEIGHT));
 				
 				//make cursor disappear
 				Toolkit t = Toolkit.getDefaultToolkit();
@@ -64,20 +81,25 @@ public class Main extends JFrame {
 				
 				
 				// Create the top-level container frame
-				JFrame frame = new JFrame(); // Swing's JFrame or AWT's Frame
-				frame.add( glcanvas );
-				if(!cursorVisible) frame.setCursor(noCursor);
-				frame.getContentPane().add(renderer);
-				frame.setUndecorated(true); // no decoration such as title bar
-				if(fullScreen) frame.setExtendedState(Frame.MAXIMIZED_BOTH); // full screen
+				//Frame frame = new Frame(); // Swing's JFrame or AWT's Frame
+				//frame.add( glcanvas );
+				//if(!cursorVisible) frame.setCursor(noCursor);
+				//frame.getContentPane().add(renderer);
+				//frame.add(renderer);
+				//frame.setUndecorated(true); // no decoration such as title bar
+				//if(fullScreen) frame.setExtendedState(Frame.MAXIMIZED_BOTH); // full screen
 																// mode
-				if(!fullScreen) frame.setTitle(TITLE); 
-	            if(!fullScreen) frame.pack();
-				frame.setVisible(true);
+				//if(!fullScreen) frame.setTitle(TITLE); 
+	            //if(!fullScreen) frame.pack();
+				//window.requestFocus();
+				
+				if(!fullScreen) window.setSize(300,300);
+				else window.setFullscreen(true);
+				window.setVisible(true);
 				
 				//initiate the GLWindow
-				GLCapabilities caps = new GLCapabilities(GLProfile.get(GLProfile.GL2GL3));
-		        caps.setBackgroundOpaque(false);
+				//GLCapabilities caps = new GLCapabilities(GLProfile.get(GLProfile.GL2GL3));
+		        //caps.setHardwareAccelerated(true);
 		        
 				animator.start(); // start the animation loop
 			}
