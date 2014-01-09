@@ -53,9 +53,10 @@ import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_LIGHT1;
 import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_POSITION;
 
 @SuppressWarnings("serial")
-public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
-		MouseListener, MouseMotionListener {
+public class Renderer implements GLEventListener, MouseMotionListener, 
+		com.jogamp.newt.event.MouseListener, com.jogamp.newt.event.KeyListener {
 
+	private static GLWindow window;
 	private GLU glu; // for the GL Utility
 	private int[] cubeList; // display list for cube
 	private Terrain terrain = new Terrain();
@@ -63,7 +64,7 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 	GLAutoDrawable drawable;
 	
 	//for lighting
-			float[] lightPos = { 20,30,20,1 };        // light position
+			float[] lightPos = { 5, 7, 5 ,1 };        // light position
 			float[] noAmbient = { 0.2f, 0.2f, 0.2f, 1f };     // low ambient light
 			float[] diffuse = { 1f, 1f, 1f, 1f };        // full diffuse colour
 	
@@ -83,6 +84,9 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 	public float view_rotx;
 	public float view_roty;
 	public float view_rotz;
+	public float oldRotX;
+	public float oldRotY;
+	public float oldRotZ;
 	public float movex;
 	public float movey;
 	public float movez;
@@ -107,15 +111,37 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 	int moveDirStrife;
 
 	/** Constructor to setup the GUI for this Component */
+	public Renderer(GLWindow window) {
+		this.window = window;
+		window.addGLEventListener(this);
+		window.addMouseListener(this);
+		//window.addMouseMotionListner(this);
+		window.addKeyListener(this);
+		window.requestFocus();
+	}
+	
+	/*
 	public Renderer() {
-
+		
+		super(window);
+	
+		//GLCapabilities = caps;
 		this.addGLEventListener(this);
-		this.addKeyListener(this); // for Handling KeyEvents
-		this.addMouseListener(this);
-		this.addMouseMotionListener(this);
-		this.setFocusable(true);
+		//this.addKeyListener(this); // for Handling KeyEvents
+		//this.addMouseListener(this);
+		//this.addMouseMotionListener(this);
+		//this.setFocusable(true);
 		this.requestFocus();
 	}
+	
+	public void Renderer(GLWindow window) {
+		
+		super(window);
+		
+		this.window = window;
+
+	}
+	*/
 
 	// for user movement
 	public void running() {
@@ -166,8 +192,8 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 	@Override
 	public void init(GLAutoDrawable drawable) {
 
-		width = getWidth();
-		height = getHeight();
+		width = window.getWidth();
+		height = window.getHeight();
 
 		// move the mouse to the center
 		try {
@@ -176,7 +202,7 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		robot.mouseMove(getWidth() / 2, getHeight() / 2);
+		robot.mouseMove(window.getWidth() / 2, window.getHeight() / 2);
 		mouseInMiddle = true;
 
 		GL2 gl = drawable.getGL().getGL2(); // get the OpenGL graphics context
@@ -294,28 +320,38 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 																// and depth
 																// buffers
 		
-		//lightPos[0] += view_rotx;
-		//lightPos[1] += view_roty;
-		//lightPos[2] += view_rotz;
-		gl.glLightfv(GL_LIGHT0, GL_POSITION,lightPos, 0);
+		//for lighting
+		//lightPos[1] -= view_rotx - oldRotX;
+		//lightPos[0] -= view_roty - oldRotY;
+		//lightPos[2] -= view_rotz - oldRotZ;
+		//gl.glLightfv(GL_LIGHT0, GL_POSITION,lightPos, 0);
 		
 		gl.glPushMatrix();
-
+		
 		// rotate around wherever the user points the mouse
 		gl.glRotatef(-view_rotx, 1.0f, 0.0f, 0.0f);
 		gl.glRotatef(-view_roty, 0.0f, 1.0f, 0.0f);
 		gl.glRotatef(-view_rotz, 0.0f, 0.0f, 1.0f);
-
+		
 		gl.glTranslatef(movex, movey, movez);
 		
+		gl.glLightfv(GL_LIGHT0, GL_POSITION,lightPos, 0);
+		
 		// --------- Rendering Code
-		terrain.refreshTerrain(gl, lightPos);
+		terrain.refreshTerrain(gl);
+		
+		terrain.testLight(gl, lightPos);
+		
 		
 		gl.glPopMatrix();
 		
 		//gl.glPopMatrix();
 		running();
 		//lightRefresh();
+		
+		oldRotX = view_rotx;
+		oldRotY = view_roty;
+		oldRotZ = view_rotz;
 	}
 
 	/**
@@ -324,72 +360,6 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 	 */
 	@Override
 	public void dispose(GLAutoDrawable drawable) {
-	}
-
-	@Override
-	public void keyPressed(KeyEvent e) {
-
-		// press esc to quit
-		int keyCode = e.getKeyCode();
-		switch (keyCode) {
-		case KeyEvent.VK_ESCAPE: // quit
-			// Use a dedicate thread to run the stop() to ensure that the
-			// animator stops before program exits.
-			new Thread() {
-				@Override
-				public void run() {
-					GLAnimatorControl animator = getAnimator();
-					if (animator.isStarted())
-						animator.stop();
-					System.exit(0);
-				}
-			}.start();
-			break;
-		}
-
-		// to move
-		if (keyCode == KeyEvent.VK_LEFT)
-			leftPressed = true;
-		if (keyCode == KeyEvent.VK_RIGHT)
-			rightPressed = true;
-		if (keyCode == KeyEvent.VK_UP)
-			upPressed = true;
-		if (keyCode == KeyEvent.VK_DOWN)
-			downPressed = true;
-
-		// flying up and down (for debugging)
-		if (keyCode == KeyEvent.VK_SHIFT) {
-			flyUpPressed = true;
-		}
-
-		if (keyCode == KeyEvent.VK_CONTROL) {
-			flyDownPressed = true;
-		}
-
-		checkKeysPressed();
-	}
-
-	@Override
-	public void keyReleased(KeyEvent e) {
-
-		int kc = e.getKeyCode();
-		if (kc == KeyEvent.VK_LEFT)
-			leftPressed = false;
-		else if (kc == KeyEvent.VK_RIGHT)
-			rightPressed = false;
-		else if (kc == KeyEvent.VK_UP)
-			upPressed = false;
-		else if (kc == KeyEvent.VK_DOWN)
-			downPressed = false;
-
-		// flying up and down (for debugging)
-		if (kc == KeyEvent.VK_SHIFT) {
-			flyUpPressed = false;
-		} else if (kc == KeyEvent.VK_CONTROL) {
-			flyDownPressed = false;
-		}
-
-		checkKeysPressed();
 	}
 
 	public void checkKeysPressed() {
@@ -447,11 +417,6 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 		}
 	}
 
-	@Override
-	public void keyTyped(KeyEvent e) {
-
-	}
-
 	// class Cubes2MouseAdapter extends MouseAdapter implements MouseListener {
 
 	public void mouseClicked(MouseEvent arg0) {
@@ -489,6 +454,35 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
+		
+	}
+
+	@Override
+	public void mouseClicked(com.jogamp.newt.event.MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseDragged(com.jogamp.newt.event.MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseEntered(com.jogamp.newt.event.MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseExited(com.jogamp.newt.event.MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseMoved(com.jogamp.newt.event.MouseEvent e) {
 		/**
 		 * To prevent the mouse from hitting the edge of the screen we have to
 		 * move the mouse to the center of the screen every other iteration and
@@ -533,5 +527,90 @@ public class Renderer extends GLCanvas implements GLEventListener, KeyListener,
 		
 		//lightPos[2] += view_roty;
 		//lightPos[0] += view_rotx;
+	}
+
+	@Override
+	public void mousePressed(com.jogamp.newt.event.MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseReleased(com.jogamp.newt.event.MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseWheelMoved(com.jogamp.newt.event.MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void keyPressed(com.jogamp.newt.event.KeyEvent e) {
+		
+		// press esc to quit
+		int keyCode = e.getKeyCode();
+		switch (keyCode) {
+		case KeyEvent.VK_ESCAPE: // quit
+			// Use a dedicate thread to run the stop() to ensure that the
+			// animator stops before program exits.
+			new Thread() {
+				@Override
+				public void run() {
+					GLAnimatorControl animator = window.getAnimator();
+					if (animator.isStarted())
+						animator.stop();
+					System.exit(0);
+				}
+			}.start();
+			break;
+		}
+
+		// to move
+		if (keyCode == KeyEvent.VK_LEFT)
+			leftPressed = true;
+		if (keyCode == KeyEvent.VK_RIGHT)
+			rightPressed = true;
+		if (keyCode == KeyEvent.VK_UP)
+			upPressed = true;
+		if (keyCode == KeyEvent.VK_DOWN)
+			downPressed = true;
+
+		// flying up and down (for debugging)
+		if (keyCode == KeyEvent.VK_SHIFT) {
+			flyUpPressed = true;
+		}
+
+		if (keyCode == KeyEvent.VK_CONTROL) {
+			flyDownPressed = true;
+		}
+
+		checkKeysPressed();
+	}
+
+	@Override
+	public void keyReleased(com.jogamp.newt.event.KeyEvent e) {
+		
+		int kc = e.getKeyCode();
+		if (kc == KeyEvent.VK_LEFT)
+			leftPressed = false;
+		else if (kc == KeyEvent.VK_RIGHT)
+			rightPressed = false;
+		else if (kc == KeyEvent.VK_UP)
+			upPressed = false;
+		else if (kc == KeyEvent.VK_DOWN)
+			downPressed = false;
+
+		// flying up and down (for debugging)
+		if (kc == KeyEvent.VK_SHIFT) {
+			flyUpPressed = false;
+		} else if (kc == KeyEvent.VK_CONTROL) {
+			flyDownPressed = false;
+		}
+
+		checkKeysPressed();
+		
 	}
 }

@@ -30,8 +30,8 @@ public class Terrain {
 
 	Texture texture;
 
-	private int xLength = 3;
-	private int yLength = 3;
+	private int xLength = 1;
+	private int yLength = 1;
 	private Quad[][] coords = new Quad[xLength][yLength];
 
 	private float[] treeSize;
@@ -193,17 +193,20 @@ public class Terrain {
 		System.out.println("terrainBuild");
 	}
 
-	public void refreshTerrain(GL2 gl, float[] lightPos) {
+	public void refreshTerrain(GL2 gl) {
 		for (int x = 0; x < xLength; x++) {
 			for (int y = 0; y < yLength; y++) {
 				coords[x][y].refreshQuad(gl);
 			}
 		}
+	}
 
+	public void testLight(GL2 gl, float[] lightPos) {
 		// draw a cube where the light is
 		gl.glPushMatrix();
 
 		gl.glTranslatef(lightPos[0], lightPos[1], lightPos[2]);
+		//gl.glScalef(10, 10, 1);
 		gl.glCallList(displayList[0]);
 
 		gl.glPopMatrix();
