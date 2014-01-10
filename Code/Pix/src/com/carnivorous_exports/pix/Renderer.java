@@ -53,7 +53,7 @@ import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_LIGHT1;
 import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_POSITION;
 
 @SuppressWarnings("serial")
-public class Renderer implements GLEventListener, MouseMotionListener, 
+public class Renderer implements GLEventListener, 
 		com.jogamp.newt.event.MouseListener, com.jogamp.newt.event.KeyListener {
 
 	private static GLWindow window;
@@ -110,38 +110,14 @@ public class Renderer implements GLEventListener, MouseMotionListener,
 	int moveDirForward;
 	int moveDirStrife;
 
-	/** Constructor to setup the GUI for this Component */
 	public Renderer(GLWindow window) {
 		this.window = window;
 		window.addGLEventListener(this);
 		window.addMouseListener(this);
-		//window.addMouseMotionListner(this);
 		window.addKeyListener(this);
+		//turn off key auto repeat
 		window.requestFocus();
 	}
-	
-	/*
-	public Renderer() {
-		
-		super(window);
-	
-		//GLCapabilities = caps;
-		this.addGLEventListener(this);
-		//this.addKeyListener(this); // for Handling KeyEvents
-		//this.addMouseListener(this);
-		//this.addMouseMotionListener(this);
-		//this.setFocusable(true);
-		this.requestFocus();
-	}
-	
-	public void Renderer(GLWindow window) {
-		
-		super(window);
-		
-		this.window = window;
-
-	}
-	*/
 
 	// for user movement
 	public void running() {
@@ -360,6 +336,7 @@ public class Renderer implements GLEventListener, MouseMotionListener,
 	 */
 	@Override
 	public void dispose(GLAutoDrawable drawable) {
+	
 	}
 
 	public void checkKeysPressed() {
@@ -446,15 +423,6 @@ public class Renderer implements GLEventListener, MouseMotionListener,
 		// if ((e.getModifiers() & e.BUTTON3_MASK) != 0) {
 		// mouseRButtonDown = false;
 		// }
-	}
-
-	public void mouseDragged(MouseEvent e) {
-
-	}
-
-	@Override
-	public void mouseMoved(MouseEvent e) {
-		
 	}
 
 	@Override
@@ -550,10 +518,11 @@ public class Renderer implements GLEventListener, MouseMotionListener,
 	@Override
 	public void keyPressed(com.jogamp.newt.event.KeyEvent e) {
 		
+		
 		// press esc to quit
 		int keyCode = e.getKeyCode();
 		switch (keyCode) {
-		case KeyEvent.VK_ESCAPE: // quit
+		case com.jogamp.newt.event.KeyEvent.VK_ESCAPE: // quit
 			// Use a dedicate thread to run the stop() to ensure that the
 			// animator stops before program exits.
 			new Thread() {
@@ -569,21 +538,21 @@ public class Renderer implements GLEventListener, MouseMotionListener,
 		}
 
 		// to move
-		if (keyCode == KeyEvent.VK_LEFT)
+		if (keyCode == com.jogamp.newt.event.KeyEvent.VK_LEFT)
 			leftPressed = true;
-		if (keyCode == KeyEvent.VK_RIGHT)
+		if (keyCode == com.jogamp.newt.event.KeyEvent.VK_RIGHT)
 			rightPressed = true;
-		if (keyCode == KeyEvent.VK_UP)
+		if (keyCode == com.jogamp.newt.event.KeyEvent.VK_UP)
 			upPressed = true;
-		if (keyCode == KeyEvent.VK_DOWN)
+		if (keyCode == com.jogamp.newt.event.KeyEvent.VK_DOWN)
 			downPressed = true;
 
 		// flying up and down (for debugging)
-		if (keyCode == KeyEvent.VK_SHIFT) {
+		if (keyCode == com.jogamp.newt.event.KeyEvent.VK_SHIFT) {
 			flyUpPressed = true;
 		}
 
-		if (keyCode == KeyEvent.VK_CONTROL) {
+		if (keyCode == com.jogamp.newt.event.KeyEvent.VK_CONTROL) {
 			flyDownPressed = true;
 		}
 
@@ -593,20 +562,22 @@ public class Renderer implements GLEventListener, MouseMotionListener,
 	@Override
 	public void keyReleased(com.jogamp.newt.event.KeyEvent e) {
 		
+		if(e.isAutoRepeat()) return;
+		
 		int kc = e.getKeyCode();
-		if (kc == KeyEvent.VK_LEFT)
+		if (kc == com.jogamp.newt.event.KeyEvent.VK_LEFT)
 			leftPressed = false;
-		else if (kc == KeyEvent.VK_RIGHT)
+		else if (kc == com.jogamp.newt.event.KeyEvent.VK_RIGHT)
 			rightPressed = false;
-		else if (kc == KeyEvent.VK_UP)
+		else if (kc == com.jogamp.newt.event.KeyEvent.VK_UP)
 			upPressed = false;
-		else if (kc == KeyEvent.VK_DOWN)
+		else if (kc == com.jogamp.newt.event.KeyEvent.VK_DOWN)
 			downPressed = false;
 
 		// flying up and down (for debugging)
-		if (kc == KeyEvent.VK_SHIFT) {
+		if (kc == com.jogamp.newt.event.KeyEvent.VK_SHIFT) {
 			flyUpPressed = false;
-		} else if (kc == KeyEvent.VK_CONTROL) {
+		} else if (kc == com.jogamp.newt.event.KeyEvent.VK_CONTROL) {
 			flyDownPressed = false;
 		}
 

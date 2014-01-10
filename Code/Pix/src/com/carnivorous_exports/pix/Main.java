@@ -38,23 +38,11 @@ public class Main extends Frame {
 		//for GLWindow
 		GLProfile glprofile = GLProfile.getDefault();
 		GLProfile.initSingleton();
-		
-        //GLCapabilities glcapabilities = new GLCapabilities( glprofile );
-        //final GLCanvas glcanvas = new GLCanvas( glcapabilities );
-		
+			
 		// Run the GUI codes in the event-dispatching thread for thread safety
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-		    
-				
-				// Create the OpenGL rendering canvas
-				// 		The renderer is also the canvas because
-				// 		the rendering class extends GLCanvas
-				//GLProfile glp = GLProfile.getDefault();
-				//glp.initSingleton();
-		        //GLCapabilities caps = new GLCapabilities(glp);
-		        //caps.setBackgroundOpaque(false);
 				
 				GLProfile glp = GLProfile.getDefault();
 				//glp.initSingleton();
@@ -72,34 +60,12 @@ public class Main extends Frame {
 				// specified FPS.
 				FPSAnimator animator = new FPSAnimator(window, FPS, true);
 
-				//if(!fullScreen) renderer.setPreferredSize(new Dimension(CANVAS_WIDTH, CANVAS_HEIGHT));
-				
-				//make cursor disappear
-				Toolkit t = Toolkit.getDefaultToolkit();
-				Image i = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
-				Cursor noCursor = t.createCustomCursor(i, new Point(0, 0), "none");
-				
-				
-				// Create the top-level container frame
-				//Frame frame = new Frame(); // Swing's JFrame or AWT's Frame
-				//frame.add( glcanvas );
-				//if(!cursorVisible) frame.setCursor(noCursor);
-				//frame.getContentPane().add(renderer);
-				//frame.add(renderer);
-				//frame.setUndecorated(true); // no decoration such as title bar
-				//if(fullScreen) frame.setExtendedState(Frame.MAXIMIZED_BOTH); // full screen
-																// mode
-				//if(!fullScreen) frame.setTitle(TITLE); 
-	            //if(!fullScreen) frame.pack();
-				//window.requestFocus();
-				
 				if(!fullScreen) window.setSize(300,300);
 				else window.setFullscreen(true);
 				window.setVisible(true);
 				
-				//initiate the GLWindow
-				//GLCapabilities caps = new GLCapabilities(GLProfile.get(GLProfile.GL2GL3));
-		        //caps.setHardwareAccelerated(true);
+				if(cursorVisible) window.setPointerVisible(true);
+				else window.setPointerVisible(false);
 		        
 				animator.start(); // start the animation loop
 			}
