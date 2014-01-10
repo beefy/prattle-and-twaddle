@@ -538,13 +538,17 @@ public class Renderer implements GLEventListener,
 		}
 
 		// to move
-		if (keyCode == com.jogamp.newt.event.KeyEvent.VK_LEFT)
+		if (keyCode == com.jogamp.newt.event.KeyEvent.VK_LEFT ||
+				keyCode == com.jogamp.newt.event.KeyEvent.VK_A)
 			leftPressed = true;
-		if (keyCode == com.jogamp.newt.event.KeyEvent.VK_RIGHT)
+		if (keyCode == com.jogamp.newt.event.KeyEvent.VK_RIGHT ||
+				keyCode == com.jogamp.newt.event.KeyEvent.VK_D)
 			rightPressed = true;
-		if (keyCode == com.jogamp.newt.event.KeyEvent.VK_UP)
+		if (keyCode == com.jogamp.newt.event.KeyEvent.VK_UP ||
+				keyCode == com.jogamp.newt.event.KeyEvent.VK_W)
 			upPressed = true;
-		if (keyCode == com.jogamp.newt.event.KeyEvent.VK_DOWN)
+		if (keyCode == com.jogamp.newt.event.KeyEvent.VK_DOWN ||
+				keyCode == com.jogamp.newt.event.KeyEvent.VK_S)
 			downPressed = true;
 
 		// flying up and down (for debugging)
@@ -565,13 +569,17 @@ public class Renderer implements GLEventListener,
 		if(e.isAutoRepeat()) return;
 		
 		int kc = e.getKeyCode();
-		if (kc == com.jogamp.newt.event.KeyEvent.VK_LEFT)
+		if (kc == com.jogamp.newt.event.KeyEvent.VK_LEFT || 
+				kc == com.jogamp.newt.event.KeyEvent.VK_A)
 			leftPressed = false;
-		else if (kc == com.jogamp.newt.event.KeyEvent.VK_RIGHT)
+		else if (kc == com.jogamp.newt.event.KeyEvent.VK_RIGHT || 
+				kc == com.jogamp.newt.event.KeyEvent.VK_D)
 			rightPressed = false;
-		else if (kc == com.jogamp.newt.event.KeyEvent.VK_UP)
+		else if (kc == com.jogamp.newt.event.KeyEvent.VK_UP || 
+				kc == com.jogamp.newt.event.KeyEvent.VK_W)
 			upPressed = false;
-		else if (kc == com.jogamp.newt.event.KeyEvent.VK_DOWN)
+		else if (kc == com.jogamp.newt.event.KeyEvent.VK_DOWN || 
+				kc == com.jogamp.newt.event.KeyEvent.VK_S)
 			downPressed = false;
 
 		// flying up and down (for debugging)
