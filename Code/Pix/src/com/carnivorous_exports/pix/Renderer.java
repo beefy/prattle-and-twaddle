@@ -18,6 +18,7 @@ import javax.media.nativewindow.NativeWindowException;
 import javax.media.nativewindow.SurfaceUpdatedListener;
 import javax.media.nativewindow.util.InsetsImmutable;
 import javax.media.nativewindow.util.Point;
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLAnimatorControl;
 import javax.media.opengl.GLAutoDrawable;
@@ -53,7 +54,7 @@ import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_LIGHT1;
 import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_POSITION;
 
 @SuppressWarnings("serial")
-public class Renderer implements GLEventListener, 
+public class Renderer implements GLEventListener,
 		com.jogamp.newt.event.MouseListener, com.jogamp.newt.event.KeyListener {
 
 	private static GLWindow window;
@@ -62,14 +63,16 @@ public class Renderer implements GLEventListener,
 	private Terrain terrain = new Terrain();
 	private boolean initiated = false;
 	GLAutoDrawable drawable;
-	
-	//for lighting
-			float[] lightPos = { 5, 7, 5 ,1 };        // light position
-			float[] noAmbient = { 0.2f, 0.2f, 0.2f, 1f };     // low ambient light
-			float[] diffuse = { 1f, 1f, 1f, 1f };        // full diffuse colour
-	
+
+	// for lighting
+	//float[] lightPos = { 5, 7, 5, 1 }; // light position
+	float[] noAmbient = { 0.2f, 0.2f, 0.2f, 1f }; // low ambient light
+	float[] diffuse = { 1f, 1f, 1f, 1f }; // full diffuse colour
+
 	float cameraPos[] = { 5.0f, 5.0f, 10.0f, 0.0f };
 	
+	float[] colorWhite  = {1.0f,1.0f,1.0f,1.0f};
+
 	Robot robot;
 	int width;
 	int height;
@@ -103,19 +106,21 @@ public class Renderer implements GLEventListener,
 
 	private boolean forwardMove;
 	private boolean strifeMove;
-	
+
 	private boolean flyUpMove;
 	private boolean flyDownMove;
-	
+
 	int moveDirForward;
 	int moveDirStrife;
+	int moveSpeed = 1;
 
 	public Renderer(GLWindow window) {
 		this.window = window;
 		window.addGLEventListener(this);
 		window.addMouseListener(this);
 		window.addKeyListener(this);
-		//turn off key auto repeat
+		//window.
+		// turn off key auto repeat
 		window.requestFocus();
 	}
 
@@ -124,39 +129,23 @@ public class Renderer implements GLEventListener,
 
 		if (forwardMove) { // moving forward or back
 			movez += Math.cos(180 - view_roty * (Math.PI / 180) + 40) * 0.1
-					* -moveDirForward;
+					* -moveDirForward * moveSpeed;
 			movex -= Math.sin(180 - view_roty * (Math.PI / 180) + 40) * 0.1
-					* -moveDirForward;
-			
-			
-			//lightPos[2] -= Math.cos(180 - view_roty * (Math.PI / 180) + 40) * 0.1
-			//		* -moveDirForward;
-			//lightPos[0] += Math.sin(180 - view_roty * (Math.PI / 180) + 40) * 0.1
-			//		* -moveDirForward;
-			
+					* -moveDirForward * moveSpeed;
+
 		}
 
 		if (strifeMove) { // moving right or left
 			movez -= Math.cos(180 - view_roty * (Math.PI / 180) + 40 + 80.1
-					* -moveDirStrife) * 0.1;
+					* -moveDirStrife) * 0.1 * moveSpeed;
 			movex += Math.sin(180 - view_roty * (Math.PI / 180) + 40 + 80.1
-					* -moveDirStrife) * 0.1;
+					* -moveDirStrife) * 0.1 * moveSpeed;
 		}
-		
-		if(flyUpMove) movey -= 0.1;
-		if(flyDownMove) movey += 0.1;
-		
-		//light debugging
-		//for(int i = 0; i < 3; i++) {
-		//	System.out.print(lightPos[i] + " ");
-		//}
-		//System.out.println();
-	}
-	
-	public void lightRefresh() {
-		//lightPos[2] -= Math.cos(180 - view_roty * (Math.PI / 180) + 40 + 80.1);
-		
-		//lightPos[0] += Math.sin(180 - view_roty * (Math.PI / 180) + 40 + 80.1);
+
+		if (flyUpMove)
+			movey -= 0.1;
+		if (flyDownMove)
+			movey += 0.1;
 	}
 
 	// ------ Implement methods declared in GLEventListener ------
@@ -167,7 +156,10 @@ public class Renderer implements GLEventListener,
 	 */
 	@Override
 	public void init(GLAutoDrawable drawable) {
-
+		
+		drawable.getAnimator().setUpdateFPSFrames(3, null);
+		drawable.setAutoSwapBufferMode(true);
+		
 		width = window.getWidth();
 		height = window.getHeight();
 
@@ -186,32 +178,46 @@ public class Renderer implements GLEventListener,
 		gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // set background (clear) color
 		gl.glClearDepth(1.0f); // set clear depth value to farthest
 		
-		//for lighting
-		 // Set up the lighting for Light-1
-	      // Ambient light does not come from a particular direction. Need some ambient
-	      // light to light up the scene. Ambient's value in RGBA
-	      //float[] lightAmbientValue = {0.5f, 0.5f, 0.5f, 1.0f};
-	      // Diffuse light comes from a particular location. Diffuse's value in RGBA
-	      //float[] lightDiffuseValue = {1.0f, 1.0f, 1.0f, 1.0f};
-	      // Diffuse light location xyz (in front of the screen).
-	      //float lightDiffusePosition[] = {0.0f, 0.0f, 2.0f, 1.0f};
+		//for anti-aliasing
+		gl.glEnable(GL.GL_LINE_SMOOTH);
+		gl.glEnable(GL.GL_BLEND);
+		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+		gl.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_DONT_CARE);
 		
-		//gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, cameraPos, 0);
-		//gl.glLightf(0, GL_SPOT_EXPONENT, 0);
-		//gl.glLightfv(GL_LIGHT1, GL_AMBIENT, lightAmbientValue, 0);
-		//gl.glLightfv(GL_LIGHT1, GL_DIFFUSE, lightDiffuseValue, 0);
-	      //gl.glLightfv(GL_LIGHT1, GL_POSITION, lightDiffusePosition, 0);
 
-		//gl.glEnable(GL_LIGHTING);
-		//gl.glEnable(GL_LIGHT0);
-		//gl.glLightfv(GL_LIGHT0, GL_AMBIENT, noAmbient, 0);
-		//gl.glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse, 0);
-		//gl.glLightfv(GL_LIGHT0, GL_POSITION,lightPos, 0);
+		// for lighting
+		// Set up the lighting for Light-1
+		// Ambient light does not come from a particular direction. Need some
+		// ambient
+		// light to light up the scene. Ambient's value in RGBA
+		// float[] lightAmbientValue = {0.5f, 0.5f, 0.5f, 1.0f};
+		// Diffuse light comes from a particular location. Diffuse's value in
+		// RGBA
+		// float[] lightDiffuseValue = {1.0f, 1.0f, 1.0f, 1.0f};
+		// Diffuse light location xyz (in front of the screen).
+		// float lightDiffusePosition[] = {0.0f, 0.0f, 2.0f, 1.0f};
+
+		// gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, cameraPos, 0);
+		// gl.glLightf(0, GL_SPOT_EXPONENT, 0);
+		// gl.glLightfv(GL_LIGHT1, GL_AMBIENT, lightAmbientValue, 0);
+		// gl.glLightfv(GL_LIGHT1, GL_DIFFUSE, lightDiffuseValue, 0);
+		// gl.glLightfv(GL_LIGHT1, GL_POSITION, lightDiffusePosition, 0);
+
+		// gl.glEnable(GL_LIGHTING);
+		// gl.glEnable(GL_LIGHT0);
+		// gl.glLightfv(GL_LIGHT0, GL_AMBIENT, noAmbient, 0);
+		// gl.glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse, 0);
+		// gl.glLightfv(GL_LIGHT0, GL_POSITION,lightPos, 0);
+
+		// gl.glEnable(GL2.GL_CULL_FACE);
+		// gl.glEnable(GL2.GL_LIGHTING);
+		// gl.glEnable(GL2.GL_LIGHT0);
 		
-		//gl.glEnable(GL2.GL_CULL_FACE);
 		//gl.glEnable(GL2.GL_LIGHTING);
 		//gl.glEnable(GL2.GL_LIGHT0);
-		
+		//gl.glDepthFunc(GL.GL_LESS);
+		//gl.glEnable(GL.GL_DEPTH_TEST);
+
 		gl.glEnable(GL_DEPTH_TEST); // enables depth testing
 		gl.glDepthFunc(GL_LEQUAL); // the type of depth test to do
 		gl.glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST); // best
@@ -221,7 +227,7 @@ public class Renderer implements GLEventListener,
 									// lighting
 
 		// Enable LIGHT0, which is pre-defined on most video cards.
-		gl.glEnable(GL_LIGHT0);
+		gl.glEnable(GL_LIGHT1);
 		gl.glEnable(GL_LIGHTING);
 
 		// Add colors to texture maps, so that glColor3f(r,g,b) takes effect.
@@ -246,13 +252,13 @@ public class Renderer implements GLEventListener,
 				"terrainTextures/Water Texture 1.jpeg", ".jpeg");
 		cubeList[6] = terrain.getCubeList(gl,
 				"terrainTextures/White Water Texture.jpeg", ".jpeg");
-		
-		
-		//start the terrain thread: refresh the terrain once it's built
-		//if(!initiatedThread) terrain.t.start();
-		//initiatedThread = true;
-		
-		if(!initiated) terrain.buildTerrain(drawable, this, gl, cubeList);
+
+		// start the terrain thread: refresh the terrain once it's built
+		// if(!initiatedThread) terrain.t.start();
+		// initiatedThread = true;
+
+		if (!initiated)
+			terrain.buildTerrain(drawable, this, gl, cubeList);
 		initiated = true;
 	}
 
@@ -288,46 +294,94 @@ public class Renderer implements GLEventListener,
 	 */
 	@Override
 	public void display(GLAutoDrawable drawable) {
-
+		long startNanos = System.nanoTime();
+		
 		this.drawable = drawable;
 
 		GL2 gl = drawable.getGL().getGL2(); // get the OpenGL 2 graphics context
 		gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear color
 																// and depth
 																// buffers
-		
-		//for lighting
-		//lightPos[1] -= view_rotx - oldRotX;
-		//lightPos[0] -= view_roty - oldRotY;
-		//lightPos[2] -= view_rotz - oldRotZ;
-		//gl.glLightfv(GL_LIGHT0, GL_POSITION,lightPos, 0);
+
+		float light_ambient[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+		float light_diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+		float light_specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+		float light_position[] = { 1.0f, 1.0f, 1.0f, 0.0f };
 		
 		gl.glPushMatrix();
+
+		// Prepare light parameters.
+        float SHINE_ALL_DIRECTIONS = 1;
+        float[] lightPos = {-30, 0, 0, SHINE_ALL_DIRECTIONS};
+        float[] lightColorAmbient = {0.2f, 0.2f, 0.2f, 1f};
+        float[] lightColorSpecular = {0.8f, 0.8f, 0.8f, 1f};
+
+        // Set light parameters.
+        gl.glLightfv(GL_LIGHT1, GL_POSITION, lightPos, 0);
+        gl.glLightfv(GL_LIGHT1, GL_AMBIENT, lightColorAmbient, 0);
+        gl.glLightfv(GL_LIGHT1, GL_SPECULAR, lightColorSpecular, 0);
+
+        // Enable lighting in GL.
+        gl.glEnable(GL_LIGHT1);
+        gl.glEnable(GL_LIGHTING);
 		
-		// rotate around wherever the user points the mouse
-		gl.glRotatef(-view_rotx, 1.0f, 0.0f, 0.0f);
-		gl.glRotatef(-view_roty, 0.0f, 1.0f, 0.0f);
-		gl.glRotatef(-view_rotz, 0.0f, 0.0f, 1.0f);
-		
+        // Set material properties.
+        float[] rgba = {1f, 1f, 1f};	//white
+        gl.glMaterialfv(GL.GL_FRONT, GL_AMBIENT, rgba, 0);
+        gl.glMaterialfv(GL.GL_FRONT, GL_SPECULAR, rgba, 0);
+        gl.glMaterialf(GL.GL_FRONT, GL_SHININESS, 0.5f);
+        
+     // rotate around wherever the user points the mouse
+     		gl.glRotatef(-view_rotx, 1.0f, 0.0f, 0.0f);
+     		gl.glRotatef(-view_roty, 0.0f, 1.0f, 0.0f);
+     		gl.glRotatef(-view_rotz, 0.0f, 0.0f, 1.0f);
+        
 		gl.glTranslatef(movex, movey, movez);
-		
-		gl.glLightfv(GL_LIGHT0, GL_POSITION,lightPos, 0);
-		
+
 		// --------- Rendering Code
 		terrain.refreshTerrain(gl);
+
+		//terrain.testLight(gl, light_position);
 		
-		terrain.testLight(gl, lightPos);
 		
+		//
+		// Light 1.
+		//
+		// Position and direction (spotlight)
+		//float posLight1[] = { 1.0f, 1.f, 1.f, 0.0f };
+		//float spotDirection[] = { -1.0f, -1.0f, 0.f };
+		//gl.glLightfv( GL_LIGHT1, GL_AMBIENT, colorWhite, 0 );
+	     // gl.glLightfv( GL_LIGHT1, GL_DIFFUSE, colorWhite, 0 );
+	     // gl.glLightfv( GL_LIGHT1, GL_SPECULAR, colorWhite, 0 );
+	     // gl.glLightf( GL_LIGHT1, GL_CONSTANT_ATTENUATION, 0.2f );
+
+		//gl.glLightfv(GL_LIGHT1, GL_POSITION,lightPos, 0);
+
 		
+
+		//gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_AMBIENT, light_ambient, 0);
+		//gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_DIFFUSE, light_diffuse, 0);
+		//gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_SPECULAR, light_specular, 0);
+		//gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, light_position, 0);
+
 		gl.glPopMatrix();
-		
-		//gl.glPopMatrix();
+
+		// gl.glPopMatrix();
 		running();
-		//lightRefresh();
-		
+		// lightRefresh();
+
 		oldRotX = view_rotx;
 		oldRotY = view_roty;
 		oldRotZ = view_rotz;
+		
+		long drawNanos = System.nanoTime() - startNanos;
+		//System.out.println("drawn in " + drawNanos);
+
+		System.out.println(drawable.getAnimator().getLastFPS());
+		
+		//gl.glFlush();
+		drawable.swapBuffers();
+		gl.glFlush();
 	}
 
 	/**
@@ -336,7 +390,7 @@ public class Renderer implements GLEventListener,
 	 */
 	@Override
 	public void dispose(GLAutoDrawable drawable) {
-	
+
 	}
 
 	public void checkKeysPressed() {
@@ -376,20 +430,20 @@ public class Renderer implements GLEventListener,
 		if (rightPressed && leftPressed) {
 			strifeMove = false;
 		}
-		
-		if(flyUpPressed && !flyDownPressed) {
+
+		if (flyUpPressed && !flyDownPressed) {
 			flyUpMove = true;
 		}
-		
-		if(flyDownPressed && !flyUpPressed) {
+
+		if (flyDownPressed && !flyUpPressed) {
 			flyDownMove = true;
 		}
-		
-		if(!flyUpPressed) {
+
+		if (!flyUpPressed) {
 			flyUpMove = false;
 		}
-		
-		if(!flyDownPressed) {
+
+		if (!flyDownPressed) {
 			flyDownMove = false;
 		}
 	}
@@ -428,25 +482,25 @@ public class Renderer implements GLEventListener,
 	@Override
 	public void mouseClicked(com.jogamp.newt.event.MouseEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void mouseDragged(com.jogamp.newt.event.MouseEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void mouseEntered(com.jogamp.newt.event.MouseEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void mouseExited(com.jogamp.newt.event.MouseEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -492,33 +546,29 @@ public class Renderer implements GLEventListener,
 		mouseInMiddle = false;
 		robot.mouseMove(width / 2, height / 2);
 		mouseInMiddle = true;
-		
-		//lightPos[2] += view_roty;
-		//lightPos[0] += view_rotx;
 	}
 
 	@Override
 	public void mousePressed(com.jogamp.newt.event.MouseEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void mouseReleased(com.jogamp.newt.event.MouseEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void mouseWheelMoved(com.jogamp.newt.event.MouseEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void keyPressed(com.jogamp.newt.event.KeyEvent e) {
-		
-		
+
 		// press esc to quit
 		int keyCode = e.getKeyCode();
 		switch (keyCode) {
@@ -538,17 +588,17 @@ public class Renderer implements GLEventListener,
 		}
 
 		// to move
-		if (keyCode == com.jogamp.newt.event.KeyEvent.VK_LEFT ||
-				keyCode == com.jogamp.newt.event.KeyEvent.VK_A)
+		if (keyCode == com.jogamp.newt.event.KeyEvent.VK_LEFT
+				|| keyCode == com.jogamp.newt.event.KeyEvent.VK_A)
 			leftPressed = true;
-		if (keyCode == com.jogamp.newt.event.KeyEvent.VK_RIGHT ||
-				keyCode == com.jogamp.newt.event.KeyEvent.VK_D)
+		if (keyCode == com.jogamp.newt.event.KeyEvent.VK_RIGHT
+				|| keyCode == com.jogamp.newt.event.KeyEvent.VK_D)
 			rightPressed = true;
-		if (keyCode == com.jogamp.newt.event.KeyEvent.VK_UP ||
-				keyCode == com.jogamp.newt.event.KeyEvent.VK_W)
+		if (keyCode == com.jogamp.newt.event.KeyEvent.VK_UP
+				|| keyCode == com.jogamp.newt.event.KeyEvent.VK_W)
 			upPressed = true;
-		if (keyCode == com.jogamp.newt.event.KeyEvent.VK_DOWN ||
-				keyCode == com.jogamp.newt.event.KeyEvent.VK_S)
+		if (keyCode == com.jogamp.newt.event.KeyEvent.VK_DOWN
+				|| keyCode == com.jogamp.newt.event.KeyEvent.VK_S)
 			downPressed = true;
 
 		// flying up and down (for debugging)
@@ -565,21 +615,22 @@ public class Renderer implements GLEventListener,
 
 	@Override
 	public void keyReleased(com.jogamp.newt.event.KeyEvent e) {
-		
-		if(e.isAutoRepeat()) return;
-		
+
+		if (e.isAutoRepeat())
+			return;
+
 		int kc = e.getKeyCode();
-		if (kc == com.jogamp.newt.event.KeyEvent.VK_LEFT || 
-				kc == com.jogamp.newt.event.KeyEvent.VK_A)
+		if (kc == com.jogamp.newt.event.KeyEvent.VK_LEFT
+				|| kc == com.jogamp.newt.event.KeyEvent.VK_A)
 			leftPressed = false;
-		else if (kc == com.jogamp.newt.event.KeyEvent.VK_RIGHT || 
-				kc == com.jogamp.newt.event.KeyEvent.VK_D)
+		else if (kc == com.jogamp.newt.event.KeyEvent.VK_RIGHT
+				|| kc == com.jogamp.newt.event.KeyEvent.VK_D)
 			rightPressed = false;
-		else if (kc == com.jogamp.newt.event.KeyEvent.VK_UP || 
-				kc == com.jogamp.newt.event.KeyEvent.VK_W)
+		else if (kc == com.jogamp.newt.event.KeyEvent.VK_UP
+				|| kc == com.jogamp.newt.event.KeyEvent.VK_W)
 			upPressed = false;
-		else if (kc == com.jogamp.newt.event.KeyEvent.VK_DOWN || 
-				kc == com.jogamp.newt.event.KeyEvent.VK_S)
+		else if (kc == com.jogamp.newt.event.KeyEvent.VK_DOWN
+				|| kc == com.jogamp.newt.event.KeyEvent.VK_S)
 			downPressed = false;
 
 		// flying up and down (for debugging)
@@ -590,6 +641,6 @@ public class Renderer implements GLEventListener,
 		}
 
 		checkKeysPressed();
-		
+
 	}
 }

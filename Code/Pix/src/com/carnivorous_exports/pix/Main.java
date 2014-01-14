@@ -48,7 +48,11 @@ public class Main extends Frame {
 				//glp.initSingleton();
 		        GLCapabilities caps = new GLCapabilities(glp);
 		        caps.setBackgroundOpaque(false);
-				
+		        caps.setDoubleBuffered(true);
+		        caps.setSampleBuffers(true);
+		        System.out.println("Hardware Accelerated: " + caps.getHardwareAccelerated());
+				System.out.println("GLCapabilities: " + caps);
+		        
 				GLWindow window = GLWindow.create(caps);
 				
 				Renderer renderer = new Renderer(window);
