@@ -184,7 +184,7 @@ public class Terrain {
 
 		for (int x = 0; x < xLength; x++) {
 			for (int y = 0; y < yLength; y++) {
-				coords[x][y] = new Quad(drawable, renderer, 12, 8, 12, 0.5f,
+				coords[x][y] = new Quad(drawable, renderer, 12, 8, 12, 0.0f,  //0.5f
 						gl, displayList, x, y);
 			}
 		}
