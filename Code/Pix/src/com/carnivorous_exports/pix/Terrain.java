@@ -6,14 +6,22 @@ import static javax.media.opengl.GL.GL_TEXTURE_MAG_FILTER;
 import static javax.media.opengl.GL.GL_TEXTURE_MIN_FILTER;
 import static javax.media.opengl.GL2.GL_COMPILE;
 import static javax.media.opengl.GL2GL3.GL_QUADS;
+import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_AMBIENT;
+import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_SHININESS;
+import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_SPECULAR;
 
 import java.io.IOException;
 import java.util.ArrayList;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLException;
 import javax.media.opengl.GLRunnable;
+import javax.media.opengl.fixedfunc.GLLightingFunc;
+import javax.media.opengl.glu.GLU;
+import javax.media.opengl.glu.GLUquadric;
 
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureCoords;
@@ -30,8 +38,8 @@ public class Terrain {
 
 	Texture texture;
 
-	private int xLength = 1;
-	private int yLength = 1;
+	private int xLength = 2;
+	private int yLength = 2;
 	private Quad[][] coords = new Quad[xLength][yLength];
 
 	private float[] treeSize;
@@ -42,6 +50,11 @@ public class Terrain {
 	private float textureBottom;
 	private float textureLeft;
 	private float textureRight;
+	
+	float whitish[] = {0.8f, 0.8f, 0.8f, 1};
+	float white[] = {1, 1, 1, 1};
+	float blackish[] = {0.2f, 0.2f, 0.2f, 1};
+	float black[] = {0, 0, 0, 1};
 
 	private String textureFileName;
 	private String textureFileType;
@@ -53,6 +66,14 @@ public class Terrain {
 
 	public int getCubeList(GL2 gl, String textureFileName,
 			String textureFileType) {
+		
+		// Set material properties.
+        float[] rgba = {1f, 1f, 1f};	//white
+        gl.glMaterialfv(GL.GL_FRONT, GL_AMBIENT, rgba, 0);
+        gl.glMaterialfv(GL.GL_FRONT, GLLightingFunc.GL_DIFFUSE, rgba, 0);
+        gl.glMaterialfv(GL.GL_FRONT, GL_SPECULAR, rgba, 0);
+        gl.glMaterialf(GL.GL_FRONT, GL_SHININESS, 0.5f);
+		
 		this.textureFileName = textureFileName;
 		this.textureFileType = textureFileType;
 
@@ -66,15 +87,25 @@ public class Terrain {
 		gl.glNewList(cubeDList, GL_COMPILE);
 
 		// Enables this texture's target in the current GL context's state.
-		texture.enable(gl); // same as gl.glEnable(texture.getTarget());
+		//texture.enable(gl); // same as gl.glEnable(texture.getTarget());
+		
 		// gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE,
 		// GL.GL_REPLACE);
 
 		// Binds this texture to the current GL context.
-		texture.bind(gl); // same as gl.glBindTexture(texture.getTarget(),
+		//texture.bind(gl); // same as gl.glBindTexture(texture.getTarget(),
 							// texture.getTextureObject());
 
+		
+		
 		gl.glBegin(GL_QUADS);
+		
+		gl.glMaterialfv(GL.GL_FRONT, GL_AMBIENT , new float[]{0.5f, 0.5f, 0.5f, 1.0f}, 0);
+		//gl.glMaterialfv(GL.GL_FRONT, GL_DIFFUSE , new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 0);
+		//gl.glMaterialfv(GL.GL_FRONT, GL_SPECULAR, new float[]{0.7f, 0.7f, 0.7f, 1.0f}, 0);
+		gl.glMaterialfv(GL.GL_FRONT, GLLightingFunc.GL_DIFFUSE, white,0);
+		gl.glMaterialfv(GL.GL_FRONT, GL_SPECULAR, white,0);
+		gl.glMaterialfv(GL.GL_FRONT, GL_SHININESS, white,0);
 
 		// Front Face
 		gl.glTexCoord2f(textureLeft, textureBottom);
@@ -175,6 +206,27 @@ public class Terrain {
 			e.printStackTrace();
 		}
 	}
+	
+	public void testLightCube(GL2 gl, int[] displayList) {
+		
+		
+		
+		gl.glPushMatrix();
+		
+		gl.glTranslatef(0f, 0f, -4f);
+		
+		// draw the cube
+		//gl.glCallList(displayList[0]);
+
+		//draw the sphere
+		GLU glu = new GLU();
+		GLUquadric quad = glu.gluNewQuadric();
+		glu.gluSphere(quad, 2, 10, 15);
+		glu.gluDeleteQuadric(quad);
+		
+		gl.glPopMatrix();
+		
+	}
 
 	public void buildTerrain(GLAutoDrawable drawable, Renderer renderer,
 			GL2 gl, int[] displayList) {
@@ -184,7 +236,7 @@ public class Terrain {
 
 		for (int x = 0; x < xLength; x++) {
 			for (int y = 0; y < yLength; y++) {
-				coords[x][y] = new Quad(drawable, renderer, 12, 8, 12, 0.0f,  //0.5f
+				coords[x][y] = new Quad(drawable, renderer, 12, 8, 12, 0.5f,  //0.5f
 						gl, displayList, x, y);
 			}
 		}

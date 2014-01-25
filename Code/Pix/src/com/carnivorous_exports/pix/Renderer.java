@@ -7,6 +7,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.nio.FloatBuffer;
 import java.text.MessageFormat;
 import java.util.List;
 
@@ -20,6 +21,7 @@ import javax.media.nativewindow.util.InsetsImmutable;
 import javax.media.nativewindow.util.Point;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 import javax.media.opengl.GLAnimatorControl;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCapabilities;
@@ -64,11 +66,17 @@ public class Renderer implements GLEventListener,
 	private boolean initiated = false;
 	GLAutoDrawable drawable;
 
-	// for lighting
-	//float[] lightPos = { 5, 7, 5, 1 }; // light position
-	float[] noAmbient = { 0.2f, 0.2f, 0.2f, 1f }; // low ambient light
-	float[] diffuse = { 1f, 1f, 1f, 1f }; // full diffuse colour
-
+	
+	// Prepare light parameters.
+    float SHINE_ALL_DIRECTIONS = 1;
+    float[] lightPos = { 20, 30, 20, SHINE_ALL_DIRECTIONS};
+    //float[] lightDif = {0.6f, 0.6f, 0.6f, 1.0f};
+    float[] lightDif = {1f, 0.0f, 0.0f, 1f};
+    //float[] lightColorAmbient = {0.2f, 0.2f, 0.2f, 1f};
+    float[] lightColorAmbient = {0.0f, 1f, 0.0f, 1f};
+    //float[] lightColorSpecular = {0.8f, 0.8f, 0.8f, 1f};
+	float[] lightColorSpecular = {0.0f, 0.0f, 1.0f, 1f};
+    
 	float cameraPos[] = { 5.0f, 5.0f, 10.0f, 0.0f };
 	
 	float[] colorWhite  = {1.0f,1.0f,1.0f,1.0f};
@@ -217,21 +225,33 @@ public class Renderer implements GLEventListener,
 		//gl.glEnable(GL2.GL_LIGHT0);
 		//gl.glDepthFunc(GL.GL_LESS);
 		//gl.glEnable(GL.GL_DEPTH_TEST);
+		
+		// Enable lighting in GL.
+        gl.glEnable(GL_LIGHT1);
+        gl.glEnable(GL_LIGHTING);
 
 		gl.glEnable(GL_DEPTH_TEST); // enables depth testing
 		gl.glDepthFunc(GL_LEQUAL); // the type of depth test to do
 		gl.glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST); // best
 																// perspective
 																// correction
-		gl.glShadeModel(GL_SMOOTH); // blends colors nicely, and smoothes out
+		//gl.glShadeModel(GL_SMOOTH); // blends colors nicely, and smoothes out
 									// lighting
 
 		// Enable LIGHT0, which is pre-defined on most video cards.
-		gl.glEnable(GL_LIGHT1);
-		gl.glEnable(GL_LIGHTING);
+		//gl.glEnable(GL_LIGHT0);
+		//gl.glEnable(GL_LIGHTING);
+       
+        
+     // Set light parameters.
+       // gl.glLightfv(GL_LIGHT1, GL_AMBIENT, lightColorAmbient, 0);
+       // gl.glLightfv(GL_LIGHT1, GL_SPECULAR, lightColorSpecular, 0);
 
 		// Add colors to texture maps, so that glColor3f(r,g,b) takes effect.
 		gl.glEnable(GL_COLOR_MATERIAL);
+		gl.glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+		//gl.glEnable(GL.GL_TEXTURE_2D);
+		
 
 		// We want the best perspective correction to be done
 		gl.glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
@@ -258,7 +278,8 @@ public class Renderer implements GLEventListener,
 		// initiatedThread = true;
 
 		if (!initiated)
-			terrain.buildTerrain(drawable, this, gl, cubeList);
+			//terrain.buildTerrain(drawable, this, gl, cubeList);
+			terrain.testLightCube(gl, cubeList);
 		initiated = true;
 	}
 
@@ -294,6 +315,7 @@ public class Renderer implements GLEventListener,
 	 */
 	@Override
 	public void display(GLAutoDrawable drawable) {
+		
 		long startNanos = System.nanoTime();
 		
 		this.drawable = drawable;
@@ -302,46 +324,33 @@ public class Renderer implements GLEventListener,
 		gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear color
 																// and depth
 																// buffers
-
-		float light_ambient[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-		float light_diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-		float light_specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-		float light_position[] = { 1.0f, 1.0f, 1.0f, 0.0f };
 		
 		gl.glPushMatrix();
 
-		// Prepare light parameters.
-        float SHINE_ALL_DIRECTIONS = 1;
-        float[] lightPos = {-30, 0, 0, SHINE_ALL_DIRECTIONS};
-        float[] lightColorAmbient = {0.2f, 0.2f, 0.2f, 1f};
-        float[] lightColorSpecular = {0.8f, 0.8f, 0.8f, 1f};
-
-        // Set light parameters.
-        gl.glLightfv(GL_LIGHT1, GL_POSITION, lightPos, 0);
-        gl.glLightfv(GL_LIGHT1, GL_AMBIENT, lightColorAmbient, 0);
-        gl.glLightfv(GL_LIGHT1, GL_SPECULAR, lightColorSpecular, 0);
-
-        // Enable lighting in GL.
-        gl.glEnable(GL_LIGHT1);
-        gl.glEnable(GL_LIGHTING);
-		
-        // Set material properties.
-        float[] rgba = {1f, 1f, 1f};	//white
-        gl.glMaterialfv(GL.GL_FRONT, GL_AMBIENT, rgba, 0);
-        gl.glMaterialfv(GL.GL_FRONT, GL_SPECULAR, rgba, 0);
-        gl.glMaterialf(GL.GL_FRONT, GL_SHININESS, 0.5f);
-        
-     // rotate around wherever the user points the mouse
-     		gl.glRotatef(-view_rotx, 1.0f, 0.0f, 0.0f);
-     		gl.glRotatef(-view_roty, 0.0f, 1.0f, 0.0f);
-     		gl.glRotatef(-view_rotz, 0.0f, 0.0f, 1.0f);
-        
+		 // rotate around wherever the user points the mouse
+  		gl.glRotatef(-view_rotx, 1.0f, 0.0f, 0.0f);
+  		gl.glRotatef(-view_roty, 0.0f, 1.0f, 0.0f);
+  		gl.glRotatef(-view_rotz, 0.0f, 0.0f, 1.0f);
+  		
 		gl.glTranslatef(movex, movey, movez);
+		
+		//gl.glLightfv(GL_LIGHT1, GL_POSITION, lightPos, 0);
+		//gl.glLightfv(GL_LIGHT1, GL_SPECULAR, lightColorSpecular, 0);
 
 		// --------- Rendering Code
-		terrain.refreshTerrain(gl);
-
-		//terrain.testLight(gl, light_position);
+		//terrain.refreshTerrain(gl);
+		terrain.testLightCube(gl, cubeList);
+		
+		//gl.glRotatef(view_rotx, 1.0f, 0.0f, 0.0f);
+  		//gl.glRotatef(view_roty, 0.0f, 1.0f, 0.0f);
+  		//gl.glRotatef(view_rotz, 0.0f, 0.0f, 1.0f);
+		
+		//gl.glLightfv(GL_LIGHT1, GL_AMBIENT, lightColorAmbient, 0);
+		gl.glLightfv(GL_LIGHT1, GL_DIFFUSE, lightDif, 0);
+		gl.glLightfv(GL_LIGHT1, GL_SPECULAR, lightColorSpecular, 0);
+		gl.glLightfv(GL_LIGHT1, GL_POSITION, lightPos, 0);
+		
+		//terrain.testLight(gl, lightPos);
 		
 		
 		//
