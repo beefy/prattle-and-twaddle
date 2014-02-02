@@ -64,7 +64,10 @@ public class Main extends Frame {
 				// specified FPS.
 				FPSAnimator animator = new FPSAnimator(window, FPS, true);
 
-				if(!fullScreen) window.setSize(300,300);
+				if(!fullScreen) {
+					window.setFullscreen(false);
+					window.setSize(500,500);
+				}
 				else window.setFullscreen(true);
 				window.setVisible(true);
 				

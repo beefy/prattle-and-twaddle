@@ -97,11 +97,8 @@ public class Terrain {
 		texture.bind(gl); // same as gl.glBindTexture(texture.getTarget(),
 							// texture.getTextureObject());
 		
-		//gl.glBegin(GL_QUADS);
 		
 		gl.glMaterialfv(GL.GL_FRONT, GL_AMBIENT , new float[]{0.5f, 0.5f, 0.5f, 1.0f}, 0);
-		  //gl.glMaterialfv(GL.GL_FRONT, GL_DIFFUSE , new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 0);
-		  //gl.glMaterialfv(GL.GL_FRONT, GL_SPECULAR, new float[]{0.7f, 0.7f, 0.7f, 1.0f}, 0);
 		gl.glMaterialfv(GL.GL_FRONT, GLLightingFunc.GL_DIFFUSE, white,0);
 		gl.glMaterialfv(GL.GL_FRONT, GL_SPECULAR, white,0);
 		gl.glMaterialfv(GL.GL_FRONT, GL_SHININESS, white,0);
