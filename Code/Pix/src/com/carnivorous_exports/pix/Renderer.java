@@ -25,7 +25,9 @@ import javax.media.opengl.GL3;
 import javax.media.opengl.GLAnimatorControl;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCapabilities;
+import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
+import javax.media.opengl.GLPbuffer;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.GLRunnable;
 import javax.media.opengl.awt.GLCanvas;
@@ -65,17 +67,20 @@ public class Renderer implements GLEventListener,
 	private Terrain terrain = new Terrain();
 	private boolean initiated = false;
 	GLAutoDrawable drawable;
+	
+	//GLPbuffer is deprecated
+	//private GLPbuffer glpBuffer;
 
 	
 	// Prepare light parameters.
     float SHINE_ALL_DIRECTIONS = 1;
     float[] lightPos = { 20, 30, 20, SHINE_ALL_DIRECTIONS};
-    //float[] lightDif = {0.6f, 0.6f, 0.6f, 1.0f};
-    float[] lightDif = {1f, 0.0f, 0.0f, 1f};
-    //float[] lightColorAmbient = {0.2f, 0.2f, 0.2f, 1f};
-    float[] lightColorAmbient = {0.0f, 1f, 0.0f, 1f};
-    //float[] lightColorSpecular = {0.8f, 0.8f, 0.8f, 1f};
-	float[] lightColorSpecular = {0.0f, 0.0f, 1.0f, 1f};
+    float[] lightDif = {0.6f, 0.6f, 0.6f, 1.0f};
+    //float[] lightDif = {1f, 0.0f, 0.0f, 1f};
+    float[] lightColorAmbient = {0.2f, 0.2f, 0.2f, 1f};
+    //float[] lightColorAmbient = {0.0f, 1f, 0.0f, 1f};
+    float[] lightColorSpecular = {0.8f, 0.8f, 0.8f, 1f};
+	//float[] lightColorSpecular = {0.0f, 0.0f, 1.0f, 1f};
     
 	float cameraPos[] = { 5.0f, 5.0f, 10.0f, 0.0f };
 	
@@ -120,7 +125,7 @@ public class Renderer implements GLEventListener,
 
 	int moveDirForward;
 	int moveDirStrife;
-	int moveSpeed = 1;
+	float moveSpeed = 1f;
 
 	public Renderer(GLWindow window) {
 		this.window = window;
@@ -128,7 +133,7 @@ public class Renderer implements GLEventListener,
 		window.addMouseListener(this);
 		window.addKeyListener(this);
 		//window.
-		// turn off key auto repeat
+		//window.
 		window.requestFocus();
 	}
 
@@ -155,6 +160,17 @@ public class Renderer implements GLEventListener,
 		if (flyDownMove)
 			movey += 0.1;
 	}
+	
+	/*
+	private void initGLPBuffer(GLCapabilities caps, int width, int height) { 
+        caps.setDoubleBuffered(false); 
+        if (!GLDrawableFactory.getFactory(caps.getGLProfile()).canCreateGLPbuffer(null, null)) 
+            throw new RuntimeException("No pbuffer support"); 
+
+        //glpBuffer = GLDrawableFactory.getFactory(caps.getGLProfile()).createGLPbuffer(null, caps, null, width, height, null); 
+        //glpBuffer.addGLEventListener(renderer); 
+    }
+    */
 
 	// ------ Implement methods declared in GLEventListener ------
 
@@ -165,8 +181,8 @@ public class Renderer implements GLEventListener,
 	@Override
 	public void init(GLAutoDrawable drawable) {
 		
-		drawable.getAnimator().setUpdateFPSFrames(3, null);
-		drawable.setAutoSwapBufferMode(true);
+		drawable.getAnimator().setUpdateFPSFrames(3, null);	//3
+		drawable.setAutoSwapBufferMode(false);
 		
 		width = window.getWidth();
 		height = window.getHeight();
@@ -189,53 +205,24 @@ public class Renderer implements GLEventListener,
 		//for anti-aliasing
 		gl.glEnable(GL.GL_LINE_SMOOTH);
 		gl.glEnable(GL.GL_BLEND);
+		gl.glEnable(GL2.GL_CULL_FACE);
+	    gl.glEnable(GL2.GL_DEPTH_TEST);
+	    gl.glEnable(GL2.GL_NORMALIZE);
 		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 		gl.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_DONT_CARE);
-		
-
-		// for lighting
-		// Set up the lighting for Light-1
-		// Ambient light does not come from a particular direction. Need some
-		// ambient
-		// light to light up the scene. Ambient's value in RGBA
-		// float[] lightAmbientValue = {0.5f, 0.5f, 0.5f, 1.0f};
-		// Diffuse light comes from a particular location. Diffuse's value in
-		// RGBA
-		// float[] lightDiffuseValue = {1.0f, 1.0f, 1.0f, 1.0f};
-		// Diffuse light location xyz (in front of the screen).
-		// float lightDiffusePosition[] = {0.0f, 0.0f, 2.0f, 1.0f};
-
-		// gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, cameraPos, 0);
-		// gl.glLightf(0, GL_SPOT_EXPONENT, 0);
-		// gl.glLightfv(GL_LIGHT1, GL_AMBIENT, lightAmbientValue, 0);
-		// gl.glLightfv(GL_LIGHT1, GL_DIFFUSE, lightDiffuseValue, 0);
-		// gl.glLightfv(GL_LIGHT1, GL_POSITION, lightDiffusePosition, 0);
-
-		// gl.glEnable(GL_LIGHTING);
-		// gl.glEnable(GL_LIGHT0);
-		// gl.glLightfv(GL_LIGHT0, GL_AMBIENT, noAmbient, 0);
-		// gl.glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse, 0);
-		// gl.glLightfv(GL_LIGHT0, GL_POSITION,lightPos, 0);
-
-		// gl.glEnable(GL2.GL_CULL_FACE);
-		// gl.glEnable(GL2.GL_LIGHTING);
-		// gl.glEnable(GL2.GL_LIGHT0);
-		
-		//gl.glEnable(GL2.GL_LIGHTING);
-		//gl.glEnable(GL2.GL_LIGHT0);
-		//gl.glDepthFunc(GL.GL_LESS);
-		//gl.glEnable(GL.GL_DEPTH_TEST);
 		
 		// Enable lighting in GL.
         gl.glEnable(GL_LIGHT1);
         gl.glEnable(GL_LIGHTING);
 
-		gl.glEnable(GL_DEPTH_TEST); // enables depth testing
-		gl.glDepthFunc(GL_LEQUAL); // the type of depth test to do
+		//gl.glEnable(GL_DEPTH_TEST); // enables depth testing
+		//gl.glDepthFunc(GL_LEQUAL); // the type of depth test to do
 		gl.glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST); // best
 																// perspective
 																// correction
-		//gl.glShadeModel(GL_SMOOTH); // blends colors nicely, and smoothes out
+		
+		//gl.glLightfv(GL_LIGHT1, GL_SPECULAR, lightColorSpecular, 0);
+		gl.glShadeModel(GL_SMOOTH); // blends colors nicely, and smoothes out
 									// lighting
 
 		// Enable LIGHT0, which is pre-defined on most video cards.
@@ -245,7 +232,7 @@ public class Renderer implements GLEventListener,
         
      // Set light parameters.
        // gl.glLightfv(GL_LIGHT1, GL_AMBIENT, lightColorAmbient, 0);
-       // gl.glLightfv(GL_LIGHT1, GL_SPECULAR, lightColorSpecular, 0);
+       gl.glLightfv(GL_LIGHT1, GL_SPECULAR, lightColorSpecular, 0);
 
 		// Add colors to texture maps, so that glColor3f(r,g,b) takes effect.
 		gl.glEnable(GL_COLOR_MATERIAL);
@@ -278,8 +265,8 @@ public class Renderer implements GLEventListener,
 		// initiatedThread = true;
 
 		if (!initiated)
-			//terrain.buildTerrain(drawable, this, gl, cubeList);
-			terrain.testLightCube(gl, cubeList);
+			terrain.buildTerrain(drawable, this, gl, cubeList);
+			//terrain.testLightCube(gl, cubeList, lightPos);
 		initiated = true;
 	}
 
@@ -325,6 +312,8 @@ public class Renderer implements GLEventListener,
 																// and depth
 																// buffers
 		
+
+		
 		gl.glPushMatrix();
 
 		 // rotate around wherever the user points the mouse
@@ -338,16 +327,15 @@ public class Renderer implements GLEventListener,
 		//gl.glLightfv(GL_LIGHT1, GL_SPECULAR, lightColorSpecular, 0);
 
 		// --------- Rendering Code
-		//terrain.refreshTerrain(gl);
-		terrain.testLightCube(gl, cubeList);
+		terrain.refreshTerrain(gl);
+		//terrain.testLightCube(gl, cubeList, lightPos);
 		
 		//gl.glRotatef(view_rotx, 1.0f, 0.0f, 0.0f);
   		//gl.glRotatef(view_roty, 0.0f, 1.0f, 0.0f);
   		//gl.glRotatef(view_rotz, 0.0f, 0.0f, 1.0f);
 		
-		//gl.glLightfv(GL_LIGHT1, GL_AMBIENT, lightColorAmbient, 0);
-		gl.glLightfv(GL_LIGHT1, GL_DIFFUSE, lightDif, 0);
-		gl.glLightfv(GL_LIGHT1, GL_SPECULAR, lightColorSpecular, 0);
+		gl.glLightfv(GL_LIGHT1, GL_AMBIENT, lightColorAmbient, 0);
+		//gl.glLightfv(GL_LIGHT1, GL_DIFFUSE, lightDif, 0);
 		gl.glLightfv(GL_LIGHT1, GL_POSITION, lightPos, 0);
 		
 		//terrain.testLight(gl, lightPos);
@@ -378,7 +366,7 @@ public class Renderer implements GLEventListener,
 		// gl.glPopMatrix();
 		running();
 		// lightRefresh();
-
+		
 		oldRotX = view_rotx;
 		oldRotY = view_roty;
 		oldRotZ = view_rotz;
@@ -553,7 +541,11 @@ public class Renderer implements GLEventListener,
 		view_roty = view_roty % 360;
 
 		mouseInMiddle = false;
-		robot.mouseMove(width / 2, height / 2);
+		
+		//both robot.mouseMove and window.warpPointer work
+		//robot.mouseMove(width / 2, height / 2);
+		window.warpPointer(width/2, height/2);
+		
 		mouseInMiddle = true;
 	}
 
@@ -620,6 +612,11 @@ public class Renderer implements GLEventListener,
 		}
 
 		checkKeysPressed();
+		
+		//drawable.swapBuffers();
+		//gl.glFlush();
+		
+		//window.display();
 	}
 
 	@Override
