@@ -76,11 +76,8 @@ public class Renderer implements GLEventListener,
     float SHINE_ALL_DIRECTIONS = 1;
     float[] lightPos = { 20, 30, 20, SHINE_ALL_DIRECTIONS};
     float[] lightDif = {0.6f, 0.6f, 0.6f, 1.0f};
-    //float[] lightDif = {1f, 0.0f, 0.0f, 1f};
     float[] lightColorAmbient = {0.2f, 0.2f, 0.2f, 1f};
-    //float[] lightColorAmbient = {0.0f, 1f, 0.0f, 1f};
     float[] lightColorSpecular = {0.8f, 0.8f, 0.8f, 1f};
-	//float[] lightColorSpecular = {0.0f, 0.0f, 1.0f, 1f};
     
 	float cameraPos[] = { 5.0f, 5.0f, 10.0f, 0.0f };
 	
@@ -160,17 +157,6 @@ public class Renderer implements GLEventListener,
 		if (flyDownMove)
 			movey += 0.1;
 	}
-	
-	/*
-	private void initGLPBuffer(GLCapabilities caps, int width, int height) { 
-        caps.setDoubleBuffered(false); 
-        if (!GLDrawableFactory.getFactory(caps.getGLProfile()).canCreateGLPbuffer(null, null)) 
-            throw new RuntimeException("No pbuffer support"); 
-
-        //glpBuffer = GLDrawableFactory.getFactory(caps.getGLProfile()).createGLPbuffer(null, caps, null, width, height, null); 
-        //glpBuffer.addGLEventListener(renderer); 
-    }
-    */
 
 	// ------ Implement methods declared in GLEventListener ------
 
@@ -206,7 +192,8 @@ public class Renderer implements GLEventListener,
 		gl.glEnable(GL.GL_LINE_SMOOTH);
 		gl.glEnable(GL.GL_BLEND);
 		gl.glEnable(GL2.GL_CULL_FACE);
-	    gl.glEnable(GL2.GL_DEPTH_TEST);
+		//gl.glEnable(GL_DEPTH_TEST);
+	    //gl.glEnable(GL2.GL_DEPTH_TEST);
 	    gl.glEnable(GL2.GL_NORMALIZE);
 		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 		gl.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_DONT_CARE);
@@ -215,24 +202,14 @@ public class Renderer implements GLEventListener,
         gl.glEnable(GL_LIGHT1);
         gl.glEnable(GL_LIGHTING);
 
-		//gl.glEnable(GL_DEPTH_TEST); // enables depth testing
-		//gl.glDepthFunc(GL_LEQUAL); // the type of depth test to do
+		gl.glEnable(GL_DEPTH_TEST); // enables depth testing
+		gl.glDepthFunc(GL_LEQUAL); // the type of depth test to do
 		gl.glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST); // best
 																// perspective
 																// correction
 		
-		//gl.glLightfv(GL_LIGHT1, GL_SPECULAR, lightColorSpecular, 0);
 		gl.glShadeModel(GL_SMOOTH); // blends colors nicely, and smoothes out
 									// lighting
-
-		// Enable LIGHT0, which is pre-defined on most video cards.
-		//gl.glEnable(GL_LIGHT0);
-		//gl.glEnable(GL_LIGHTING);
-       
-        
-     // Set light parameters.
-       // gl.glLightfv(GL_LIGHT1, GL_AMBIENT, lightColorAmbient, 0);
-       gl.glLightfv(GL_LIGHT1, GL_SPECULAR, lightColorSpecular, 0);
 
 		// Add colors to texture maps, so that glColor3f(r,g,b) takes effect.
 		gl.glEnable(GL_COLOR_MATERIAL);
@@ -259,10 +236,6 @@ public class Renderer implements GLEventListener,
 				"terrainTextures/Water Texture 1.jpeg", ".jpeg");
 		cubeList[6] = terrain.getCubeList(gl,
 				"terrainTextures/White Water Texture.jpeg", ".jpeg");
-
-		// start the terrain thread: refresh the terrain once it's built
-		// if(!initiatedThread) terrain.t.start();
-		// initiatedThread = true;
 
 		if (!initiated)
 			terrain.buildTerrain(drawable, this, gl, cubeList);
@@ -323,49 +296,20 @@ public class Renderer implements GLEventListener,
   		
 		gl.glTranslatef(movex, movey, movez);
 		
-		//gl.glLightfv(GL_LIGHT1, GL_POSITION, lightPos, 0);
-		//gl.glLightfv(GL_LIGHT1, GL_SPECULAR, lightColorSpecular, 0);
-
 		// --------- Rendering Code
 		terrain.refreshTerrain(gl);
 		//terrain.testLightCube(gl, cubeList, lightPos);
 		
-		//gl.glRotatef(view_rotx, 1.0f, 0.0f, 0.0f);
-  		//gl.glRotatef(view_roty, 0.0f, 1.0f, 0.0f);
-  		//gl.glRotatef(view_rotz, 0.0f, 0.0f, 1.0f);
-		
 		gl.glLightfv(GL_LIGHT1, GL_AMBIENT, lightColorAmbient, 0);
-		//gl.glLightfv(GL_LIGHT1, GL_DIFFUSE, lightDif, 0);
+		gl.glLightfv(GL_LIGHT1, GL_DIFFUSE, lightDif, 0);
+		gl.glLightfv(GL_LIGHT1, GL_SPECULAR, lightColorSpecular, 0);
 		gl.glLightfv(GL_LIGHT1, GL_POSITION, lightPos, 0);
 		
 		//terrain.testLight(gl, lightPos);
 		
-		
-		//
-		// Light 1.
-		//
-		// Position and direction (spotlight)
-		//float posLight1[] = { 1.0f, 1.f, 1.f, 0.0f };
-		//float spotDirection[] = { -1.0f, -1.0f, 0.f };
-		//gl.glLightfv( GL_LIGHT1, GL_AMBIENT, colorWhite, 0 );
-	     // gl.glLightfv( GL_LIGHT1, GL_DIFFUSE, colorWhite, 0 );
-	     // gl.glLightfv( GL_LIGHT1, GL_SPECULAR, colorWhite, 0 );
-	     // gl.glLightf( GL_LIGHT1, GL_CONSTANT_ATTENUATION, 0.2f );
-
-		//gl.glLightfv(GL_LIGHT1, GL_POSITION,lightPos, 0);
-
-		
-
-		//gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_AMBIENT, light_ambient, 0);
-		//gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_DIFFUSE, light_diffuse, 0);
-		//gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_SPECULAR, light_specular, 0);
-		//gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, light_position, 0);
-
 		gl.glPopMatrix();
 
-		// gl.glPopMatrix();
 		running();
-		// lightRefresh();
 		
 		oldRotX = view_rotx;
 		oldRotY = view_roty;
@@ -376,7 +320,6 @@ public class Renderer implements GLEventListener,
 
 		System.out.println(drawable.getAnimator().getLastFPS());
 		
-		//gl.glFlush();
 		drawable.swapBuffers();
 		gl.glFlush();
 	}
@@ -613,10 +556,6 @@ public class Renderer implements GLEventListener,
 
 		checkKeysPressed();
 		
-		//drawable.swapBuffers();
-		//gl.glFlush();
-		
-		//window.display();
 	}
 
 	@Override
