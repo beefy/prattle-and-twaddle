@@ -35,6 +35,7 @@ public class Terrain {
 
 	// for testing rotation
 	float tempRotX;
+	float tempRot;
 
 	Texture texture;
 
@@ -87,89 +88,95 @@ public class Terrain {
 		gl.glNewList(cubeDList, GL_COMPILE);
 
 		// Enables this texture's target in the current GL context's state.
-		//texture.enable(gl); // same as gl.glEnable(texture.getTarget());
+		texture.enable(gl); // same as gl.glEnable(texture.getTarget());
 		
 		// gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE,
 		// GL.GL_REPLACE);
 
 		// Binds this texture to the current GL context.
-		//texture.bind(gl); // same as gl.glBindTexture(texture.getTarget(),
+		texture.bind(gl); // same as gl.glBindTexture(texture.getTarget(),
 							// texture.getTextureObject());
-
 		
-		
-		gl.glBegin(GL_QUADS);
+		//gl.glBegin(GL_QUADS);
 		
 		gl.glMaterialfv(GL.GL_FRONT, GL_AMBIENT , new float[]{0.5f, 0.5f, 0.5f, 1.0f}, 0);
-		//gl.glMaterialfv(GL.GL_FRONT, GL_DIFFUSE , new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 0);
-		//gl.glMaterialfv(GL.GL_FRONT, GL_SPECULAR, new float[]{0.7f, 0.7f, 0.7f, 1.0f}, 0);
+		  //gl.glMaterialfv(GL.GL_FRONT, GL_DIFFUSE , new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 0);
+		  //gl.glMaterialfv(GL.GL_FRONT, GL_SPECULAR, new float[]{0.7f, 0.7f, 0.7f, 1.0f}, 0);
 		gl.glMaterialfv(GL.GL_FRONT, GLLightingFunc.GL_DIFFUSE, white,0);
 		gl.glMaterialfv(GL.GL_FRONT, GL_SPECULAR, white,0);
 		gl.glMaterialfv(GL.GL_FRONT, GL_SHININESS, white,0);
 
-		// Front Face
-		gl.glTexCoord2f(textureLeft, textureBottom);
-		gl.glVertex3f(-1.0f, -1.0f, 1.0f); // bottom-left of the texture and
-											// quad
-		gl.glTexCoord2f(textureRight, textureBottom);
-		gl.glVertex3f(1.0f, -1.0f, 1.0f); // bottom-right of the texture and
-											// quad
-		gl.glTexCoord2f(textureRight, textureTop);
-		gl.glVertex3f(1.0f, 1.0f, 1.0f); // top-right of the texture and quad
-		gl.glTexCoord2f(textureLeft, textureTop);
-		gl.glVertex3f(-1.0f, 1.0f, 1.0f); // top-left of the texture and quad
+		gl.glBegin(GL_QUADS); 
 
-		// Back Face
-		gl.glTexCoord2f(textureRight, textureBottom);
-		gl.glVertex3f(-1.0f, -1.0f, -1.0f);
-		gl.glTexCoord2f(textureRight, textureTop);
-		gl.glVertex3f(-1.0f, 1.0f, -1.0f);
-		gl.glTexCoord2f(textureLeft, textureTop);
-		gl.glVertex3f(1.0f, 1.0f, -1.0f);
-		gl.glTexCoord2f(textureLeft, textureBottom);
-		gl.glVertex3f(1.0f, -1.0f, -1.0f);
+	      // Front Face
+	      gl.glNormal3f(0.0f, 0.0f, 1.0f);
+	      gl.glTexCoord2f(textureLeft, textureBottom);
+	      gl.glVertex3f(-1.0f, -1.0f, 1.0f); // bottom-left of the texture and quad
+	      gl.glTexCoord2f(textureRight, textureBottom);
+	      gl.glVertex3f(1.0f, -1.0f, 1.0f);  // bottom-right of the texture and quad
+	      gl.glTexCoord2f(textureRight, textureTop);
+	      gl.glVertex3f(1.0f, 1.0f, 1.0f);   // top-right of the texture and quad
+	      gl.glTexCoord2f(textureLeft, textureTop);
+	      gl.glVertex3f(-1.0f, 1.0f, 1.0f);  // top-left of the texture and quad
 
-		// Top Face
-		gl.glTexCoord2f(textureLeft, textureTop);
-		gl.glVertex3f(-1.0f, 1.0f, -1.0f);
-		gl.glTexCoord2f(textureLeft, textureBottom);
-		gl.glVertex3f(-1.0f, 1.0f, 1.0f);
-		gl.glTexCoord2f(textureRight, textureBottom);
-		gl.glVertex3f(1.0f, 1.0f, 1.0f);
-		gl.glTexCoord2f(textureRight, textureTop);
-		gl.glVertex3f(1.0f, 1.0f, -1.0f);
+	      // Back Face
+	      gl.glNormal3f(0.0f, 0.0f, -1.0f);
+	      gl.glTexCoord2f(textureRight, textureBottom);
+	      gl.glVertex3f(-1.0f, -1.0f, -1.0f);
+	      gl.glTexCoord2f(textureRight, textureTop);
+	      gl.glVertex3f(-1.0f, 1.0f, -1.0f);
+	      gl.glTexCoord2f(textureLeft, textureTop);
+	      gl.glVertex3f(1.0f, 1.0f, -1.0f);
+	      gl.glTexCoord2f(textureLeft, textureBottom);
+	      gl.glVertex3f(1.0f, -1.0f, -1.0f);
+	      
+	      // Top Face
+	      gl.glNormal3f(0.0f, 1.0f, 0.0f);
+	      gl.glTexCoord2f(textureLeft, textureTop);
+	      gl.glVertex3f(-1.0f, 1.0f, -1.0f);
+	      gl.glTexCoord2f(textureLeft, textureBottom);
+	      gl.glVertex3f(-1.0f, 1.0f, 1.0f);
+	      gl.glTexCoord2f(textureRight, textureBottom);
+	      gl.glVertex3f(1.0f, 1.0f, 1.0f);
+	      gl.glTexCoord2f(textureRight, textureTop);
+	      gl.glVertex3f(1.0f, 1.0f, -1.0f);
+	      
+	      // Bottom Face
+	      gl.glNormal3f(0.0f, -1.0f, 0.0f);
+	      gl.glTexCoord2f(textureRight, textureTop);
+	      gl.glVertex3f(-1.0f, -1.0f, -1.0f);
+	      gl.glTexCoord2f(textureLeft, textureTop);
+	      gl.glVertex3f(1.0f, -1.0f, -1.0f);
+	      gl.glTexCoord2f(textureLeft, textureBottom);
+	      gl.glVertex3f(1.0f, -1.0f, 1.0f);
+	      gl.glTexCoord2f(textureRight, textureBottom);
+	      gl.glVertex3f(-1.0f, -1.0f, 1.0f);
+	      
+	      // Right face
+	      gl.glNormal3f(1.0f, 0.0f, 0.0f);
+	      gl.glTexCoord2f(textureRight, textureBottom);
+	      gl.glVertex3f(1.0f, -1.0f, -1.0f);
+	      gl.glTexCoord2f(textureRight, textureTop);
+	      gl.glVertex3f(1.0f, 1.0f, -1.0f);
+	      gl.glTexCoord2f(textureLeft, textureTop);
+	      gl.glVertex3f(1.0f, 1.0f, 1.0f);
+	      gl.glTexCoord2f(textureLeft, textureBottom);
+	      gl.glVertex3f(1.0f, -1.0f, 1.0f);
+	      
+	      // Left Face
+	      gl.glNormal3f(-1.0f, 0.0f, 0.0f);
+	      gl.glTexCoord2f(textureLeft, textureBottom);
+	      gl.glVertex3f(-1.0f, -1.0f, -1.0f);
+	      gl.glTexCoord2f(textureRight, textureBottom);
+	      gl.glVertex3f(-1.0f, -1.0f, 1.0f);
+	      gl.glTexCoord2f(textureRight, textureTop);
+	      gl.glVertex3f(-1.0f, 1.0f, 1.0f);
+	      gl.glTexCoord2f(textureLeft, textureTop);
+	      gl.glVertex3f(-1.0f, 1.0f, -1.0f);
 
-		// Bottom Face
-		gl.glTexCoord2f(textureRight, textureTop);
-		gl.glVertex3f(-1.0f, -1.0f, -1.0f);
-		gl.glTexCoord2f(textureLeft, textureTop);
-		gl.glVertex3f(1.0f, -1.0f, -1.0f);
-		gl.glTexCoord2f(textureLeft, textureBottom);
-		gl.glVertex3f(1.0f, -1.0f, 1.0f);
-		gl.glTexCoord2f(textureRight, textureBottom);
-		gl.glVertex3f(-1.0f, -1.0f, 1.0f);
+	      gl.glEnd();
 
-		// Right face
-		gl.glTexCoord2f(textureRight, textureBottom);
-		gl.glVertex3f(1.0f, -1.0f, -1.0f);
-		gl.glTexCoord2f(textureRight, textureTop);
-		gl.glVertex3f(1.0f, 1.0f, -1.0f);
-		gl.glTexCoord2f(textureLeft, textureTop);
-		gl.glVertex3f(1.0f, 1.0f, 1.0f);
-		gl.glTexCoord2f(textureLeft, textureBottom);
-		gl.glVertex3f(1.0f, -1.0f, 1.0f);
-
-		// Left Face
-		gl.glTexCoord2f(textureLeft, textureBottom);
-		gl.glVertex3f(-1.0f, -1.0f, -1.0f);
-		gl.glTexCoord2f(textureRight, textureBottom);
-		gl.glVertex3f(-1.0f, -1.0f, 1.0f);
-		gl.glTexCoord2f(textureRight, textureTop);
-		gl.glVertex3f(-1.0f, 1.0f, 1.0f);
-		gl.glTexCoord2f(textureLeft, textureTop);
-		gl.glVertex3f(-1.0f, 1.0f, -1.0f);
-
-		gl.glEnd();
+		//gl.glEnd();
 		gl.glEndList();
 
 		return cubeDList;
@@ -207,17 +214,31 @@ public class Terrain {
 		}
 	}
 	
-	public void testLightCube(GL2 gl, int[] displayList) {
+	public void testLightCube(GL2 gl, int[] displayList, float[] lightPos) {
 		
 		
-		
+		//cube
 		gl.glPushMatrix();
 		
-		gl.glTranslatef(0f, 0f, -4f);
+		//gl.glTranslatef(lightPos[0], lightPos[1], lightPos[2]);
+		gl.glTranslatef(2f, 0f, -4f);
+		
+		//gl.glRotatef(180, 1, 0, 0);
+		//gl.glRotatef(tempRot, 1.0f, 0.0f, 0);
+		//tempRot++;
 		
 		// draw the cube
-		//gl.glCallList(displayList[0]);
-
+		gl.glCallList(displayList[0]);
+		
+		gl.glPopMatrix();
+		
+		//sphere
+		gl.glPushMatrix();
+		
+		gl.glTranslatef(-2f, 0f, -4f);
+		
+		gl.glRotatef(tempRot, 0.5f, 0.5f, 0);
+		
 		//draw the sphere
 		GLU glu = new GLU();
 		GLUquadric quad = glu.gluNewQuadric();
@@ -225,7 +246,6 @@ public class Terrain {
 		glu.gluDeleteQuadric(quad);
 		
 		gl.glPopMatrix();
-		
 	}
 
 	public void buildTerrain(GLAutoDrawable drawable, Renderer renderer,
