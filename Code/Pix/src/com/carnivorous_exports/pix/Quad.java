@@ -114,7 +114,7 @@ public class Quad {
 		}
 	}
 
-	public void refreshQuad(GL2 gl) {
+	public void refreshQuad(GL2 gl, float selectedObject) {
 
 		for (int i = 4; i >= 1; i--) { // loop for each box size
 			for (int x = 0; x < topX; x++) { // x coords
@@ -148,8 +148,14 @@ public class Quad {
 							}
 
 							// draw the cube
-							gl.glCallList(displayList[0]);
-
+							if(this.hashCode() != selectedObject) {
+								gl.glCallList(displayList[0]);
+								//System.out.println("Hash: " + this.hashCode() + 
+								//		"\nObj: " + selectedObject);
+							} else {
+								gl.glCallList(displayList[1]);
+							}
+							
 							gl.glPopMatrix();
 						}
 					}

@@ -8,6 +8,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.text.MessageFormat;
 import java.util.List;
 
@@ -33,6 +34,7 @@ import javax.media.opengl.GLRunnable;
 import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.glu.GLU;
 
+import com.jogamp.common.nio.Buffers;
 import com.jogamp.newt.MonitorDevice;
 import com.jogamp.newt.Screen;
 import com.jogamp.newt.Window;
@@ -64,24 +66,23 @@ public class Renderer implements GLEventListener,
 	private static GLWindow window;
 	private GLU glu; // for the GL Utility
 	private int[] cubeList; // display list for cube
-	private Terrain terrain = new Terrain();
+	private Scene terrain = new Scene();
 	private boolean initiated = false;
 	GLAutoDrawable drawable;
-	
-	//GLPbuffer is deprecated
-	//private GLPbuffer glpBuffer;
 
-	
+	// GLPbuffer is deprecated
+	// private GLPbuffer glpBuffer;
+
 	// Prepare light parameters.
-    float SHINE_ALL_DIRECTIONS = 1;
-    float[] lightPos = { 20, 30, 20, SHINE_ALL_DIRECTIONS};
-    float[] lightDif = {0.6f, 0.6f, 0.6f, 1.0f};
-    float[] lightColorAmbient = {0.2f, 0.2f, 0.2f, 1f};
-    float[] lightColorSpecular = {0.8f, 0.8f, 0.8f, 1f};
-    
+	float SHINE_ALL_DIRECTIONS = 1;
+	float[] lightPos = { 20, 30, 20, SHINE_ALL_DIRECTIONS };
+	float[] lightDif = { 0.6f, 0.6f, 0.6f, 1.0f };
+	float[] lightColorAmbient = { 0.2f, 0.2f, 0.2f, 1f };
+	float[] lightColorSpecular = { 0.8f, 0.8f, 0.8f, 1f };
+
 	float cameraPos[] = { 5.0f, 5.0f, 10.0f, 0.0f };
-	
-	float[] colorWhite  = {1.0f,1.0f,1.0f,1.0f};
+
+	float[] colorWhite = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 	Robot robot;
 	int width;
@@ -124,18 +125,20 @@ public class Renderer implements GLEventListener,
 	int moveDirStrife;
 	float moveSpeed = 1f;
 
+	float selectedObject;
+
 	public Renderer(GLWindow window) {
 		this.window = window;
 		window.addGLEventListener(this);
 		window.addMouseListener(this);
 		window.addKeyListener(this);
-		//window.
-		//window.
+		// window.
+		// window.
 		window.requestFocus();
 	}
 
 	// for user movement
-	public void running() {
+	public void checkMoving() {
 
 		if (forwardMove) { // moving forward or back
 			movez += Math.cos(180 - view_roty * (Math.PI / 180) + 40) * 0.1
@@ -147,15 +150,41 @@ public class Renderer implements GLEventListener,
 
 		if (strifeMove) { // moving right or left
 			movez -= Math.cos(180 - view_roty * (Math.PI / 180) + 40 + 80.1
-					* -moveDirStrife) * 0.1 * moveSpeed;
+					* -moveDirStrife)
+					* 0.1 * moveSpeed;
 			movex += Math.sin(180 - view_roty * (Math.PI / 180) + 40 + 80.1
-					* -moveDirStrife) * 0.1 * moveSpeed;
+					* -moveDirStrife)
+					* 0.1 * moveSpeed;
 		}
 
 		if (flyUpMove)
 			movey -= 0.1;
 		if (flyDownMove)
 			movey += 0.1;
+	}
+
+	/**
+	 * Get the current mouse position in world coordinates.
+	 * 
+	 * @return
+	 */
+	public double[] getPosition() {
+		
+		int[] myViewport = new int[4];				//viewport
+	    double[] myProjMatrix = new double[16];		//projection view matrix
+	    double[] myMVMatrix = new double [16];		//model view matrix
+		
+		double[] p = new double[3];
+		int x = mouseX;
+		int y = mouseY;
+
+		GLU glu = new GLU();
+		y = window.getHeight() - y - 1;
+
+		glu.gluUnProject((double) x, (double) y, 0.0,
+				myMVMatrix, 0, myProjMatrix, 0, myViewport, 0, p, 0);
+
+		return p;
 	}
 
 	// ------ Implement methods declared in GLEventListener ------
@@ -166,10 +195,10 @@ public class Renderer implements GLEventListener,
 	 */
 	@Override
 	public void init(GLAutoDrawable drawable) {
-		
-		drawable.getAnimator().setUpdateFPSFrames(3, null);	//3
+
+		drawable.getAnimator().setUpdateFPSFrames(3, null); // 3
 		drawable.setAutoSwapBufferMode(false);
-		
+
 		width = window.getWidth();
 		height = window.getHeight();
 
@@ -187,35 +216,34 @@ public class Renderer implements GLEventListener,
 		glu = new GLU(); // get GL Utilities
 		gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // set background (clear) color
 		gl.glClearDepth(1.0f); // set clear depth value to farthest
-		
-		//for anti-aliasing
+
+		// for anti-aliasing
 		gl.glEnable(GL.GL_LINE_SMOOTH);
 		gl.glEnable(GL.GL_BLEND);
 		gl.glEnable(GL2.GL_CULL_FACE);
-		//gl.glEnable(GL_DEPTH_TEST);
-	    //gl.glEnable(GL2.GL_DEPTH_TEST);
-	    gl.glEnable(GL2.GL_NORMALIZE);
+		// gl.glEnable(GL_DEPTH_TEST);
+		// gl.glEnable(GL2.GL_DEPTH_TEST);
+		gl.glEnable(GL2.GL_NORMALIZE);
 		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 		gl.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_DONT_CARE);
-		
+
 		// Enable lighting in GL.
-        gl.glEnable(GL_LIGHT1);
-        gl.glEnable(GL_LIGHTING);
+		gl.glEnable(GL_LIGHT1);
+		gl.glEnable(GL_LIGHTING);
 
 		gl.glEnable(GL_DEPTH_TEST); // enables depth testing
 		gl.glDepthFunc(GL_LEQUAL); // the type of depth test to do
 		gl.glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST); // best
 																// perspective
 																// correction
-		
+
 		gl.glShadeModel(GL_SMOOTH); // blends colors nicely, and smoothes out
 									// lighting
 
 		// Add colors to texture maps, so that glColor3f(r,g,b) takes effect.
 		gl.glEnable(GL_COLOR_MATERIAL);
 		gl.glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-		//gl.glEnable(GL.GL_TEXTURE_2D);
-		
+		gl.glEnable(GL.GL_TEXTURE_2D);
 
 		// We want the best perspective correction to be done
 		gl.glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
@@ -238,8 +266,8 @@ public class Renderer implements GLEventListener,
 				"terrainTextures/White Water Texture.jpeg", ".jpeg");
 
 		if (!initiated)
-			terrain.buildTerrain(drawable, this, gl, cubeList);
-			//terrain.testLightCube(gl, cubeList, lightPos);
+			terrain.buildScene(drawable, this, gl, cubeList);
+		// terrain.testLightCube(gl, cubeList, lightPos);
 		initiated = true;
 	}
 
@@ -275,51 +303,57 @@ public class Renderer implements GLEventListener,
 	 */
 	@Override
 	public void display(GLAutoDrawable drawable) {
-		
+
 		long startNanos = System.nanoTime();
-		
+
 		this.drawable = drawable;
 
 		GL2 gl = drawable.getGL().getGL2(); // get the OpenGL 2 graphics context
 		gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear color
 																// and depth
 																// buffers
-		
 
-		
 		gl.glPushMatrix();
+		
+		// rotate around wherever the user points the mouse
+		gl.glRotatef(-view_rotx, 1.0f, 0.0f, 0.0f);
+		gl.glRotatef(-view_roty, 0.0f, 1.0f, 0.0f);
+		gl.glRotatef(-view_rotz, 0.0f, 0.0f, 1.0f);
 
-		 // rotate around wherever the user points the mouse
-  		gl.glRotatef(-view_rotx, 1.0f, 0.0f, 0.0f);
-  		gl.glRotatef(-view_roty, 0.0f, 1.0f, 0.0f);
-  		gl.glRotatef(-view_rotz, 0.0f, 0.0f, 1.0f);
-  		
 		gl.glTranslatef(movex, movey, movez);
-		
+
 		// --------- Rendering Code
-		terrain.refreshTerrain(gl);
-		//terrain.testLightCube(gl, cubeList, lightPos);
-		
+		terrain.drawScene(gl, selectedObject);
+		// terrain.testLightCube(gl, cubeList, lightPos);
+
 		gl.glLightfv(GL_LIGHT1, GL_AMBIENT, lightColorAmbient, 0);
 		gl.glLightfv(GL_LIGHT1, GL_DIFFUSE, lightDif, 0);
 		gl.glLightfv(GL_LIGHT1, GL_SPECULAR, lightColorSpecular, 0);
 		gl.glLightfv(GL_LIGHT1, GL_POSITION, lightPos, 0);
+
+		// terrain.testLight(gl, lightPos);
 		
-		//terrain.testLight(gl, lightPos);
-		
+
 		gl.glPopMatrix();
 
-		running();
-		
+		//print mouse position
+		double[] mouse3Dpos = getPosition();
+		for(int i = 0; i < 3; i++) {
+			System.out.print(mouse3Dpos[i] + ",  ");
+		}
+		System.out.println();
+
+		checkMoving();
+
 		oldRotX = view_rotx;
 		oldRotY = view_roty;
 		oldRotZ = view_rotz;
-		
+
 		long drawNanos = System.nanoTime() - startNanos;
-		//System.out.println("drawn in " + drawNanos);
+		// System.out.println("drawn in " + drawNanos);
 
 		System.out.println(drawable.getAnimator().getLastFPS());
-		
+
 		drawable.swapBuffers();
 		gl.glFlush();
 	}
@@ -484,11 +518,11 @@ public class Renderer implements GLEventListener,
 		view_roty = view_roty % 360;
 
 		mouseInMiddle = false;
-		
-		//both robot.mouseMove and window.warpPointer work
-		//robot.mouseMove(width / 2, height / 2);
-		window.warpPointer(width/2, height/2);
-		
+
+		// both robot.mouseMove and window.warpPointer work
+		// robot.mouseMove(width / 2, height / 2);
+		window.warpPointer(width / 2, height / 2);
+
 		mouseInMiddle = true;
 	}
 
@@ -555,7 +589,7 @@ public class Renderer implements GLEventListener,
 		}
 
 		checkKeysPressed();
-		
+
 	}
 
 	@Override

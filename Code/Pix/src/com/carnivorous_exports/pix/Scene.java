@@ -27,7 +27,7 @@ import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureCoords;
 import com.jogamp.opengl.util.texture.TextureIO;
 
-public class Terrain {
+public class Scene {
 
 	GL2 gl;
 	int[] displayList;
@@ -59,6 +59,8 @@ public class Terrain {
 
 	private String textureFileName;
 	private String textureFileType;
+	
+	float selectedObject;
 
 	private static float[][] boxColors = { // Bright: Red, Orange, Yellow,
 			// Green, Blue
@@ -245,7 +247,7 @@ public class Terrain {
 		gl.glPopMatrix();
 	}
 
-	public void buildTerrain(GLAutoDrawable drawable, Renderer renderer,
+	public void buildScene(GLAutoDrawable drawable, Renderer renderer,
 			GL2 gl, int[] displayList) {
 
 		this.gl = gl;
@@ -262,10 +264,11 @@ public class Terrain {
 		System.out.println("terrainBuild");
 	}
 
-	public void refreshTerrain(GL2 gl) {
+	public void drawScene(GL2 gl, float selectedObject) {
+		this.selectedObject = selectedObject;
 		for (int x = 0; x < xLength; x++) {
 			for (int y = 0; y < yLength; y++) {
-				coords[x][y].refreshQuad(gl);
+				coords[x][y].refreshQuad(gl, selectedObject);
 			}
 		}
 	}
