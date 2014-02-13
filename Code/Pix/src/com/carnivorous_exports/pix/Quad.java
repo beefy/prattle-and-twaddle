@@ -23,6 +23,8 @@ public class Quad {
 	int posX;
 	int posY;
 	int posZ;
+	
+	public boolean collided = true;
 
 	Renderer renderer;
 	GLAutoDrawable drawable;
@@ -157,10 +159,34 @@ public class Quad {
 							}
 							
 							gl.glPopMatrix();
+							checkCollision(posX, posY, posZ, i);
 						}
 					}
 				}
 			}
 		}
+	}
+	
+	public void checkCollision(int x, int y, int z, int i) {
+		
+		float length;
+		
+		if(i==4) { 
+			length = 0.5f;
+			
+			if((.5f * (x + posX) < 0 && .5f * (x + posX) + 0.5f > 0)
+					&& (.5f * (x + posY) < 0 && .5f * (x + posY) + 0.5f > 0)
+					&& (.5f * (x + posZ) < 0 && .5f * (x + posZ) + 0.5f > 0)) 
+						collided = true;
+			
+		} else if(i==3) { 
+			length = 0.6666f;
+		} else if(i==2) { 
+			length = 1f;
+		} else if(i==1) {
+			length = 2f;
+		}
+		
+		
 	}
 }

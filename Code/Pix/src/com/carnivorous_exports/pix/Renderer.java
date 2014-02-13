@@ -95,6 +95,8 @@ public class Renderer implements GLEventListener,
 	private int prevMouseY;
 	private int mouseX;
 	private int mouseY;
+	private int mouseXGlobal;
+	private int mouseYGlobal;
 	public float view_rotx;
 	public float view_roty;
 	public float view_rotz;
@@ -140,7 +142,7 @@ public class Renderer implements GLEventListener,
 	// for user movement
 	public void checkMoving() {
 
-		if (forwardMove) { // moving forward or back
+		if (forwardMove && !terrain.collided) { // moving forward or back
 			movez += Math.cos(180 - view_roty * (Math.PI / 180) + 40) * 0.1
 					* -moveDirForward * moveSpeed;
 			movex -= Math.sin(180 - view_roty * (Math.PI / 180) + 40) * 0.1
@@ -148,7 +150,7 @@ public class Renderer implements GLEventListener,
 
 		}
 
-		if (strifeMove) { // moving right or left
+		if (strifeMove && !terrain.collided) { // moving right or left
 			movez -= Math.cos(180 - view_roty * (Math.PI / 180) + 40 + 80.1
 					* -moveDirStrife)
 					* 0.1 * moveSpeed;
@@ -161,6 +163,8 @@ public class Renderer implements GLEventListener,
 			movey -= 0.1;
 		if (flyDownMove)
 			movey += 0.1;
+		
+		if(terrain.collided) System.out.println("COLLISION");
 	}
 
 	/**
@@ -175,8 +179,8 @@ public class Renderer implements GLEventListener,
 	    double[] myMVMatrix = new double [16];		//model view matrix
 		
 		double[] p = new double[3];
-		int x = mouseX;
-		int y = mouseY;
+		int x = mouseXGlobal;
+		int y = mouseYGlobal;
 
 		GLU glu = new GLU();
 		y = window.getHeight() - y - 1;
@@ -184,6 +188,8 @@ public class Renderer implements GLEventListener,
 		glu.gluUnProject((double) x, (double) y, 0.0,
 				myMVMatrix, 0, myProjMatrix, 0, myViewport, 0, p, 0);
 
+		System.out.println("(" + mouseXGlobal + ", " + mouseYGlobal + ")");
+		
 		return p;
 	}
 
@@ -487,6 +493,9 @@ public class Renderer implements GLEventListener,
 		 * mouseInMiddle == false when we are iterating just to keep the mouse
 		 * in the middle
 		 */
+		
+		mouseXGlobal = e.getX();
+		mouseYGlobal = e.getY();
 
 		if (!mouseInMiddle)
 			return;
