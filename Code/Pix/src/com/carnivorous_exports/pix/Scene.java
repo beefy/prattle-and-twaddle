@@ -61,6 +61,7 @@ public class Scene {
 	private String textureFileType;
 	
 	float selectedObject;
+	public boolean collided;
 
 	private static float[][] boxColors = { // Bright: Red, Orange, Yellow,
 			// Green, Blue
@@ -269,6 +270,13 @@ public class Scene {
 		for (int x = 0; x < xLength; x++) {
 			for (int y = 0; y < yLength; y++) {
 				coords[x][y].refreshQuad(gl, selectedObject);
+				if(coords[x][y].collided) collided = true;
+			}
+		}
+		
+		for (int x = 0; x < xLength; x++) {
+			for (int y = 0; y < yLength; y++) {
+				coords[x][y].collided = false;
 			}
 		}
 	}
