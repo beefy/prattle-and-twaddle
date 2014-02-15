@@ -24,7 +24,7 @@ public class Quad {
 	int posY;
 	int posZ;
 	
-	public boolean collided = true;
+	public boolean collided = false;
 
 	Renderer renderer;
 	GLAutoDrawable drawable;
@@ -44,7 +44,7 @@ public class Quad {
 		this.coordX = coordX;
 		this.coordY = coordY;
 
-		// position of the Quad
+		// position of this Quad
 		posX = 12 * coordY;
 		posY = 2 * coordX + 2 * coordY; // to make a hill
 		posZ = 12 * coordX - 40;
@@ -172,19 +172,25 @@ public class Quad {
 		float length;
 		
 		if(i==4) { 
-			length = 0.5f;
+			length = 1f;
 			
-			if((.5f * (x + posX) < 0 && .5f * (x + posX) + 0.5f > 0)
-					&& (.5f * (x + posY) < 0 && .5f * (x + posY) + 0.5f > 0)
-					&& (.5f * (x + posZ) < 0 && .5f * (x + posZ) + 0.5f > 0)) 
+			if((.5f * (x + posX) > 0 && .5f * (x + posX) + length < 0)
+					&& (.5f * (x + posY) > 0 && .5f * (x + posY) + length < 0)
+					&& (.5f * (x + posZ) > 0 && .5f * (x + posZ) + length < 0)) { 
 						collided = true;
+						System.out.println("\n\n\n\ncollsion coord: (" + .5f * (x + posX) + ", " +
+								.5f * (x + posY) + ", " + .5f * (x + posZ) +
+								")\n\n\n\n");
+			}
+			
+			//System.out.println("				" + .5f * (x + posX));
 			
 		} else if(i==3) { 
-			length = 0.6666f;
+			length = 0.75f;
 		} else if(i==2) { 
-			length = 1f;
+			length = 0.5f;
 		} else if(i==1) {
-			length = 2f;
+			length = 0.25f;
 		}
 		
 		

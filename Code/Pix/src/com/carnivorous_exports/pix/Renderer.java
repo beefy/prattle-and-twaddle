@@ -172,25 +172,30 @@ public class Renderer implements GLEventListener,
 	 * 
 	 * @return
 	 */
-	public double[] getPosition() {
+	public double[] getPosition(GL2 gl) {
 		
-		int[] myViewport = new int[4];				//viewport
-	    double[] myProjMatrix = new double[16];		//projection view matrix
-	    double[] myMVMatrix = new double [16];		//model view matrix
-		
-		double[] p = new double[3];
-		int x = mouseXGlobal;
-		int y = mouseYGlobal;
+		int viewport[] = new int[4];
+		double modelview[] = new double[16];
+		double projection[] = new double[16];
+		float winX, winY, winZ;
+		float posX, posY, posZ;
+		double wcoord[] = new double[4];
 
-		GLU glu = new GLU();
-		y = window.getHeight() - y - 1;
+		gl.glGetDoublev( GL2.GL_MODELVIEW_MATRIX, modelview, 0 );
+		gl.glGetDoublev( GL2.GL_PROJECTION_MATRIX, projection, 0 );
+		gl.glGetIntegerv( GL2.GL_VIEWPORT, viewport, 0 );
 
-		glu.gluUnProject((double) x, (double) y, 0.0,
-				myMVMatrix, 0, myProjMatrix, 0, myViewport, 0, p, 0);
+		winX = (float) mouseX;
+		winY = (float)viewport[3] - (float) mouseY;
 
-		System.out.println("(" + mouseXGlobal + ", " + mouseYGlobal + ")");
-		
-		return p;
+		float[] depth = new float[1];
+		// gl.glReadPixels(winX, winY, 1, 1, gl.GL_DEPTH_COMPONENT, GL2.GL_FLOAT, depth);
+
+		glu.gluUnProject( winX, winY, 0.0, modelview, 0, projection, 0, viewport, 0, wcoord, 0);
+
+		//System.out.println("x: " + wcoord[0] +"y: "+wcoord[1]+" worked? "+test);
+		//System.out.println(modelview[0]);
+		return wcoord;
 	}
 
 	// ------ Implement methods declared in GLEventListener ------
@@ -328,6 +333,8 @@ public class Renderer implements GLEventListener,
 
 		gl.glTranslatef(movex, movey, movez);
 
+		double[] mouse3Dpos = getPosition(gl);
+		
 		// --------- Rendering Code
 		terrain.drawScene(gl, selectedObject);
 		// terrain.testLightCube(gl, cubeList, lightPos);
@@ -341,13 +348,15 @@ public class Renderer implements GLEventListener,
 		
 
 		gl.glPopMatrix();
-
+		
 		//print mouse position
-		double[] mouse3Dpos = getPosition();
+		
+		//double[] mouse3Dpos = getPosition(gl);
 		for(int i = 0; i < 3; i++) {
 			System.out.print(mouse3Dpos[i] + ",  ");
 		}
 		System.out.println();
+		
 
 		checkMoving();
 
