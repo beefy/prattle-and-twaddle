@@ -11,6 +11,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.Vector;
 
 import javax.media.nativewindow.CapabilitiesChooser;
 import javax.media.nativewindow.CapabilitiesImmutable;
@@ -47,6 +48,7 @@ import com.jogamp.newt.event.WindowListener;
 import com.jogamp.newt.event.awt.AWTKeyAdapter;
 import com.jogamp.newt.event.awt.AWTMouseAdapter;
 import com.jogamp.newt.opengl.GLWindow;
+import com.jogamp.opengl.math.VectorUtil;
 import com.jogamp.opengl.util.Animator;
 
 import static javax.media.opengl.GL.*; // GL constants
@@ -179,7 +181,8 @@ public class Renderer implements GLEventListener,
 		double projection[] = new double[16];
 		float winX, winY, winZ;
 		float posX, posY, posZ;
-		double wcoord[] = new double[4];
+		double nearArray[] = new double[4];
+		double farArray[] = new double[4];
 
 		gl.glGetDoublev( GL2.GL_MODELVIEW_MATRIX, modelview, 0 );
 		gl.glGetDoublev( GL2.GL_PROJECTION_MATRIX, projection, 0 );
@@ -191,11 +194,24 @@ public class Renderer implements GLEventListener,
 		float[] depth = new float[1];
 		// gl.glReadPixels(winX, winY, 1, 1, gl.GL_DEPTH_COMPONENT, GL2.GL_FLOAT, depth);
 
-		glu.gluUnProject( winX, winY, 0.0, modelview, 0, projection, 0, viewport, 0, wcoord, 0);
+		glu.gluUnProject( winX, winY, 0.0, modelview, 0, projection, 0, viewport, 0, nearArray, 0);
+		glu.gluUnProject( winX, winY, 0.0, modelview, 0, projection, 0, viewport, 0, farArray, 0);
 
-		//System.out.println("x: " + wcoord[0] +"y: "+wcoord[1]+" worked? "+test);
-		//System.out.println(modelview[0]);
-		return wcoord;
+		//turn the double[]s into points
+		
+		/*
+		gl.glBegin(GL2.GL_POINT); 
+		gl.glVertex3d(nearArray[0], nearArray[1], nearArray[2]);
+		gl.glEnd();
+		
+		gl.glBegin(GL2.GL_POINT); 
+		gl.glVertex3d(farArray[0], farArray[1], farArray[2]);
+		gl.glEnd();
+		*/
+		
+		
+		return nearArray;
+		
 	}
 
 	// ------ Implement methods declared in GLEventListener ------
@@ -330,9 +346,9 @@ public class Renderer implements GLEventListener,
 		gl.glRotatef(-view_rotx, 1.0f, 0.0f, 0.0f);
 		gl.glRotatef(-view_roty, 0.0f, 1.0f, 0.0f);
 		gl.glRotatef(-view_rotz, 0.0f, 0.0f, 1.0f);
-
+		
 		gl.glTranslatef(movex, movey, movez);
-
+		
 		double[] mouse3Dpos = getPosition(gl);
 		
 		// --------- Rendering Code
@@ -350,13 +366,13 @@ public class Renderer implements GLEventListener,
 		gl.glPopMatrix();
 		
 		//print mouse position
-		
-		//double[] mouse3Dpos = getPosition(gl);
 		for(int i = 0; i < 3; i++) {
 			System.out.print(mouse3Dpos[i] + ",  ");
 		}
 		System.out.println();
 		
+		//draw sphere where mouse is (in 3D space)
+		terrain.drawSphere(mouse3Dpos[0], mouse3Dpos[1], mouse3Dpos[2]);
 
 		checkMoving();
 

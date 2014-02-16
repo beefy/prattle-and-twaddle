@@ -247,6 +247,23 @@ public class Scene {
 		
 		gl.glPopMatrix();
 	}
+	
+	public void drawSphere(double x, double y, double z) {
+		
+		gl.glPushMatrix();
+		
+		gl.glTranslated(x, y, z-4);
+		
+		//set material to make it colorful
+		
+		//draw the sphere
+		GLU glu = new GLU();
+		GLUquadric quad = glu.gluNewQuadric();
+		glu.gluSphere(quad, 0.5, 10, 15);
+		glu.gluDeleteQuadric(quad);
+		
+		gl.glPopMatrix();
+	}
 
 	public void buildScene(GLAutoDrawable drawable, Renderer renderer,
 			GL2 gl, int[] displayList) {
