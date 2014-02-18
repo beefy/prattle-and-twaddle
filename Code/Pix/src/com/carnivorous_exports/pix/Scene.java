@@ -252,9 +252,14 @@ public class Scene {
 		
 		gl.glPushMatrix();
 		
-		gl.glTranslated(x, y, z-4);
+		gl.glTranslated(x, y, z);
 		
-		//set material to make it colorful
+		// Set material properties.
+        float[] rgba = {0f, 1f, 1f};	//light blue
+        gl.glMaterialfv(GL.GL_FRONT, GL_AMBIENT, rgba, 0);
+        gl.glMaterialfv(GL.GL_FRONT, GLLightingFunc.GL_DIFFUSE, rgba, 0);
+        gl.glMaterialfv(GL.GL_FRONT, GL_SPECULAR, rgba, 0);
+        gl.glMaterialf(GL.GL_FRONT, GL_SHININESS, 0.5f);
 		
 		//draw the sphere
 		GLU glu = new GLU();

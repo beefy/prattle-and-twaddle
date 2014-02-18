@@ -29,7 +29,6 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
-import javax.media.opengl.GLPbuffer;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.GLRunnable;
 import javax.media.opengl.awt.GLCanvas;
@@ -69,6 +68,7 @@ public class Renderer implements GLEventListener,
 	private GLU glu; // for the GL Utility
 	private int[] cubeList; // display list for cube
 	private Scene terrain = new Scene();
+	private Audio walking = new Audio();
 	private boolean initiated = false;
 	GLAutoDrawable drawable;
 
@@ -296,6 +296,7 @@ public class Renderer implements GLEventListener,
 			terrain.buildScene(drawable, this, gl, cubeList);
 		// terrain.testLightCube(gl, cubeList, lightPos);
 		initiated = true;
+		
 	}
 
 	/**
@@ -372,7 +373,8 @@ public class Renderer implements GLEventListener,
 		System.out.println();
 		
 		//draw sphere where mouse is (in 3D space)
-		terrain.drawSphere(mouse3Dpos[0], mouse3Dpos[1], mouse3Dpos[2]);
+		terrain.drawSphere(mouse3Dpos[0] + movex, mouse3Dpos[1] + movey, 
+				mouse3Dpos[2] + movez - 4);
 
 		checkMoving();
 
@@ -580,7 +582,7 @@ public class Renderer implements GLEventListener,
 
 	@Override
 	public void keyPressed(com.jogamp.newt.event.KeyEvent e) {
-
+		
 		// press esc to quit
 		int keyCode = e.getKeyCode();
 		switch (keyCode) {
@@ -628,10 +630,12 @@ public class Renderer implements GLEventListener,
 
 	@Override
 	public void keyReleased(com.jogamp.newt.event.KeyEvent e) {
-
+		
 		if (e.isAutoRepeat())
 			return;
 
+		walking.play();
+		
 		int kc = e.getKeyCode();
 		if (kc == com.jogamp.newt.event.KeyEvent.VK_LEFT
 				|| kc == com.jogamp.newt.event.KeyEvent.VK_A)
