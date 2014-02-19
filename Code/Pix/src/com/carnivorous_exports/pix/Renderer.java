@@ -68,7 +68,7 @@ public class Renderer implements GLEventListener,
 	private GLU glu; // for the GL Utility
 	private int[] cubeList; // display list for cube
 	private Scene terrain = new Scene();
-	private Audio walking = new Audio();
+	private Audio walking = new Audio("src/audio/Walking1.wav", true, new float[3], 1.0f);
 	private boolean initiated = false;
 	GLAutoDrawable drawable;
 
@@ -132,6 +132,7 @@ public class Renderer implements GLEventListener,
 	float selectedObject;
 
 	public Renderer(GLWindow window) {
+		
 		this.window = window;
 		window.addGLEventListener(this);
 		window.addMouseListener(this);
@@ -222,7 +223,7 @@ public class Renderer implements GLEventListener,
 	 */
 	@Override
 	public void init(GLAutoDrawable drawable) {
-
+		
 		drawable.getAnimator().setUpdateFPSFrames(3, null); // 3
 		drawable.setAutoSwapBufferMode(false);
 
@@ -453,6 +454,14 @@ public class Renderer implements GLEventListener,
 		if (!flyDownPressed) {
 			flyDownMove = false;
 		}
+		
+		
+		//for walking audio
+		if(!forwardMove && !strifeMove) {
+			walking.stop();
+		} else if((forwardMove || strifeMove) && !walking.isPlaying) {
+			walking.play();
+		}
 	}
 
 	// class Cubes2MouseAdapter extends MouseAdapter implements MouseListener {
@@ -633,8 +642,6 @@ public class Renderer implements GLEventListener,
 		
 		if (e.isAutoRepeat())
 			return;
-
-		walking.play();
 		
 		int kc = e.getKeyCode();
 		if (kc == com.jogamp.newt.event.KeyEvent.VK_LEFT
