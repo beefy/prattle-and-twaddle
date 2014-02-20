@@ -29,7 +29,7 @@ public class Main extends Frame {
 	private static final int CANVAS_WIDTH = 640; // width of the drawable
 	private static final int CANVAS_HEIGHT = 480; // height of the drawable
 	private static final int FPS = 60; // animator's target frames per second
-	private boolean fullScreen = false;
+	private boolean fullScreen = true;
 	private boolean cursorVisible = false;
 	
 	/** Constructor to setup the top-level container and animator */

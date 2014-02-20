@@ -68,13 +68,20 @@ public class Renderer implements GLEventListener,
 	private GLU glu; // for the GL Utility
 	private int[] cubeList; // display list for cube
 	private Scene terrain = new Scene();
-	private Audio walking = new Audio("src/audio/Walking1.wav", true, new float[3], 1.0f);
 	private boolean initiated = false;
 	GLAutoDrawable drawable;
 
 	// GLPbuffer is deprecated
 	// private GLPbuffer glpBuffer;
-
+	
+	private Audio walking1 = new Audio(true, "SoundEffects/Actions/Eating.wav", false, new float[3], 1.0f, 500);
+	private Audio walking2 = new Audio(false, "SoundEffects/Fighting/ArrowHit.wav", false, new float[3], 1.0f, 500);
+	private Audio walking3 = new Audio(false, "SoundEffects/Fighting/SwordClash1.wav", false, new float[3], 1.0f, 500);
+	private Audio walking4 = new Audio(false, "SoundEffects/Groups/Humanoids/Walking4.wav", false, new float[3], 1.0f, 500);
+	private Audio[] walking = {walking1, walking2, walking3, walking4};
+	int walkNum = 0;
+	
+	
 	// Prepare light parameters.
 	float SHINE_ALL_DIRECTIONS = 1;
 	float[] lightPos = { 20, 30, 20, SHINE_ALL_DIRECTIONS };
@@ -377,6 +384,7 @@ public class Renderer implements GLEventListener,
 		terrain.drawSphere(mouse3Dpos[0] + movex, mouse3Dpos[1] + movey, 
 				mouse3Dpos[2] + movez - 4);
 
+		checkKeysPressed();
 		checkMoving();
 
 		oldRotX = view_rotx;
@@ -455,12 +463,13 @@ public class Renderer implements GLEventListener,
 			flyDownMove = false;
 		}
 		
-		
 		//for walking audio
 		if(!forwardMove && !strifeMove) {
-			walking.stop();
-		} else if((forwardMove || strifeMove) && !walking.isPlaying) {
-			walking.play();
+			walking[walkNum].stop();
+		} else if((forwardMove || strifeMove) && !walking[walkNum].isPlaying) {
+			walkNum =(int)(Math.random()*4);
+			walking[walkNum].play();
+			System.out.println("									CHANGED TO " + walkNum);		
 		}
 	}
 
@@ -632,9 +641,6 @@ public class Renderer implements GLEventListener,
 		if (keyCode == com.jogamp.newt.event.KeyEvent.VK_CONTROL) {
 			flyDownPressed = true;
 		}
-
-		checkKeysPressed();
-
 	}
 
 	@Override
@@ -663,8 +669,5 @@ public class Renderer implements GLEventListener,
 		} else if (kc == com.jogamp.newt.event.KeyEvent.VK_CONTROL) {
 			flyDownPressed = false;
 		}
-
-		checkKeysPressed();
-
 	}
 }
