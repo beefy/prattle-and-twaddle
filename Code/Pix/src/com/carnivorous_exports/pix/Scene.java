@@ -284,7 +284,7 @@ public class Scene {
 		}
 
 		// terrainBuilt = true;
-		System.out.println("terrainBuild");
+		System.out.println("terrain built");
 	}
 
 	public void drawScene(GL2 gl, float selectedObject) {
