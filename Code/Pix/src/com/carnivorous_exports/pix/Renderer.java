@@ -74,11 +74,7 @@ public class Renderer implements GLEventListener,
 	// GLPbuffer is deprecated
 	// private GLPbuffer glpBuffer;
 	
-	private Audio walking1 = new Audio(true, "SoundEffects/Actions/Eating.wav", false, new float[3], 1.0f, 500);
-	private Audio walking2 = new Audio(false, "SoundEffects/Fighting/ArrowHit.wav", false, new float[3], 1.0f, 500);
-	private Audio walking3 = new Audio(false, "SoundEffects/Fighting/SwordClash1.wav", false, new float[3], 1.0f, 500);
-	private Audio walking4 = new Audio(false, "SoundEffects/Groups/Humanoids/Walking4.wav", false, new float[3], 1.0f, 500);
-	private Audio[] walking = {walking1, walking2, walking3, walking4};
+	public static Audio audio = new Audio();
 	int walkNum = 0;
 	
 	
@@ -222,6 +218,14 @@ public class Renderer implements GLEventListener,
 		
 	}
 
+	public static void initAudio() {
+		
+		audio.newFile(1, "SoundEffects/Actions/Eating.wav", false, new float[3], 1.0f, 2000);
+		audio.newFile(2, "SoundEffects/Fighting/ArrowHit.wav", false, new float[3], 1.0f, 500);
+		audio.newFile(3, "SoundEffects/Fighting/SwordClash1.wav", false, new float[3], 1.0f, 500);
+		audio.newFile(4, "SoundEffects/Groups/Humanoids/Walking4.wav", false, new float[3], 1.0f, 500);
+	}
+	
 	// ------ Implement methods declared in GLEventListener ------
 
 	/**
@@ -230,6 +234,8 @@ public class Renderer implements GLEventListener,
 	 */
 	@Override
 	public void init(GLAutoDrawable drawable) {
+		
+		initAudio();
 		
 		drawable.getAnimator().setUpdateFPSFrames(3, null); // 3
 		drawable.setAutoSwapBufferMode(false);
@@ -465,10 +471,10 @@ public class Renderer implements GLEventListener,
 		
 		//for walking audio
 		if(!forwardMove && !strifeMove) {
-			walking[walkNum].stop();
-		} else if((forwardMove || strifeMove) && !walking[walkNum].isPlaying) {
+			audio.stop(walkNum);
+		} else if((forwardMove || strifeMove) && !audio.isPlaying(walkNum)) {
 			walkNum =(int)(Math.random()*4);
-			walking[walkNum].play();
+			audio.play(walkNum);
 			System.out.println("									CHANGED TO " + walkNum);		
 		}
 	}
