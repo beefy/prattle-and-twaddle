@@ -220,9 +220,9 @@ public class Renderer implements GLEventListener,
 
 	public static void initAudio() {
 		
-		audio.newFile(1, "SoundEffects/Actions/Eating.wav", false, new float[3], 1.0f, 2000);
-		audio.newFile(2, "SoundEffects/Fighting/ArrowHit.wav", false, new float[3], 1.0f, 500);
-		audio.newFile(3, "SoundEffects/Fighting/SwordClash1.wav", false, new float[3], 1.0f, 500);
+		audio.newFile(1, "SoundEffects/Groups/Humanoids/Walking1.wav", false, new float[3], 1.0f, 500);
+		audio.newFile(2, "SoundEffects/Groups/Humanoids/Walking2.wav", false, new float[3], 1.0f, 500);
+		audio.newFile(3, "SoundEffects/Groups/Humanoids/Walking3.wav", false, new float[3], 1.0f, 500);
 		audio.newFile(4, "SoundEffects/Groups/Humanoids/Walking4.wav", false, new float[3], 1.0f, 500);
 	}
 	
