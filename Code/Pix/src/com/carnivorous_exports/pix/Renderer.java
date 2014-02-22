@@ -475,7 +475,6 @@ public class Renderer implements GLEventListener,
 		} else if((forwardMove || strifeMove) && !audio.isPlaying(walkNum)) {
 			walkNum =(int)(Math.random()*4);
 			audio.play(walkNum);
-			System.out.println("									CHANGED TO " + walkNum);		
 		}
 	}
 

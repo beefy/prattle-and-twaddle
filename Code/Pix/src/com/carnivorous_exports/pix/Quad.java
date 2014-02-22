@@ -118,36 +118,45 @@ public class Quad {
 
 	public void refreshQuad(GL2 gl, float selectedObject) {
 
-		for (int i = 4; i >= 1; i--) { // loop for each box size
+		for (float i = 4; i >= 1; i--) { // loop for each box size
 			for (int x = 0; x < topX; x++) { // x coords
 				for (int y = 0; y < topY; y++) { // y coords
 					for (int z = 0; z < topZ; z++) { // z coords
 
 						// if a box is placed there
-						if (placement[i - 1][x][y][z]) {
+						if (placement[(int)(i - 1)][x][y][z]) {
 
 							// draw the box
 							gl.glPushMatrix();
 
 							gl.glScalef(0.25f * i, 0.25f * i, 0.25f * i);
 
+							
+							float q = 2/i;				//q = i*(1/(i*(i/2)));
+							gl.glTranslatef((float)(q*(x+posX) - (q*(i-4)*-0.5)), 
+									(float)(q*(y+posY) - (q*(i-4)*-0.5)), 
+									(float)(q*(z+posZ) - (q*(i-4)*-0.5)));
+							
+							/*
 							// move to the coordinate
-							if (i == 4) {
-								gl.glTranslatef(.5f * (x + posX),
+							if (i == 4) {															
+								gl.glTranslatef(.5f * (x + posX),					
 										.5f * (y + posY), .5f * (z + posZ));
-							} else if (i == 3) {
-								gl.glTranslatef(0.6666f * (x + posX) - 0.3333f,
+							} else if (i == 3) {													
+								gl.glTranslatef(0.6666f * (x + posX) - 0.3333f,		
 										0.6666f * (y + posY) - 0.3333f,
 										0.6666f * (z + posZ) - 0.3333f);
-							} else if (i == 2) {
-								gl.glTranslatef(1f * (x + posX) - 1f,
+							} else if (i == 2) {													
+								gl.glTranslatef(1f * (x + posX) - 1f,				
 										1f * (y + posY) - 1f,
 										1f * (z + posZ) - 1f);
-							} else if (i == 1) {
-								gl.glTranslatef(2f * (x + posX) - 3f,
+							} else if (i == 1) {													
+								gl.glTranslatef(2f * (x + posX) - 3f,				
 										2f * (y + posY) - 3f,
 										2f * (z + posZ) - 3f);
 							}
+							*/
+							
 
 							// draw the cube
 							if(this.hashCode() != selectedObject) {
@@ -159,7 +168,7 @@ public class Quad {
 							}
 							
 							gl.glPopMatrix();
-							checkCollision(posX, posY, posZ, i);
+							//checkCollision(posX, posY, posZ, (int)(i));
 						}
 					}
 				}
@@ -178,9 +187,9 @@ public class Quad {
 					&& (.5f * (x + posY) > 0 && .5f * (x + posY) + length < 0)
 					&& (.5f * (x + posZ) > 0 && .5f * (x + posZ) + length < 0)) { 
 						collided = true;
-						System.out.println("\n\n\n\ncollsion coord: (" + .5f * (x + posX) + ", " +
-								.5f * (x + posY) + ", " + .5f * (x + posZ) +
-								")\n\n\n\n");
+						//System.out.println("\n\n\n\ncollsion coord: (" + .5f * (x + posX) + ", " +
+						//		.5f * (x + posY) + ", " + .5f * (x + posZ) +
+						//		")\n\n\n\n");
 			}
 			
 			//System.out.println("				" + .5f * (x + posX));
