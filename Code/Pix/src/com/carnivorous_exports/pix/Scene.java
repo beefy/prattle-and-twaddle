@@ -214,6 +214,7 @@ public class Scene {
 		}
 	}
 	
+	//after this works, maybe set it so it only names things when mode = GL.GL_SELECT
 	public void testLightCube(GL2 gl, int[] displayList, float[] lightPos, int mode) {
 		
 		
@@ -222,6 +223,13 @@ public class Scene {
 		//if (mode == GL2.GL_SELECT) 
 		//	gl.glPushName(1);
 		//cube
+		final int EVERYTHING = 0;
+		final int CUBE = 1;
+		final int SPHERE = 2;
+		
+		gl.glLoadName(EVERYTHING);
+		
+		gl.glPushName(CUBE);
 		gl.glPushMatrix();
 		
 		//gl.glTranslatef(lightPos[0], lightPos[1], lightPos[2]);
@@ -232,16 +240,16 @@ public class Scene {
 		//tempRot++;
 		
 		// draw the cube
-		if(mode == GL2.GL_SELECT) gl.glPushName(1);
 		gl.glCallList(displayList[0]);
-		if(mode == GL2.GL_SELECT) gl.glPushName(1);
 		
 		gl.glPopMatrix();
+		gl.glPopName();
 		
 		//if (mode == GL2.GL_SELECT) 
 			//gl.glPopName();
 		
 		//sphere
+		gl.glPushName(SPHERE);
 		gl.glPushMatrix();
 		
 		gl.glTranslatef(-2f, 0f, -4f);
@@ -255,6 +263,7 @@ public class Scene {
 		glu.gluDeleteQuadric(quad);
 		
 		gl.glPopMatrix();
+		gl.glPopName();
 	}
 	
 	public void drawSphere(double x, double y, double z) {
