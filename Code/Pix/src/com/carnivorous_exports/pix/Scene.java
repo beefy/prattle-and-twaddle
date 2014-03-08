@@ -214,9 +214,13 @@ public class Scene {
 		}
 	}
 	
-	public void testLightCube(GL2 gl, int[] displayList, float[] lightPos) {
+	public void testLightCube(GL2 gl, int[] displayList, float[] lightPos, int mode) {
 		
 		
+		//if(mode == GL2.GL_SELECT) gl.glRenderMode(GL2.GL_RENDER);
+		//if (mode == GL2.GL_SELECT) gl.glLoadName(0);
+		//if (mode == GL2.GL_SELECT) 
+		//	gl.glPushName(1);
 		//cube
 		gl.glPushMatrix();
 		
@@ -228,9 +232,14 @@ public class Scene {
 		//tempRot++;
 		
 		// draw the cube
+		if(mode == GL2.GL_SELECT) gl.glPushName(1);
 		gl.glCallList(displayList[0]);
+		if(mode == GL2.GL_SELECT) gl.glPushName(1);
 		
 		gl.glPopMatrix();
+		
+		//if (mode == GL2.GL_SELECT) 
+			//gl.glPopName();
 		
 		//sphere
 		gl.glPushMatrix();
@@ -287,8 +296,8 @@ public class Scene {
 		System.out.println("terrain built");
 	}
 
-	public void drawScene(GL2 gl, float selectedObject) {
-		this.selectedObject = selectedObject;
+	public void drawScene(GL2 gl) {
+		//this.selectedObject = selectedObject;
 		for (int x = 0; x < xLength; x++) {
 			for (int y = 0; y < yLength; y++) {
 				coords[x][y].refreshQuad(gl, selectedObject);
