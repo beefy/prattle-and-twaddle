@@ -133,6 +133,7 @@ public class Renderer implements GLEventListener,
 	float moveSpeed = 1f;
 
 	float selectedObject;
+	boolean pick = false;
 
 	public Renderer(GLWindow window) {
 		
@@ -174,19 +175,20 @@ public class Renderer implements GLEventListener,
 	}
 
 	/**
-	 * Get the current mouse position in world coordinates.
-	 * 
+	 * Get the current mouse position in world coordinates
+	 * using gluUnProject
+	 * d is the distance away from the screen
+	 * d == 0.0 is at the screen, d == 1.0 is very far away from the screen
 	 * @return
 	 */
-	public double[] getPosition(GL2 gl) {
+	public double[] getPositionUnProject(GL2 gl, float d) {
 		
 		int viewport[] = new int[4];
 		double modelview[] = new double[16];
 		double projection[] = new double[16];
 		float winX, winY, winZ;
 		float posX, posY, posZ;
-		double nearArray[] = new double[4];
-		double farArray[] = new double[4];
+		double mouse3DPos[] = new double[4];
 
 		gl.glGetDoublev( GL2.GL_MODELVIEW_MATRIX, modelview, 0 );
 		gl.glGetDoublev( GL2.GL_PROJECTION_MATRIX, projection, 0 );
@@ -198,25 +200,128 @@ public class Renderer implements GLEventListener,
 		float[] depth = new float[1];
 		// gl.glReadPixels(winX, winY, 1, 1, gl.GL_DEPTH_COMPONENT, GL2.GL_FLOAT, depth);
 
-		glu.gluUnProject( winX, winY, 0.0, modelview, 0, projection, 0, viewport, 0, nearArray, 0);
-		glu.gluUnProject( winX, winY, 0.0, modelview, 0, projection, 0, viewport, 0, farArray, 0);
-
-		//turn the double[]s into points
+		glu.gluUnProject( winX, winY, d, modelview, 0, projection, 0, viewport, 0, mouse3DPos, 0);
 		
-		/*
-		gl.glBegin(GL2.GL_POINT); 
-		gl.glVertex3d(nearArray[0], nearArray[1], nearArray[2]);
-		gl.glEnd();
-		
-		gl.glBegin(GL2.GL_POINT); 
-		gl.glVertex3d(farArray[0], farArray[1], farArray[2]);
-		gl.glEnd();
-		*/
-		
-		
-		return nearArray;
-		
+		return mouse3DPos;
 	}
+	
+	/**
+	 * Get the current mouse position in world coordinates
+	 * using gluPickMatrix
+	 * d is the distance away from the screen
+	 * d == 0.0 is at the screen, d == 1.0 is very far away from the screen
+	 * @return
+	 */
+	public double[] getPositionPickMatrix(GL2 gl) {
+		int buffsize = 512;
+        double x = (double) mouseXGlobal;
+        double y = (double) mouseYGlobal;
+        
+        System.out.println("mouse at (" + mouseXGlobal + "," + mouseYGlobal + ")");
+        		
+        		
+        int[] viewport = new int[4];
+        IntBuffer selectBuffer = Buffers.newDirectIntBuffer(buffsize);
+        int hits = 0;
+        
+        gl.glGetIntegerv(GL2.GL_VIEWPORT, viewport, 0);
+        gl.glSelectBuffer(buffsize, selectBuffer);
+        gl.glRenderMode(GL2.GL_SELECT);
+        
+        gl.glInitNames();
+        //gl.glPushName(0);
+      //  gl.glMatrixMode(GL2.GL_PROJECTION);
+        gl.glPushMatrix();
+        //gl.glLoadIdentity();
+        
+        
+        
+        /* create 5x5 pixel picking region near cursor location */
+        
+        glu.gluPickMatrix((double) x,
+            (double) (viewport[3] - y),// 
+            5.0, 5.0, viewport, 0);
+        
+        
+        glu.gluOrtho2D(0.0d, 1.0d, 0.0d, 1.0d);
+        
+        
+        //gl.glPushMatrix();
+		
+		// rotate around wherever the user points the mouse
+		gl.glRotatef(-view_rotx, 1.0f, 0.0f, 0.0f);
+		gl.glRotatef(-view_roty, 0.0f, 1.0f, 0.0f);
+		gl.glRotatef(-view_rotz, 0.0f, 0.0f, 1.0f);
+		
+		gl.glTranslatef(movex, movey, movez);
+		
+		//terrain.drawScene(gl);
+		terrain.testLightCube(gl, cubeList, lightPos, GL2.GL_RENDER);
+		
+		
+		// --------- Rendering Code
+		//terrain.drawScene(gl, selectedObject);
+		//terrain.drawScene(gl);
+		// terrain.testLightCube(gl, cubeList, lightPos);
+
+		gl.glLightfv(GL_LIGHT1, GL_AMBIENT, lightColorAmbient, 0);
+		gl.glLightfv(GL_LIGHT1, GL_DIFFUSE, lightDif, 0);
+		gl.glLightfv(GL_LIGHT1, GL_SPECULAR, lightColorSpecular, 0);
+		gl.glLightfv(GL_LIGHT1, GL_POSITION, lightPos, 0);
+
+		// terrain.testLight(gl, lightPos);
+		
+
+		//gl.glPopMatrix();
+        
+        
+        //terrain.drawScene(gl);
+        //gl.glLoadName(0);
+        //terrain.testLightCube(gl, cubeList, lightPos, GL2.GL_SELECT);
+        gl.glMatrixMode(GL2.GL_MODELVIEW);
+        gl.glPopMatrix();
+        gl.glFlush();
+        
+        
+        hits = gl.glRenderMode(GL2.GL_RENDER);
+        processHits(hits, selectBuffer);
+        
+        pick = false;
+		return new double[4];
+	}
+	
+	public void processHits(int hits, IntBuffer buffer)
+    {
+      System.out.println("---------------------------------");
+      System.out.println(" HITS: " + hits);
+      int offset = 0;
+      int names;
+      float z1, z2;
+      for (int i=0;i<hits;i++)
+        {
+          System.out.println("- - - - - - - - - - - -");
+          System.out.println(" hit: " + (i + 1));
+          names = buffer.get(offset); offset++;
+          z1 = (float) (buffer.get(offset)& 0xffffffffL) / 0x7fffffff; offset++;
+          z2 = (float) (buffer.get(offset)& 0xffffffffL) / 0x7fffffff; offset++;
+          System.out.println(" number of names: " + names);
+          System.out.println(" z1: " + z1);
+          System.out.println(" z2: " + z2);
+          System.out.println(" names: ");
+
+          for (int j=0;j<names;j++)
+            {
+              System.out.print("       " + buffer.get(offset)); 
+              if (j==(names-1))
+                System.out.println("<-");
+              else
+                System.out.println();
+              offset++;
+            }
+          System.out.println("- - - - - - - - - - - -");
+        }
+      System.out.println("---------------------------------");
+    }
 
 	public static void initAudio() {
 		
@@ -285,6 +390,10 @@ public class Renderer implements GLEventListener,
 		gl.glEnable(GL_COLOR_MATERIAL);
 		gl.glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 		gl.glEnable(GL.GL_TEXTURE_2D);
+		
+		//set the drawing mode
+		gl.glMatrixMode(GL2.GL_MODELVIEW);
+		gl.glRenderMode(GL2.GL_RENDER);
 
 		// We want the best perspective correction to be done
 		gl.glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
@@ -307,10 +416,9 @@ public class Renderer implements GLEventListener,
 				"terrainTextures/White Water Texture.jpeg", ".jpeg");
 
 		if (!initiated)
-			terrain.buildScene(drawable, this, gl, cubeList);
-		// terrain.testLightCube(gl, cubeList, lightPos);
+			//terrain.buildScene(drawable, this, gl, cubeList);
+			terrain.testLightCube(gl, cubeList, lightPos, GL2.GL_RENDER);
 		initiated = true;
-		
 	}
 
 	/**
@@ -355,6 +463,12 @@ public class Renderer implements GLEventListener,
 																// and depth
 																// buffers
 
+		double[] mouse3Dpos;
+		if(pick) {
+			mouse3Dpos = getPositionPickMatrix(gl);
+			return;
+		}
+		
 		gl.glPushMatrix();
 		
 		// rotate around wherever the user points the mouse
@@ -364,10 +478,13 @@ public class Renderer implements GLEventListener,
 		
 		gl.glTranslatef(movex, movey, movez);
 		
-		double[] mouse3Dpos = getPosition(gl);
+		//terrain.drawScene(gl);
+		terrain.testLightCube(gl, cubeList, lightPos, GL2.GL_RENDER);
+		
 		
 		// --------- Rendering Code
-		terrain.drawScene(gl, selectedObject);
+		//terrain.drawScene(gl, selectedObject);
+		//terrain.drawScene(gl);
 		// terrain.testLightCube(gl, cubeList, lightPos);
 
 		gl.glLightfv(GL_LIGHT1, GL_AMBIENT, lightColorAmbient, 0);
@@ -381,14 +498,16 @@ public class Renderer implements GLEventListener,
 		gl.glPopMatrix();
 		
 		//print mouse position
+		/*
 		for(int i = 0; i < 3; i++) {
 			System.out.print(mouse3Dpos[i] + ",  ");
 		}
 		System.out.println();
+		*/
 		
 		//draw sphere where mouse is (in 3D space)
-		terrain.drawSphere(mouse3Dpos[0] + movex, mouse3Dpos[1] + movey, 
-				mouse3Dpos[2] + movez - 4);
+		//terrain.drawSphere(mouse3Dpos[0] + movex, mouse3Dpos[1] + movey, 
+		//		mouse3Dpos[2] + movez - 4);
 
 		checkKeysPressed();
 		checkMoving();
@@ -400,7 +519,7 @@ public class Renderer implements GLEventListener,
 		long drawNanos = System.nanoTime() - startNanos;
 		// System.out.println("drawn in " + drawNanos);
 
-		System.out.println(drawable.getAnimator().getLastFPS());
+		//System.out.println(drawable.getAnimator().getLastFPS());
 
 		drawable.swapBuffers();
 		gl.glFlush();
@@ -478,41 +597,9 @@ public class Renderer implements GLEventListener,
 		}
 	}
 
-	// class Cubes2MouseAdapter extends MouseAdapter implements MouseListener {
-
-	public void mouseClicked(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	public void mouseEntered(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	public void mouseExited(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	public void mousePressed(MouseEvent e) {
-		// prevMouseX = e.getX();
-		// prevMouseY = e.getY();
-		// if ((e.getModifiers() & e.BUTTON3_MASK) != 0) {
-		// mouseRButtonDown = true;
-		// }
-	}
-
-	public void mouseReleased(MouseEvent e) {
-		// if ((e.getModifiers() & e.BUTTON3_MASK) != 0) {
-		// mouseRButtonDown = false;
-		// }
-	}
-
 	@Override
-	public void mouseClicked(com.jogamp.newt.event.MouseEvent arg0) {
-		// TODO Auto-generated method stub
-
+	public void mouseClicked(com.jogamp.newt.event.MouseEvent e) {
+		pick = true;
 	}
 
 	@Override
