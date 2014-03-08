@@ -299,28 +299,6 @@ public class Renderer implements GLEventListener,
           System.out.println("- - - - - - - - - - - -");
         }
       System.out.println("---------------------------------");
-      
-		
-		/*
-		 int name = -1;
-	        int i = 0, nrOfHits = 0;
-	        while(nrOfHits < hits && i < 512) {		//512 is the buffer size
-	            if(buffer.get(i) > 0){
-	                name = buffer.get(i);
-	                nrOfHits++;
-	            }
-	            i++;
-	        }
-	        
-	        if (name < 0) {
-	            System.out.printf("You didn't click a snowman!");
-	        } else {
-	            System.out.printf("You picked snowman  ");
-	            System.out.printf("%d ",  name);
-	        }
-	        System.out.printf("\n\n\n");
-	        
-	        */
     }
 	
 	public void draw(GL2 gl) {
@@ -492,31 +470,15 @@ public class Renderer implements GLEventListener,
 		gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear color
 																// and depth
 																// buffers
-
-		//double[] mouse3Dpos;
-		//if(pick) {
-		//	mouse3Dpos = getPositionPickMatrix(gl);
-		//	return;
-		//}
 		
-		if (pick) startPicking(gl);
+		if (pick) {
+			startPicking(gl);
+			draw(gl);
+			stopPicking(gl);		
+		}
 		
 		draw(gl);
 		
-		if(pick) stopPicking(gl);
-		
-		//print mouse position
-		/*
-		for(int i = 0; i < 3; i++) {
-			System.out.print(mouse3Dpos[i] + ",  ");
-		}
-		System.out.println();
-		*/
-		
-		//draw sphere where mouse is (in 3D space)
-		//terrain.drawSphere(mouse3Dpos[0] + movex, mouse3Dpos[1] + movey, 
-		//		mouse3Dpos[2] + movez - 4);
-
 		checkKeysPressed();
 		checkMoving();
 
