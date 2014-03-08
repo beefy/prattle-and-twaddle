@@ -74,11 +74,10 @@ public class Renderer implements GLEventListener,
 
 	// GLPbuffer is deprecated
 	// private GLPbuffer glpBuffer;
-	
+
 	public static Audio audio = new Audio();
 	int walkNum = 0;
-	
-	
+
 	// Prepare light parameters.
 	float SHINE_ALL_DIRECTIONS = 1;
 	float[] lightPos = { 20, 30, 20, SHINE_ALL_DIRECTIONS };
@@ -134,15 +133,16 @@ public class Renderer implements GLEventListener,
 	float moveSpeed = 1f;
 
 	float selectedObject;
-	
+
 	// picking variables
-    int BUFSIZE = 1024;
-    IntBuffer selectBuf = Buffers.newDirectIntBuffer(BUFSIZE);
+	int BUFSIZE = 1024;
+	IntBuffer selectBuf = Buffers.newDirectIntBuffer(BUFSIZE);
 	boolean pick = false;
 	public static int hits;
+	int textureNum = 0; // picking test variable
 
 	public Renderer(GLWindow window) {
-		
+
 		this.window = window;
 		window.addGLEventListener(this);
 		window.addMouseListener(this);
@@ -176,19 +176,20 @@ public class Renderer implements GLEventListener,
 			movey -= 0.1;
 		if (flyDownMove)
 			movey += 0.1;
-		
-		if(terrain.collided) System.out.println("COLLISION");
+
+		if (terrain.collided)
+			System.out.println("COLLISION");
 	}
 
 	/**
-	 * Get the current mouse position in world coordinates
-	 * using gluUnProject
-	 * d is the distance away from the screen
-	 * d == 0.0 is at the screen, d == 1.0 is very far away from the screen
+	 * Get the current mouse position in world coordinates using gluUnProject d
+	 * is the distance away from the screen d == 0.0 is at the screen, d == 1.0
+	 * is very far away from the screen
+	 * 
 	 * @return
 	 */
 	public double[] getPositionUnProject(GL2 gl, float d) {
-		
+
 		int viewport[] = new int[4];
 		double modelview[] = new double[16];
 		double projection[] = new double[16];
@@ -196,129 +197,140 @@ public class Renderer implements GLEventListener,
 		float posX, posY, posZ;
 		double mouse3DPos[] = new double[4];
 
-		gl.glGetDoublev( GL2.GL_MODELVIEW_MATRIX, modelview, 0 );
-		gl.glGetDoublev( GL2.GL_PROJECTION_MATRIX, projection, 0 );
-		gl.glGetIntegerv( GL2.GL_VIEWPORT, viewport, 0 );
+		gl.glGetDoublev(GL2.GL_MODELVIEW_MATRIX, modelview, 0);
+		gl.glGetDoublev(GL2.GL_PROJECTION_MATRIX, projection, 0);
+		gl.glGetIntegerv(GL2.GL_VIEWPORT, viewport, 0);
 
 		winX = (float) mouseX;
-		winY = (float)viewport[3] - (float) mouseY;
+		winY = (float) viewport[3] - (float) mouseY;
 
 		float[] depth = new float[1];
-		// gl.glReadPixels(winX, winY, 1, 1, gl.GL_DEPTH_COMPONENT, GL2.GL_FLOAT, depth);
+		// gl.glReadPixels(winX, winY, 1, 1, gl.GL_DEPTH_COMPONENT,
+		// GL2.GL_FLOAT, depth);
 
-		glu.gluUnProject( winX, winY, d, modelview, 0, projection, 0, viewport, 0, mouse3DPos, 0);
-		
+		glu.gluUnProject(winX, winY, d, modelview, 0, projection, 0, viewport,
+				0, mouse3DPos, 0);
+
 		return mouse3DPos;
 	}
-	
+
 	/**
-	 * Get the current mouse position in world coordinates
-	 * using gluPickMatrix
+	 * Get the current mouse position in world coordinates using gluPickMatrix
 	 * Call startPicking() before drawing and stopPicking() after drawing
+	 * 
 	 * @return
 	 */
 	public void startPicking(GL2 gl) {
 		System.out.println("Start Picking");
-        IntBuffer viewport = Buffers.newDirectIntBuffer(4);
-        float ratio;
+		IntBuffer viewport = Buffers.newDirectIntBuffer(4);
+		float ratio;
 
-        gl.glSelectBuffer(BUFSIZE, selectBuf);
+		gl.glSelectBuffer(BUFSIZE, selectBuf);
 
-        gl.glGetIntegerv(GL2.GL_VIEWPORT, viewport);
+		gl.glGetIntegerv(GL2.GL_VIEWPORT, viewport);
 
-        gl.glRenderMode(GL2.GL_SELECT);
+		gl.glRenderMode(GL2.GL_SELECT);
 
-        gl.glInitNames();
+		gl.glInitNames();
 
-        gl.glMatrixMode(GL2.GL_PROJECTION);
-        gl.glPushMatrix();
-        gl.glLoadIdentity();
+		gl.glMatrixMode(GL2.GL_PROJECTION);
+		gl.glPushMatrix();
+		gl.glLoadIdentity();
 
-        GLU glu = new GLU();
-        glu.gluPickMatrix(mouseXGlobal, viewport.get(3) - mouseYGlobal, 5, 5, viewport);
+		GLU glu = new GLU();
+		glu.gluPickMatrix(mouseXGlobal, viewport.get(3) - mouseYGlobal, 5, 5,
+				viewport);
 
-        ratio = (float) (viewport.get(2) + 0.0f) / (float) viewport.get(3);
-        glu.gluPerspective(45, ratio, 0.1, 1000);
-        System.out.println("viewport[] = " + viewport.get(0) + ", " + viewport.get(1) + ", " + viewport.get(2));
-        gl.glMatrixMode(GL2.GL_MODELVIEW);
+		ratio = (float) (viewport.get(2) + 0.0f) / (float) viewport.get(3);
+		glu.gluPerspective(45, ratio, 0.1, 1000);
+		System.out.println("viewport[] = " + viewport.get(0) + ", "
+				+ viewport.get(1) + ", " + viewport.get(2));
+		gl.glMatrixMode(GL2.GL_MODELVIEW);
 	}
-	
-	public void stopPicking(GL2 gl) {
+
+	// returns the name of the picked object
+	public int[] stopPicking(GL2 gl) {
 		System.out.println("Stop Picking");
 
-        gl.glMatrixMode(GL2.GL_PROJECTION);
-        gl.glPopMatrix();
-        gl.glMatrixMode(GL2.GL_MODELVIEW);
-        gl.glFlush();
+		gl.glMatrixMode(GL2.GL_PROJECTION);
+		gl.glPopMatrix();
+		gl.glMatrixMode(GL2.GL_MODELVIEW);
+		gl.glFlush();
 
-        hits = gl.glRenderMode(GL2.GL_RENDER);
+		hits = gl.glRenderMode(GL2.GL_RENDER);
 
-        if (hits > 0) {
-            System.out.println("# of hits: " + hits);
-            processHits(hits, selectBuf);
-        } else {
-            System.out.println("no hits");
-        }
-        
-        System.out.printf("\n\n\n");
-        
-		pick = false;
+		if (hits > 0) {
+			System.out.println("# of hits: " + hits);
+			System.out.printf("\n\n\n");
+			pick = false;
+			return processHits(hits, selectBuf);
+		} else {
+			System.out.println("no hits");
+			System.out.printf("\n\n\n");
+			pick = false;
+			return new int[0];
+		}
 	}
-	
-	public void processHits(int hits, IntBuffer buffer)
-    {
-		
-      System.out.println("---------------------------------");
-      System.out.println(" HITS: " + hits);
-      int offset = 0;
-      int names;
-      float z1, z2;
-      for (int i=0;i<hits;i++)
-        {
-          System.out.println("- - - - - - - - - - - -");
-          System.out.println(" hit: " + (i + 1));
-          names = buffer.get(offset); offset++;
-          z1 = (float) (buffer.get(offset)& 0xffffffffL) / 0x7fffffff; 
-          offset++;
-          z2 = (float) (buffer.get(offset)& 0xffffffffL) / 0x7fffffff; 
-          offset++;
-          System.out.println(" number of names: " + names);
-          System.out.println(" z1: " + z1);
-          System.out.println(" z2: " + z2);
-          System.out.println(" names: ");
 
-          for (int j=0;j<names;j++)
-            {
-              System.out.print("       " + buffer.get(offset)); 
-              if (j==(names-1))
-                System.out.println("<-");
-              else
-                System.out.println();
-              offset++;
-            }
-          System.out.println("- - - - - - - - - - - -");
-        }
-      System.out.println("---------------------------------");
-    }
-	
-	public void draw(GL2 gl) {
+	public int[] processHits(int hits, IntBuffer buffer) {
 		
+		int[] out = new int[hits];
+				
+		System.out.println("---------------------------------");
+		System.out.println(" HITS: " + hits);
+		int offset = 0;
+		int names;
+		float z1, z2;
+		for (int i = 0; i < hits; i++) {
+			System.out.println("- - - - - - - - - - - -");
+			System.out.println(" hit: " + (i + 1));
+			names = buffer.get(offset);
+			offset++;
+			z1 = (float) (buffer.get(offset) & 0xffffffffL) / 0x7fffffff;
+			offset++;
+			z2 = (float) (buffer.get(offset) & 0xffffffffL) / 0x7fffffff;
+			offset++;
+			System.out.println(" number of names: " + names);
+			System.out.println(" z1: " + z1);
+			System.out.println(" z2: " + z2);
+			System.out.println(" names: ");
+
+			for (int j = 0; j < names; j++) {
+				int q = buffer.get(offset);
+				System.out.print("       " + q);
+				//out should be 2 dimensional
+				out[i] = q;
+				if (j == (names - 1)) {
+					System.out.println("<-");
+				} else {
+					System.out.println();
+				}
+				offset++;
+			}
+			System.out.println("- - - - - - - - - - - -");
+		}
+		System.out.println("---------------------------------");
+		
+		return out;
+	}
+
+	public void draw(GL2 gl, int textureNum) {
+
 		gl.glPushMatrix();
-		
+
 		// rotate around wherever the user points the mouse
 		gl.glRotatef(-view_rotx, 1.0f, 0.0f, 0.0f);
 		gl.glRotatef(-view_roty, 0.0f, 1.0f, 0.0f);
 		gl.glRotatef(-view_rotz, 0.0f, 0.0f, 1.0f);
-		
+
 		gl.glTranslatef(movex, movey, movez);
-		
-		//terrain.drawScene(gl);
-		terrain.testLightCube(gl, cubeList, lightPos, GL2.GL_RENDER);
-		
-		
+
+		// terrain.drawScene(gl);
+		terrain.testLightCube(gl, cubeList, lightPos, GL2.GL_RENDER, textureNum);
+
 		// --------- Rendering Code
-		//terrain.drawScene(gl, selectedObject);
-		//terrain.drawScene(gl);
+		// terrain.drawScene(gl, selectedObject);
+		// terrain.drawScene(gl);
 		// terrain.testLightCube(gl, cubeList, lightPos);
 
 		gl.glLightfv(GL_LIGHT1, GL_AMBIENT, lightColorAmbient, 0);
@@ -332,13 +344,17 @@ public class Renderer implements GLEventListener,
 	}
 
 	public static void initAudio() {
-		
-		audio.newFile(1, "SoundEffects/Groups/Humanoids/Walking1.wav", false, new float[3], 1.0f, 500);
-		audio.newFile(2, "SoundEffects/Groups/Humanoids/Walking2.wav", false, new float[3], 1.0f, 500);
-		audio.newFile(3, "SoundEffects/Groups/Humanoids/Walking3.wav", false, new float[3], 1.0f, 500);
-		audio.newFile(4, "SoundEffects/Groups/Humanoids/Walking4.wav", false, new float[3], 1.0f, 500);
+
+		audio.newFile(1, "SoundEffects/Groups/Humanoids/Walking1.wav", false,
+				new float[3], 1.0f, 500);
+		audio.newFile(2, "SoundEffects/Groups/Humanoids/Walking2.wav", false,
+				new float[3], 1.0f, 500);
+		audio.newFile(3, "SoundEffects/Groups/Humanoids/Walking3.wav", false,
+				new float[3], 1.0f, 500);
+		audio.newFile(4, "SoundEffects/Groups/Humanoids/Walking4.wav", false,
+				new float[3], 1.0f, 500);
 	}
-	
+
 	// ------ Implement methods declared in GLEventListener ------
 
 	/**
@@ -347,9 +363,9 @@ public class Renderer implements GLEventListener,
 	 */
 	@Override
 	public void init(GLAutoDrawable drawable) {
-		
+
 		initAudio();
-		
+
 		drawable.getAnimator().setUpdateFPSFrames(3, null); // 3
 		drawable.setAutoSwapBufferMode(false);
 
@@ -398,8 +414,8 @@ public class Renderer implements GLEventListener,
 		gl.glEnable(GL_COLOR_MATERIAL);
 		gl.glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 		gl.glEnable(GL.GL_TEXTURE_2D);
-		
-		//set the drawing mode
+
+		// set the drawing mode
 		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		gl.glRenderMode(GL2.GL_RENDER);
 
@@ -424,8 +440,8 @@ public class Renderer implements GLEventListener,
 				"terrainTextures/White Water Texture.jpeg", ".jpeg");
 
 		if (!initiated)
-			//terrain.buildScene(drawable, this, gl, cubeList);
-			terrain.testLightCube(gl, cubeList, lightPos, GL2.GL_RENDER);
+			// terrain.buildScene(drawable, this, gl, cubeList);
+			terrain.testLightCube(gl, cubeList, lightPos, GL2.GL_RENDER, 0);
 		initiated = true;
 	}
 
@@ -470,15 +486,26 @@ public class Renderer implements GLEventListener,
 		gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear color
 																// and depth
 																// buffers
-		
+
+		int[] pickedObject = null;
+
 		if (pick) {
 			startPicking(gl);
-			draw(gl);
-			stopPicking(gl);		
+			draw(gl, 0);
+			pickedObject = stopPicking(gl);
+			
+			for(int i = 0; i < pickedObject.length; i++) {
+				if (pickedObject[i] == 1 && textureNum < 6) {
+					textureNum++;
+				}
+				System.out.println(pickedObject[i]);
+			}
+			
+			System.out.println("TEXTURE NUM: " + textureNum);
 		}
-		
-		draw(gl);
-		
+
+		draw(gl, textureNum);
+
 		checkKeysPressed();
 		checkMoving();
 
@@ -489,7 +516,7 @@ public class Renderer implements GLEventListener,
 		long drawNanos = System.nanoTime() - startNanos;
 		// System.out.println("drawn in " + drawNanos);
 
-		//System.out.println(drawable.getAnimator().getLastFPS());
+		// System.out.println(drawable.getAnimator().getLastFPS());
 
 		drawable.swapBuffers();
 		gl.glFlush();
@@ -557,12 +584,12 @@ public class Renderer implements GLEventListener,
 		if (!flyDownPressed) {
 			flyDownMove = false;
 		}
-		
-		//for walking audio
-		if(!forwardMove && !strifeMove) {
+
+		// for walking audio
+		if (!forwardMove && !strifeMove) {
 			audio.stop(walkNum);
-		} else if((forwardMove || strifeMove) && !audio.isPlaying(walkNum)) {
-			walkNum =(int)(Math.random()*4);
+		} else if ((forwardMove || strifeMove) && !audio.isPlaying(walkNum)) {
+			walkNum = (int) (Math.random() * 4);
 			audio.play(walkNum);
 		}
 	}
@@ -600,7 +627,7 @@ public class Renderer implements GLEventListener,
 		 * mouseInMiddle == false when we are iterating just to keep the mouse
 		 * in the middle
 		 */
-		
+
 		mouseXGlobal = e.getX();
 		mouseYGlobal = e.getY();
 
@@ -662,7 +689,7 @@ public class Renderer implements GLEventListener,
 
 	@Override
 	public void keyPressed(com.jogamp.newt.event.KeyEvent e) {
-		
+
 		// press esc to quit
 		int keyCode = e.getKeyCode();
 		switch (keyCode) {
@@ -707,10 +734,10 @@ public class Renderer implements GLEventListener,
 
 	@Override
 	public void keyReleased(com.jogamp.newt.event.KeyEvent e) {
-		
+
 		if (e.isAutoRepeat())
 			return;
-		
+
 		int kc = e.getKeyCode();
 		if (kc == com.jogamp.newt.event.KeyEvent.VK_LEFT
 				|| kc == com.jogamp.newt.event.KeyEvent.VK_A)

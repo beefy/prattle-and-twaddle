@@ -215,7 +215,7 @@ public class Scene {
 	}
 	
 	//after this works, maybe set it so it only names things when mode = GL.GL_SELECT
-	public void testLightCube(GL2 gl, int[] displayList, float[] lightPos, int mode) {
+	public void testLightCube(GL2 gl, int[] displayList, float[] lightPos, int mode, int i) {
 		
 		
 		//if(mode == GL2.GL_SELECT) gl.glRenderMode(GL2.GL_RENDER);
@@ -240,7 +240,7 @@ public class Scene {
 		//tempRot++;
 		
 		// draw the cube
-		gl.glCallList(displayList[0]);
+		gl.glCallList(displayList[i]);
 		
 		gl.glPopMatrix();
 		gl.glPopName();
