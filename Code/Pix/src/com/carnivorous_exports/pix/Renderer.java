@@ -214,72 +214,9 @@ public class Renderer implements GLEventListener,
 	/**
 	 * Get the current mouse position in world coordinates
 	 * using gluPickMatrix
-	 * d is the distance away from the screen
-	 * d == 0.0 is at the screen, d == 1.0 is very far away from the screen
+	 * Call startPicking() before drawing and stopPicking() after drawing
 	 * @return
 	 */
-	public double[] getPositionPickMatrix(GL2 gl) {
-		int buffsize = 512;
-        double x = (double) mouseXGlobal;
-        double y = (double) mouseYGlobal;
-        
-        System.out.println("mouse at (" + mouseXGlobal + "," + mouseYGlobal + ")");
-        		
-        		
-        IntBuffer viewport = Buffers.newDirectIntBuffer(4);
-        IntBuffer selectBuffer = Buffers.newDirectIntBuffer(buffsize);
-        int hits = 0;
-        
-        gl.glGetIntegerv(GL2.GL_VIEWPORT, viewport);
-        gl.glSelectBuffer(buffsize, selectBuffer);
-        gl.glRenderMode(GL2.GL_SELECT);
-        
-        gl.glInitNames();
-        gl.glMatrixMode(GL2.GL_PROJECTION);
-        gl.glPushMatrix();
-        gl.glLoadIdentity();
-        
-        //System.out.println("viewport[] = " + Arrays.asList(viewport).toString());
-        //System.out.println("viewport[] = " + viewport[0] + ", " + viewport[1] + ", " + viewport[2]);
-        System.out.println("width of screen = " + window.getWidth());
-        System.out.println("height of screen = " + window.getHeight());
-        
-        /* create 5x5 pixel picking region near cursor location */
-        glu = new GLU();
-        glu.gluPickMatrix(x, viewport.get(3) - y, 5, 5, viewport);
-        
-        glu.gluOrtho2D(0.0d, 1.0d, 0.0d, 1.0d);
-        
-		// rotate around wherever the user points the mouse
-		gl.glRotatef(-view_rotx, 1.0f, 0.0f, 0.0f);
-		gl.glRotatef(-view_roty, 0.0f, 1.0f, 0.0f);
-		gl.glRotatef(-view_rotz, 0.0f, 0.0f, 1.0f);
-		
-		gl.glTranslatef(movex, movey, movez);
-		
-		//draw the scene
-		//terrain.drawScene(gl);
-		terrain.testLightCube(gl, cubeList, lightPos, GL2.GL_SELECT);
-		
-		//lighting
-		gl.glLightfv(GL_LIGHT1, GL_AMBIENT, lightColorAmbient, 0);
-		gl.glLightfv(GL_LIGHT1, GL_DIFFUSE, lightDif, 0);
-		gl.glLightfv(GL_LIGHT1, GL_SPECULAR, lightColorSpecular, 0);
-		gl.glLightfv(GL_LIGHT1, GL_POSITION, lightPos, 0);
-
-		gl.glMatrixMode(GL2.GL_PROJECTION);
-        gl.glPopMatrix();
-        gl.glFlush();
-        
-        
-        hits = gl.glRenderMode(GL2.GL_RENDER);
-        processHits(hits, selectBuffer);
-        
-        pick = false;
-        gl.glMatrixMode(GL2.GL_MODELVIEW);
-		return new double[4];
-	}
-	
 	public void startPicking(GL2 gl) {
 		System.out.println("Start Picking");
         IntBuffer viewport = Buffers.newDirectIntBuffer(4);
@@ -330,7 +267,7 @@ public class Renderer implements GLEventListener,
 	
 	public void processHits(int hits, IntBuffer buffer)
     {
-		/*
+		
       System.out.println("---------------------------------");
       System.out.println(" HITS: " + hits);
       int offset = 0;
@@ -362,8 +299,9 @@ public class Renderer implements GLEventListener,
           System.out.println("- - - - - - - - - - - -");
         }
       System.out.println("---------------------------------");
-      */
+      
 		
+		/*
 		 int name = -1;
 	        int i = 0, nrOfHits = 0;
 	        while(nrOfHits < hits && i < 512) {		//512 is the buffer size
@@ -381,6 +319,8 @@ public class Renderer implements GLEventListener,
 	            System.out.printf("%d ",  name);
 	        }
 	        System.out.printf("\n\n\n");
+	        
+	        */
     }
 	
 	public void draw(GL2 gl) {
