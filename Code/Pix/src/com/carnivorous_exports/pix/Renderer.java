@@ -10,6 +10,7 @@ import java.awt.event.MouseMotionListener;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 
@@ -133,7 +134,12 @@ public class Renderer implements GLEventListener,
 	float moveSpeed = 1f;
 
 	float selectedObject;
+	
+	// picking variables
+    int BUFSIZE = 1024;
+    IntBuffer selectBuf = Buffers.newDirectIntBuffer(BUFSIZE);
 	boolean pick = false;
+	public static int hits;
 
 	public Renderer(GLWindow window) {
 		
@@ -220,33 +226,166 @@ public class Renderer implements GLEventListener,
         System.out.println("mouse at (" + mouseXGlobal + "," + mouseYGlobal + ")");
         		
         		
-        int[] viewport = new int[4];
+        IntBuffer viewport = Buffers.newDirectIntBuffer(4);
         IntBuffer selectBuffer = Buffers.newDirectIntBuffer(buffsize);
         int hits = 0;
         
-        gl.glGetIntegerv(GL2.GL_VIEWPORT, viewport, 0);
+        gl.glGetIntegerv(GL2.GL_VIEWPORT, viewport);
         gl.glSelectBuffer(buffsize, selectBuffer);
         gl.glRenderMode(GL2.GL_SELECT);
         
         gl.glInitNames();
-        //gl.glPushName(0);
         gl.glMatrixMode(GL2.GL_PROJECTION);
         gl.glPushMatrix();
-        //gl.glLoadIdentity();
+        gl.glLoadIdentity();
         
-        
+        //System.out.println("viewport[] = " + Arrays.asList(viewport).toString());
+        //System.out.println("viewport[] = " + viewport[0] + ", " + viewport[1] + ", " + viewport[2]);
+        System.out.println("width of screen = " + window.getWidth());
+        System.out.println("height of screen = " + window.getHeight());
         
         /* create 5x5 pixel picking region near cursor location */
-        
-        glu.gluPickMatrix((double) x,
-            (double) (viewport[3] - y),// 
-            5.0, 5.0, viewport, 0);
-        
+        glu = new GLU();
+        glu.gluPickMatrix(x, viewport.get(3) - y, 5, 5, viewport);
         
         glu.gluOrtho2D(0.0d, 1.0d, 0.0d, 1.0d);
         
+		// rotate around wherever the user points the mouse
+		gl.glRotatef(-view_rotx, 1.0f, 0.0f, 0.0f);
+		gl.glRotatef(-view_roty, 0.0f, 1.0f, 0.0f);
+		gl.glRotatef(-view_rotz, 0.0f, 0.0f, 1.0f);
+		
+		gl.glTranslatef(movex, movey, movez);
+		
+		//draw the scene
+		//terrain.drawScene(gl);
+		terrain.testLightCube(gl, cubeList, lightPos, GL2.GL_SELECT);
+		
+		//lighting
+		gl.glLightfv(GL_LIGHT1, GL_AMBIENT, lightColorAmbient, 0);
+		gl.glLightfv(GL_LIGHT1, GL_DIFFUSE, lightDif, 0);
+		gl.glLightfv(GL_LIGHT1, GL_SPECULAR, lightColorSpecular, 0);
+		gl.glLightfv(GL_LIGHT1, GL_POSITION, lightPos, 0);
+
+		gl.glMatrixMode(GL2.GL_PROJECTION);
+        gl.glPopMatrix();
+        gl.glFlush();
         
-        //gl.glPushMatrix();
+        
+        hits = gl.glRenderMode(GL2.GL_RENDER);
+        processHits(hits, selectBuffer);
+        
+        pick = false;
+        gl.glMatrixMode(GL2.GL_MODELVIEW);
+		return new double[4];
+	}
+	
+	public void startPicking(GL2 gl) {
+		System.out.println("Start Picking");
+        IntBuffer viewport = Buffers.newDirectIntBuffer(4);
+        float ratio;
+
+        gl.glSelectBuffer(BUFSIZE, selectBuf);
+
+        gl.glGetIntegerv(GL2.GL_VIEWPORT, viewport);
+
+        gl.glRenderMode(GL2.GL_SELECT);
+
+        gl.glInitNames();
+
+        gl.glMatrixMode(GL2.GL_PROJECTION);
+        gl.glPushMatrix();
+        gl.glLoadIdentity();
+
+        GLU glu = new GLU();
+        glu.gluPickMatrix(mouseXGlobal, viewport.get(3) - mouseYGlobal, 5, 5, viewport);
+
+        ratio = (float) (viewport.get(2) + 0.0f) / (float) viewport.get(3);
+        glu.gluPerspective(45, ratio, 0.1, 1000);
+        System.out.println("viewport[] = " + viewport.get(0) + ", " + viewport.get(1) + ", " + viewport.get(2));
+        gl.glMatrixMode(GL2.GL_MODELVIEW);
+	}
+	
+	public void stopPicking(GL2 gl) {
+		System.out.println("Stop Picking");
+
+        gl.glMatrixMode(GL2.GL_PROJECTION);
+        gl.glPopMatrix();
+        gl.glMatrixMode(GL2.GL_MODELVIEW);
+        gl.glFlush();
+
+        hits = gl.glRenderMode(GL2.GL_RENDER);
+
+        if (hits > 0) {
+            System.out.println("# of hits: " + hits);
+            processHits(hits, selectBuf);
+        } else {
+            System.out.println("no hits");
+        }
+        
+        System.out.printf("\n\n\n");
+        
+		pick = false;
+	}
+	
+	public void processHits(int hits, IntBuffer buffer)
+    {
+		/*
+      System.out.println("---------------------------------");
+      System.out.println(" HITS: " + hits);
+      int offset = 0;
+      int names;
+      float z1, z2;
+      for (int i=0;i<hits;i++)
+        {
+          System.out.println("- - - - - - - - - - - -");
+          System.out.println(" hit: " + (i + 1));
+          names = buffer.get(offset); offset++;
+          z1 = (float) (buffer.get(offset)& 0xffffffffL) / 0x7fffffff; 
+          offset++;
+          z2 = (float) (buffer.get(offset)& 0xffffffffL) / 0x7fffffff; 
+          offset++;
+          System.out.println(" number of names: " + names);
+          System.out.println(" z1: " + z1);
+          System.out.println(" z2: " + z2);
+          System.out.println(" names: ");
+
+          for (int j=0;j<names;j++)
+            {
+              System.out.print("       " + buffer.get(offset)); 
+              if (j==(names-1))
+                System.out.println("<-");
+              else
+                System.out.println();
+              offset++;
+            }
+          System.out.println("- - - - - - - - - - - -");
+        }
+      System.out.println("---------------------------------");
+      */
+		
+		 int name = -1;
+	        int i = 0, nrOfHits = 0;
+	        while(nrOfHits < hits && i < 512) {		//512 is the buffer size
+	            if(buffer.get(i) > 0){
+	                name = buffer.get(i);
+	                nrOfHits++;
+	            }
+	            i++;
+	        }
+	        
+	        if (name < 0) {
+	            System.out.printf("You didn't click a snowman!");
+	        } else {
+	            System.out.printf("You picked snowman  ");
+	            System.out.printf("%d ",  name);
+	        }
+	        System.out.printf("\n\n\n");
+    }
+	
+	public void draw(GL2 gl) {
+		
+		gl.glPushMatrix();
 		
 		// rotate around wherever the user points the mouse
 		gl.glRotatef(-view_rotx, 1.0f, 0.0f, 0.0f);
@@ -270,58 +409,9 @@ public class Renderer implements GLEventListener,
 		gl.glLightfv(GL_LIGHT1, GL_POSITION, lightPos, 0);
 
 		// terrain.testLight(gl, lightPos);
-		
 
-		//gl.glPopMatrix();
-        
-        
-        //terrain.drawScene(gl);
-        gl.glLoadName(0);
-        terrain.testLightCube(gl, cubeList, lightPos, GL2.GL_SELECT);
-        gl.glPopMatrix();
-        gl.glFlush();
-        
-        
-        hits = gl.glRenderMode(GL2.GL_RENDER);
-        processHits(hits, selectBuffer);
-        
-        pick = false;
-        gl.glMatrixMode(GL2.GL_MODELVIEW);
-		return new double[4];
+		gl.glPopMatrix();
 	}
-	
-	public void processHits(int hits, IntBuffer buffer)
-    {
-      System.out.println("---------------------------------");
-      System.out.println(" HITS: " + hits);
-      int offset = 0;
-      int names;
-      float z1, z2;
-      for (int i=0;i<hits;i++)
-        {
-          System.out.println("- - - - - - - - - - - -");
-          System.out.println(" hit: " + (i + 1));
-          names = buffer.get(offset); offset++;
-          z1 = (float) (buffer.get(offset)& 0xffffffffL) / 0x7fffffff; offset++;
-          z2 = (float) (buffer.get(offset)& 0xffffffffL) / 0x7fffffff; offset++;
-          System.out.println(" number of names: " + names);
-          System.out.println(" z1: " + z1);
-          System.out.println(" z2: " + z2);
-          System.out.println(" names: ");
-
-          for (int j=0;j<names;j++)
-            {
-              System.out.print("       " + buffer.get(offset)); 
-              if (j==(names-1))
-                System.out.println("<-");
-              else
-                System.out.println();
-              offset++;
-            }
-          System.out.println("- - - - - - - - - - - -");
-        }
-      System.out.println("---------------------------------");
-    }
 
 	public static void initAudio() {
 		
@@ -463,39 +553,17 @@ public class Renderer implements GLEventListener,
 																// and depth
 																// buffers
 
-		double[] mouse3Dpos;
-		if(pick) {
-			mouse3Dpos = getPositionPickMatrix(gl);
-			return;
-		}
+		//double[] mouse3Dpos;
+		//if(pick) {
+		//	mouse3Dpos = getPositionPickMatrix(gl);
+		//	return;
+		//}
 		
-		gl.glPushMatrix();
+		if (pick) startPicking(gl);
 		
-		// rotate around wherever the user points the mouse
-		gl.glRotatef(-view_rotx, 1.0f, 0.0f, 0.0f);
-		gl.glRotatef(-view_roty, 0.0f, 1.0f, 0.0f);
-		gl.glRotatef(-view_rotz, 0.0f, 0.0f, 1.0f);
+		draw(gl);
 		
-		gl.glTranslatef(movex, movey, movez);
-		
-		//terrain.drawScene(gl);
-		terrain.testLightCube(gl, cubeList, lightPos, GL2.GL_RENDER);
-		
-		
-		// --------- Rendering Code
-		//terrain.drawScene(gl, selectedObject);
-		//terrain.drawScene(gl);
-		// terrain.testLightCube(gl, cubeList, lightPos);
-
-		gl.glLightfv(GL_LIGHT1, GL_AMBIENT, lightColorAmbient, 0);
-		gl.glLightfv(GL_LIGHT1, GL_DIFFUSE, lightDif, 0);
-		gl.glLightfv(GL_LIGHT1, GL_SPECULAR, lightColorSpecular, 0);
-		gl.glLightfv(GL_LIGHT1, GL_POSITION, lightPos, 0);
-
-		// terrain.testLight(gl, lightPos);
-		
-
-		gl.glPopMatrix();
+		if(pick) stopPicking(gl);
 		
 		//print mouse position
 		/*
