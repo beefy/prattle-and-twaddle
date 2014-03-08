@@ -230,7 +230,7 @@ public class Renderer implements GLEventListener,
         
         gl.glInitNames();
         //gl.glPushName(0);
-      //  gl.glMatrixMode(GL2.GL_PROJECTION);
+        gl.glMatrixMode(GL2.GL_PROJECTION);
         gl.glPushMatrix();
         //gl.glLoadIdentity();
         
@@ -276,9 +276,8 @@ public class Renderer implements GLEventListener,
         
         
         //terrain.drawScene(gl);
-        //gl.glLoadName(0);
-        //terrain.testLightCube(gl, cubeList, lightPos, GL2.GL_SELECT);
-        gl.glMatrixMode(GL2.GL_MODELVIEW);
+        gl.glLoadName(0);
+        terrain.testLightCube(gl, cubeList, lightPos, GL2.GL_SELECT);
         gl.glPopMatrix();
         gl.glFlush();
         
@@ -287,6 +286,7 @@ public class Renderer implements GLEventListener,
         processHits(hits, selectBuffer);
         
         pick = false;
+        gl.glMatrixMode(GL2.GL_MODELVIEW);
 		return new double[4];
 	}
 	
