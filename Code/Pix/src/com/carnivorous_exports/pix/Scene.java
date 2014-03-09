@@ -214,8 +214,7 @@ public class Scene {
 		}
 	}
 	
-	//after this works, maybe set it so it only names things when mode = GL.GL_SELECT
-	public void testLightCube(GL2 gl, int[] displayList, float[] lightPos, int mode, int i) {
+	public void testLightCube(GL2 gl, int[] displayList, float[] lightPos, int i) {
 		
 		
 		//if(mode == GL2.GL_SELECT) gl.glRenderMode(GL2.GL_RENDER);
@@ -264,6 +263,18 @@ public class Scene {
 		
 		gl.glPopMatrix();
 		gl.glPopName();
+	}
+	
+	public boolean hasCollided(float x, float y, float z) {
+		boolean out = false;
+		float[] cubeCoords = {2f, 0f, -4f};
+		
+			if((x > cubeCoords[0] - 0.5 && x < cubeCoords[0] + 0.5)
+				&& (y > cubeCoords[1] - 0.5  && y < cubeCoords[1] + 0.5)
+				&& (z > cubeCoords[2] - 0.5  && z < cubeCoords[2] + 0.5))
+				out = true;
+		
+		return out;
 	}
 	
 	public void drawSphere(double x, double y, double z) {
