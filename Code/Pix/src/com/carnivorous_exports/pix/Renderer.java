@@ -111,6 +111,9 @@ public class Renderer implements GLEventListener,
 	public float movex;
 	public float movey;
 	public float movez;
+	public float oldmovex;
+	public float oldmovey;
+	public float oldmovez;
 	private float mouseSensitivity = 0.75f;
 
 	// for (arrow) key movement
@@ -155,6 +158,10 @@ public class Renderer implements GLEventListener,
 	// for user movement
 	public void checkMoving() {
 
+		oldmovex = movex;
+		oldmovey = movey;
+		oldmovez = movez;
+		
 		if (forwardMove && !terrain.collided) { // moving forward or back
 			movez += Math.cos(180 - view_roty * (Math.PI / 180) + 40) * 0.1
 					* -moveDirForward * moveSpeed;
@@ -326,7 +333,7 @@ public class Renderer implements GLEventListener,
 		gl.glTranslatef(movex, movey, movez);
 
 		// terrain.drawScene(gl);
-		terrain.testLightCube(gl, cubeList, lightPos, GL2.GL_RENDER, textureNum);
+		terrain.testLightCube(gl, cubeList, lightPos, textureNum);
 
 		// --------- Rendering Code
 		// terrain.drawScene(gl, selectedObject);
@@ -441,7 +448,7 @@ public class Renderer implements GLEventListener,
 
 		if (!initiated)
 			// terrain.buildScene(drawable, this, gl, cubeList);
-			terrain.testLightCube(gl, cubeList, lightPos, GL2.GL_RENDER, 0);
+			terrain.testLightCube(gl, cubeList, lightPos, 0);
 		initiated = true;
 	}
 
@@ -507,8 +514,17 @@ public class Renderer implements GLEventListener,
 		draw(gl, textureNum);
 
 		checkKeysPressed();
-		checkMoving();
-
+		System.out.println(-movex + ", " + -movey + ", " + -movez);
+				
+		if(!terrain.hasCollided(-movex, -movey, -movez)) {
+			checkMoving();
+		} else {
+			movex = oldmovex;
+			movey = oldmovey;
+			movez = oldmovez;
+			System.out.println("COLLIDED");
+		}
+		
 		oldRotX = view_rotx;
 		oldRotY = view_roty;
 		oldRotZ = view_rotz;
