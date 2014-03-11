@@ -516,7 +516,10 @@ public class Renderer implements GLEventListener,
 		checkKeysPressed();
 		System.out.println(-movex + ", " + -movey + ", " + -movez);
 				
-		if(!terrain.hasCollided(-movex, -movey, -movez)) {
+		float[] cube1 = {-movex, -movey, -movez};
+		float[] cube2 = {2f, 0f, -4f};
+		
+		if(!terrain.hasCollided(cube1, 1.5f, cube2, 2f)) {
 			checkMoving();
 		} else {
 			movex = oldmovex;
