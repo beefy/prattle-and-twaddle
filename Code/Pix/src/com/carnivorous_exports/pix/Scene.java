@@ -11,6 +11,8 @@ import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_SHININESS;
 import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_SPECULAR;
 
 import java.io.IOException;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 
 import javax.media.opengl.GL;
@@ -23,6 +25,7 @@ import javax.media.opengl.fixedfunc.GLLightingFunc;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUquadric;
 
+import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureCoords;
 import com.jogamp.opengl.util.texture.TextureIO;
@@ -67,6 +70,8 @@ public class Scene {
 			// Green, Blue
 			{ 1.0f, 0.0f, 0.0f }, { 1.0f, 0.5f, 0.0f }, { 1.0f, 1.0f, 0.0f },
 			{ 0.0f, 1.0f, 0.0f }, { 0.0f, 1.0f, 1.0f } };
+	
+	IntBuffer vertexArray = IntBuffer.allocate(1);
 
 	public int getCubeList(GL2 gl, String textureFileName,
 			String textureFileType) {
@@ -214,6 +219,61 @@ public class Scene {
 		}
 	}
 	
+	
+	public void vertexArrayBuild(GL2 gl) {
+		
+		/*
+		int vertices = 3;
+
+		int vertex_size = 3; // X, Y, Z,
+		int color_size = 3; // R, G, B,
+
+		IntBuffer vertex_data = Buffers.newDirectIntBuffer(vertices * vertex_size);
+		vertex_data.put(new int[] { -1, -1, 0, });
+		vertex_data.put(new int[] { 1, -1, 0, });
+		vertex_data.put(new int[] { 1, 1, 0, });
+		vertex_data.flip();
+
+		FloatBuffer color_data = Buffers.newDirectFloatBuffer(vertices * color_size);
+		color_data.put(new float[] { 1f, 0f, 0f, });
+		color_data.put(new float[] { 0f, 1f, 0f, });
+		color_data.put(new float[] { 0f, 0f, 1f, });
+		color_data.flip();
+
+		int vbo_vertex_handle = gl.glGenBuffers(0, vertex_data);
+		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, vbo_vertex_handle);
+		gl.glBufferData(GL2.GL_ARRAY_BUFFER, vbo_vertex_handle, vertex_data, GL2.GL_STATIC_DRAW);
+		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, 0);
+
+		int vbo_color_handle = gl.glGenBuffers();
+		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, vbo_color_handle);
+		gl.glBufferData(GL2.GL_ARRAY_BUFFER, vbo_color_handle, color_data, GL2.GL_STATIC_DRAW);
+		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, 0);
+		
+		
+		
+		// Create Vertex Array.
+		gl.glGenVertexArrays(1, vertexArray);
+		gl.glBindVertexArray(vertexArray.get(0));
+
+		// Specify how data should be sent to the Program.
+
+		// VertexAttribArray 0 corresponds with location 0 in the vertex shader.
+		gl.glEnableVertexAttribArray(0);
+		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, buffers.get(0));
+		gl.glVertexAttribPointer(0, 2, GL.GL_FLOAT, false, 0, 0);
+
+		// VertexAttribArray 1 corresponds with location 1 in the vertex shader.
+		gl.glEnableVertexAttribArray(1);
+		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, buffers.get(1));
+		gl.glVertexAttribPointer(1, 3, GL.GL_FLOAT, false, 0, 0);
+		*/
+	}
+	
+	public void vertexArrayDraw() {
+		
+	}
+	
 	public void testLightCube(GL2 gl, int[] displayList, float[] lightPos, int i) {
 		
 		
@@ -265,15 +325,20 @@ public class Scene {
 		gl.glPopName();
 	}
 	
-	public boolean hasCollided(float x, float y, float z) {
+	public boolean hasCollided(float[] cube1, float cube1Length, float[] cube2, float cube2Length) {
 		boolean out = false;
-		float[] cubeCoords = {2f, 0f, -4f};
 		
-			if((x > cubeCoords[0] - 0.5 && x < cubeCoords[0] + 0.5)
-				&& (y > cubeCoords[1] - 0.5  && y < cubeCoords[1] + 0.5)
-				&& (z > cubeCoords[2] - 0.5  && z < cubeCoords[2] + 0.5))
+			if(((cube1[0] > cube2[0] - cube2Length && cube1[0] < cube2[0] + cube2Length)
+				&& (cube1[1] > cube2[1] - cube2Length  && cube1[1] < cube2[1] + cube2Length)
+				&& (cube1[2] > cube2[2] - cube2Length  && cube1[2] < cube2[2] + cube2Length))
+			
+				||
+		
+				((cube1[0] - cube2Length > cube2[0] && cube1[0] + cube2Length < cube2[0])
+				&& (cube1[1] - cube2Length > cube2[1] && cube1[1] + cube2Length < cube2[1])
+				&& (cube1[2] - cube2Length > cube2[2] && cube1[2] + cube2Length < cube2[2])))
 				out = true;
-		
+			
 		return out;
 	}
 	
