@@ -157,10 +157,6 @@ public class Renderer implements GLEventListener,
 
 	// for user movement
 	public void checkMoving() {
-
-		oldmovex = movex;
-		oldmovey = movey;
-		oldmovez = movez;
 		
 		if (forwardMove && !terrain.collided) { // moving forward or back
 			movez += Math.cos(180 - view_roty * (Math.PI / 180) + 40) * 0.1
@@ -520,12 +516,27 @@ public class Renderer implements GLEventListener,
 		float[] cube2 = {2f, 0f, -4f};
 		
 		if(!terrain.hasCollided(cube1, 1.5f, cube2, 2f)) {
+			oldmovex = movex;
+			oldmovey = movey;
+			oldmovez = movez;
 			checkMoving();
 		} else {
-			movex = oldmovex;
-			movey = oldmovey;
-			movez = oldmovez;
+			float movextemp = movex;
+			float moveytemp = movey;
+			float moveztemp = movez;
+			
+			movex = ((oldmovex));// + movex)/2);// + movex)/2;// + movex/2;
+			movey = ((oldmovey));// + movey)/2);// + movey)/2;// + movey/2;
+			movez = ((oldmovez));// + movez)/2);// + movez)/2;// + movez/2;
 			System.out.println("COLLIDED");
+			
+			oldmovex = movex;
+			oldmovey = movey;
+			oldmovez = movez;
+			checkMoving();
+			//oldmovex = movextemp;
+			//oldmovey = moveytemp;
+			//oldmovez = moveztemp;
 		}
 		
 		oldRotX = view_rotx;
