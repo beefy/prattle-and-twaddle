@@ -8,7 +8,7 @@ import javax.media.opengl.GLAutoDrawable;
 
 public class Quad {
 
-	private boolean[][][][] placement = new boolean[4][12][12][12];
+	public boolean[][][][] placement = new boolean[4][12][12][12];
 	int[] displayList;
 	int coordX;
 	int coordY;

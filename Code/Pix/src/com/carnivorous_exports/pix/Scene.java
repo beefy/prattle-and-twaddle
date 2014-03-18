@@ -42,8 +42,8 @@ public class Scene {
 
 	Texture texture;
 
-	private int xLength = 2;
-	private int yLength = 2;
+	private int xLength = 1;
+	private int yLength = 1;
 	private Quad[][] coords = new Quad[xLength][yLength];
 
 	private float[] treeSize;
@@ -326,6 +326,7 @@ public class Scene {
 	}
 	
 	public boolean hasCollided(float[] cube1, float cube1Length, float[] cube2, float cube2Length) {
+		
 		boolean out = false;
 		
 			if(((cube1[0] > cube2[0] - cube2Length && cube1[0] < cube2[0] + cube2Length)
@@ -339,6 +340,73 @@ public class Scene {
 				&& (cube1[2] - cube2Length > cube2[2] && cube1[2] + cube2Length < cube2[2])))
 				out = true;
 			
+		return out;
+	}
+	
+	public float[] checkCollisions(float movex, float movey, float movez, 
+			float oldmovex, float oldmovey, float oldmovez) {
+		
+		float[] cube1 = { -movex, -movey, -movez };
+		float[] cube2 = { 2f, 0f, -4f };
+		
+		int topX = 12;
+		int topY = 8;
+		int topZ = 12;
+		
+		// position of this Quad
+		int posX = 12 * 0;
+		int posY = 2 * 0 + 2 * 0; // to make a hill
+		int posZ = 12 * 0 - 40;
+
+		boolean collision = false;
+		
+		for (float i = 4; i >= 1; i--) { // loop for each box size
+			for (int x = 0; x < topX; x++) { // x coords
+				for (int y = 0; y < topY; y++) { // y coords
+					for (int z = 0; z < topZ; z++) { // z coords
+
+						// if a box is placed there
+						if (coords[0][0].placement[(int)(i - 1)][x][y][z]) {
+							
+							float q = 2/i;
+							float[] in = {(float)(q*(x+posX) - (q*(i-4)*-0.5)), 
+									(float)(q*(y+posY) - (q*(i-4)*-0.5)), 
+									(float)(q*(z+posZ) - (q*(i-4)*-0.5))};
+							if (hasCollided(in, 0.25f * i, cube1, 2f)) {
+								collision = true;
+								//break;
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		if(!collision) {
+			oldmovex = movex;
+			oldmovey = movey;
+			oldmovez = movez;
+		} else {
+			movex = oldmovex;
+			movey = oldmovey;
+			movez = oldmovez;
+		}
+		
+		/*
+		if (!hasCollided(cube1, 1.5f, cube2, 2f)) {
+			
+			oldmovex = movex;
+			oldmovey = movey;
+			oldmovez = movez;
+		} else {
+
+			movex = oldmovex;
+			movey = oldmovey;
+			movez = oldmovez;
+		}
+		*/
+		
+		float[] out = {movex, movey, movez, oldmovex, oldmovey, oldmovez};
 		return out;
 	}
 	
