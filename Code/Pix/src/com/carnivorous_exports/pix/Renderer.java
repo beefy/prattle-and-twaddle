@@ -66,7 +66,8 @@ public class Renderer implements GLEventListener,
 		com.jogamp.newt.event.MouseListener, com.jogamp.newt.event.KeyListener {
 
 	private static GLWindow window;
-	private GLU glu; // for the GL Utility
+	private GLU glu; // for the GL Utility\
+	public boolean audioOn = false;
 	private int[] cubeList; // display list for cube
 	private Scene terrain = new Scene();
 	private boolean initiated = false;
@@ -133,7 +134,7 @@ public class Renderer implements GLEventListener,
 
 	int moveDirForward;
 	int moveDirStrife;
-	float moveSpeed = 1f;
+	float moveSpeed = 2f;
 
 	float selectedObject;
 
@@ -157,7 +158,7 @@ public class Renderer implements GLEventListener,
 
 	// for user movement
 	public void checkMoving() {
-		
+
 		if (forwardMove && !terrain.collided) { // moving forward or back
 			movez += Math.cos(180 - view_roty * (Math.PI / 180) + 40) * 0.1
 					* -moveDirForward * moveSpeed;
@@ -276,9 +277,9 @@ public class Renderer implements GLEventListener,
 	}
 
 	public int[] processHits(int hits, IntBuffer buffer) {
-		
+
 		int[] out = new int[hits];
-				
+
 		System.out.println("---------------------------------");
 		System.out.println(" HITS: " + hits);
 		int offset = 0;
@@ -301,7 +302,7 @@ public class Renderer implements GLEventListener,
 			for (int j = 0; j < names; j++) {
 				int q = buffer.get(offset);
 				System.out.print("       " + q);
-				//out should be 2 dimensional
+				// out should be 2 dimensional
 				out[i] = q;
 				if (j == (names - 1)) {
 					System.out.println("<-");
@@ -313,7 +314,7 @@ public class Renderer implements GLEventListener,
 			System.out.println("- - - - - - - - - - - -");
 		}
 		System.out.println("---------------------------------");
-		
+
 		return out;
 	}
 
@@ -328,8 +329,8 @@ public class Renderer implements GLEventListener,
 
 		gl.glTranslatef(movex, movey, movez);
 
-		// terrain.drawScene(gl);
-		terrain.testLightCube(gl, cubeList, lightPos, textureNum);
+		terrain.drawScene(gl);
+		//terrain.testLightCube(gl, cubeList, lightPos, textureNum);
 
 		// --------- Rendering Code
 		// terrain.drawScene(gl, selectedObject);
@@ -443,8 +444,8 @@ public class Renderer implements GLEventListener,
 				"terrainTextures/White Water Texture.jpeg", ".jpeg");
 
 		if (!initiated)
-			// terrain.buildScene(drawable, this, gl, cubeList);
-			terrain.testLightCube(gl, cubeList, lightPos, 0);
+			terrain.buildScene(drawable, this, gl, cubeList);
+			//terrain.testLightCube(gl, cubeList, lightPos, 0);
 		initiated = true;
 	}
 
@@ -496,49 +497,31 @@ public class Renderer implements GLEventListener,
 			startPicking(gl);
 			draw(gl, 0);
 			pickedObject = stopPicking(gl);
-			
-			for(int i = 0; i < pickedObject.length; i++) {
+
+			for (int i = 0; i < pickedObject.length; i++) {
 				if (pickedObject[i] == 1 && textureNum < 6) {
 					textureNum++;
 				}
 				System.out.println(pickedObject[i]);
 			}
-			
+
 			System.out.println("TEXTURE NUM: " + textureNum);
 		}
 
 		draw(gl, textureNum);
 
 		checkKeysPressed();
-		System.out.println(-movex + ", " + -movey + ", " + -movez);
-				
-		float[] cube1 = {-movex, -movey, -movez};
-		float[] cube2 = {2f, 0f, -4f};
 		
-		if(!terrain.hasCollided(cube1, 1.5f, cube2, 2f)) {
-			oldmovex = movex;
-			oldmovey = movey;
-			oldmovez = movez;
-			checkMoving();
-		} else {
-			float movextemp = movex;
-			float moveytemp = movey;
-			float moveztemp = movez;
-			
-			movex = ((oldmovex));// + movex)/2);// + movex)/2;// + movex/2;
-			movey = ((oldmovey));// + movey)/2);// + movey)/2;// + movey/2;
-			movez = ((oldmovez));// + movez)/2);// + movez)/2;// + movez/2;
-			System.out.println("COLLIDED");
-			
-			oldmovex = movex;
-			oldmovey = movey;
-			oldmovez = movez;
-			checkMoving();
-			//oldmovex = movextemp;
-			//oldmovey = moveytemp;
-			//oldmovez = moveztemp;
-		}
+		float[] in = terrain.checkCollisions(movex, movey, movez, oldmovex, oldmovey, oldmovez);
+		movex = in[0];
+		movey = in[1];
+		movez = in[2];
+		oldmovex = in[3];
+		oldmovey = in[4];
+		oldmovez = in[5];
 		
+		checkMoving();
+
 		oldRotX = view_rotx;
 		oldRotY = view_roty;
 		oldRotZ = view_rotz;
@@ -615,12 +598,14 @@ public class Renderer implements GLEventListener,
 			flyDownMove = false;
 		}
 
-		// for walking audio
-		if (!forwardMove && !strifeMove) {
-			audio.stop(walkNum);
-		} else if ((forwardMove || strifeMove) && !audio.isPlaying(walkNum)) {
-			walkNum = (int) (Math.random() * 4);
-			audio.play(walkNum);
+		if (audioOn) {
+			// for walking audio
+			if (!forwardMove && !strifeMove) {
+				audio.stop(walkNum);
+			} else if ((forwardMove || strifeMove) && !audio.isPlaying(walkNum)) {
+				walkNum = (int) (Math.random() * 4);
+				audio.play(walkNum);
+			}
 		}
 	}
 
