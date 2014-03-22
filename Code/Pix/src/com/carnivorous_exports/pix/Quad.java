@@ -119,9 +119,13 @@ public class Quad {
 	public void refreshQuad(GL2 gl, float selectedObject) {
 
 		for (float i = 4; i >= 1; i--) { // loop for each box size
+			gl.glPushName((int)(i-1));
 			for (int x = 0; x < topX; x++) { // x coords
+				gl.glPushName(x);
 				for (int y = 0; y < topY; y++) { // y coords
+					gl.glPushName(y);
 					for (int z = 0; z < topZ; z++) { // z coords
+						gl.glPushName(z);
 
 						// if a box is placed there
 						if (placement[(int)(i - 1)][x][y][z]) {
@@ -168,40 +172,15 @@ public class Quad {
 							}
 							
 							gl.glPopMatrix();
-							//checkCollision(posX, posY, posZ, (int)(i));
 						}
+						
+						gl.glPopName();
+						gl.glPopName();
+						gl.glPopName();
+						gl.glPopName();
 					}
 				}
 			}
 		}
-	}
-	
-	public void checkCollision(int x, int y, int z, int i) {
-		
-		float length;
-		
-		if(i==4) { 
-			length = 1f;
-			
-			if((.5f * (x + posX) > 0 && .5f * (x + posX) + length < 0)
-					&& (.5f * (x + posY) > 0 && .5f * (x + posY) + length < 0)
-					&& (.5f * (x + posZ) > 0 && .5f * (x + posZ) + length < 0)) { 
-						collided = true;
-						//System.out.println("\n\n\n\ncollsion coord: (" + .5f * (x + posX) + ", " +
-						//		.5f * (x + posY) + ", " + .5f * (x + posZ) +
-						//		")\n\n\n\n");
-			}
-			
-			//System.out.println("				" + .5f * (x + posX));
-			
-		} else if(i==3) { 
-			length = 0.75f;
-		} else if(i==2) { 
-			length = 0.5f;
-		} else if(i==1) {
-			length = 0.25f;
-		}
-		
-		
 	}
 }

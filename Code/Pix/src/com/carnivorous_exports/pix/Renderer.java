@@ -225,7 +225,7 @@ public class Renderer implements GLEventListener,
 	 * @return
 	 */
 	public void startPicking(GL2 gl) {
-		System.out.println("Start Picking");
+		//System.out.println("Start Picking");
 		IntBuffer viewport = Buffers.newDirectIntBuffer(4);
 		float ratio;
 
@@ -247,14 +247,14 @@ public class Renderer implements GLEventListener,
 
 		ratio = (float) (viewport.get(2) + 0.0f) / (float) viewport.get(3);
 		glu.gluPerspective(45, ratio, 0.1, 1000);
-		System.out.println("viewport[] = " + viewport.get(0) + ", "
-				+ viewport.get(1) + ", " + viewport.get(2));
+		//System.out.println("viewport[] = " + viewport.get(0) + ", "
+		//		+ viewport.get(1) + ", " + viewport.get(2));
 		gl.glMatrixMode(GL2.GL_MODELVIEW);
 	}
 
 	// returns the name of the picked object
-	public int[] stopPicking(GL2 gl) {
-		System.out.println("Stop Picking");
+	public int[][] stopPicking(GL2 gl) {
+		//System.out.println("Stop Picking");
 
 		gl.glMatrixMode(GL2.GL_PROJECTION);
 		gl.glPopMatrix();
@@ -264,56 +264,57 @@ public class Renderer implements GLEventListener,
 		hits = gl.glRenderMode(GL2.GL_RENDER);
 
 		if (hits > 0) {
-			System.out.println("# of hits: " + hits);
-			System.out.printf("\n\n\n");
+			//System.out.println("# of hits: " + hits);
+			//System.out.printf("\n\n\n");
 			pick = false;
 			return processHits(hits, selectBuf);
 		} else {
-			System.out.println("no hits");
-			System.out.printf("\n\n\n");
+			//System.out.println("no hits");
+			//System.out.printf("\n\n\n");
 			pick = false;
-			return new int[0];
+			return new int[0][0];
 		}
 	}
 
-	public int[] processHits(int hits, IntBuffer buffer) {
+	public int[][] processHits(int hits, IntBuffer buffer) {
 
-		int[] out = new int[hits];
+		int[][] out = new int[hits][10];
 
-		System.out.println("---------------------------------");
-		System.out.println(" HITS: " + hits);
+		//System.out.println("---------------------------------");
+		//System.out.println(" HITS: " + hits);
 		int offset = 0;
 		int names;
 		float z1, z2;
 		for (int i = 0; i < hits; i++) {
-			System.out.println("- - - - - - - - - - - -");
-			System.out.println(" hit: " + (i + 1));
+			//System.out.println("- - - - - - - - - - - -");
+			//System.out.println(" hit: " + (i + 1));
 			names = buffer.get(offset);
 			offset++;
 			z1 = (float) (buffer.get(offset) & 0xffffffffL) / 0x7fffffff;
 			offset++;
 			z2 = (float) (buffer.get(offset) & 0xffffffffL) / 0x7fffffff;
 			offset++;
-			System.out.println(" number of names: " + names);
-			System.out.println(" z1: " + z1);
-			System.out.println(" z2: " + z2);
-			System.out.println(" names: ");
+			//System.out.println(" number of names: " + names);
+			//System.out.println(" z1: " + z1);
+			//System.out.println(" z2: " + z2);
+			//System.out.println(" names: ");
 
 			for (int j = 0; j < names; j++) {
 				int q = buffer.get(offset);
-				System.out.print("       " + q);
-				// out should be 2 dimensional
-				out[i] = q;
+				//System.out.print("       " + q);
+				out[i][j] = q;
+				/*
 				if (j == (names - 1)) {
 					System.out.println("<-");
 				} else {
 					System.out.println();
 				}
+				*/
 				offset++;
 			}
-			System.out.println("- - - - - - - - - - - -");
+			//System.out.println("- - - - - - - - - - - -");
 		}
-		System.out.println("---------------------------------");
+		//System.out.println("---------------------------------");
 
 		return out;
 	}
@@ -491,21 +492,25 @@ public class Renderer implements GLEventListener,
 																// and depth
 																// buffers
 
-		int[] pickedObject = null;
+		int[][] pickedObject = null;
 
 		if (pick) {
 			startPicking(gl);
 			draw(gl, 0);
 			pickedObject = stopPicking(gl);
 
+			System.out.print("( ");
 			for (int i = 0; i < pickedObject.length; i++) {
-				if (pickedObject[i] == 1 && textureNum < 6) {
-					textureNum++;
+				for(int y = 0; y < pickedObject[i].length; y++) {
+					//if (pickedObject[i] == 1 && textureNum < 6) {
+					//textureNum++;
+					//}
+					System.out.print(pickedObject[i][y] + " , ");
 				}
-				System.out.println(pickedObject[i]);
 			}
+			System.out.println(" )");
 
-			System.out.println("TEXTURE NUM: " + textureNum);
+			//System.out.println("TEXTURE NUM: " + textureNum);
 		}
 
 		draw(gl, textureNum);
@@ -519,8 +524,8 @@ public class Renderer implements GLEventListener,
 		oldmovex = in[3];
 		oldmovey = in[4];
 		oldmovez = in[5];
-		
 		checkMoving();
+		
 
 		oldRotX = view_rotx;
 		oldRotY = view_roty;
