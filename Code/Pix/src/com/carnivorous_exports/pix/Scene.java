@@ -327,79 +327,68 @@ public class Scene {
 	
 	public float[] hasCollided(float[] cube1, float cube1Length, float[] cube2, float cube2Length) {
 		
-		
-		/*
-		 * out = 1 --> right side collision
-		 *  =2 --> left side collision
-		 *  =3 --> top collision
-		 *  =4 --> bottom collision
-		 *  =5 --> front collision
-		 *  =6 --> back collision
-		 */
 		float[] out = new float[3];
-		int num = -1;
+		
 		
 		/*
-			if(cube1[0] > cube2[0] - cube2Length && cube1[0] < cube2[0] + cube2Length && cube1[2] > cube2[2] - cube2Length
-					&& cube1[2] > cube2[2] - cube2Length  && cube1[2] < cube2[2] + cube2Length)
-				//front collided
-				num = 5;
-			if(cube1[0] > cube2[0] - cube2Length && cube1[0] < cube2[0] + cube2Length && cube1[2] > cube2[2] + cube2Length
-					&& cube1[2] > cube2[2] - cube2Length  && cube1[2] < cube2[2] + cube2Length)
-				//back collided
-				num = 6;
+		if(((cube1[0] > cube2[0] - cube2Length && cube1[0] < cube2[0] + cube2Length)
+				&& (cube1[1] > cube2[1] - cube2Length  && cube1[1] < cube2[1] + cube2Length)
+				&& (cube1[2] > cube2[2] - cube2Length  && cube1[2] < cube2[2] + cube2Length))
 			
-			if(cube1[2] > cube2[2] - cube2Length  && cube1[2] < cube2[2] + cube2Length && cube1[0] > cube2[0] - cube2Length
-					&& cube1[0] > cube2[0] - cube2Length && cube1[0] < cube2[0] + cube2Length)
-				//right collided
-				num = 1;
-			if(cube1[2] > cube2[2] - cube2Length  && cube1[2] < cube2[2] + cube2Length && cube1[0] > cube2[0] + cube2Length
-					&& cube1[0] > cube2[0] - cube2Length && cube1[0] < cube2[0] + cube2Length)
-				//left collided
-				num = 2;
-			*/
-			
-			//if(cube1[0] > cube2[0] - cube2Length && cube1[0] < cube2[0] + cube2Length )
-			
-			
-			if(cube2[0]-cube2Length < cube1[0] && cube2[0]+cube2Length > cube1[0]
-					&& cube2[1]-cube2Length < cube1[1] && cube2[1]+cube2Length > cube1[1]
-					&& cube2[2]-cube2Length < cube1[2]) {
+				||
+		
+				((cube1[0] - cube2Length > cube2[0] && cube1[0] + cube2Length < cube2[0])
+				&& (cube1[1] - cube2Length > cube2[1] && cube1[1] + cube2Length < cube2[1])
+				&& (cube1[2] - cube2Length > cube2[2] && cube1[2] + cube2Length < cube2[2]))) {
+		*/
+		
+			if(cube2[0]-cube2Length < cube1[0] && cube2[0]+cube1Length > cube1[0]
+					&& cube2[1]-cube2Length < cube1[1] && cube2[1]+cube1Length > cube1[1]
+					&& cube2[2] > cube1[2]) {
 				
-				out[0] -= 0.1f;
-				
-			} else if(cube2[0]-cube2Length < cube1[0] && cube2[0]+cube2Length > cube1[0]
-					&& cube2[1]-cube2Length < cube1[1] && cube2[1]+cube2Length > cube1[1]
-					&& cube2[2]+cube2Length < cube1[2]) {
-				
-				out[0] += 0.1f;
-				
-			} else if(cube2[2]-cube2Length < cube1[2] && cube2[2]+cube2Length > cube1[2]
-					&& cube2[1]-cube2Length < cube1[1] && cube2[1]+cube2Length > cube1[1]
-					&& cube2[0]-cube2Length < cube1[0]) {
-				
-				out[2] -= 0.1f;
-				
-			} else if(cube2[2]-cube2Length < cube1[2] && cube2[2]+cube2Length > cube1[2]
-					&& cube2[1]-cube2Length < cube1[1] && cube2[1]+cube2Length > cube1[1]
-					&& cube2[0]+cube2Length < cube1[0]) {
-				
-				out[2] += 0.1f;
-				
-			} else if(cube2[2]-cube2Length < cube1[2] && cube2[2]+cube2Length > cube1[2]
-					&& cube2[0]-cube2Length < cube1[0] && cube2[0]+cube2Length > cube1[0]
-					&& cube2[1]-cube2Length < cube1[1]) {
-				
-				out[1] -= 0.1f;
-				
-			} else if(cube2[2]-cube2Length < cube1[2] && cube2[2]+cube2Length > cube1[2]
-					&& cube2[0]-cube2Length < cube1[0] && cube2[1]+cube2Length > cube1[0]
-					&& cube2[1]+cube2Length < cube1[1]) {
-				
-				out[1] -= 0.1f;
+				out[2] -= 0.05f;
 				
 			}
-		
+			
+			if(cube2[0]-cube2Length < cube1[0] && cube2[0]+cube1Length > cube1[0]
+					&& cube2[1]-cube2Length < cube1[1] && cube2[1]+cube1Length > cube1[1]
+					&& cube2[2] < cube1[2]) {
+				
+				out[2] += 0.05f;
+				
+			}
+			
+			if(cube2[2]-cube2Length < cube1[2] && cube2[2]+cube1Length > cube1[2]
+					&& cube2[1]-cube2Length < cube1[1] && cube2[1]+cube1Length > cube1[1]
+					&& cube2[0] > cube1[0]) {
+				
+				out[0] -= 0.05f;
+				
+			}
+			
+			if(cube2[2]-cube2Length < cube1[2] && cube2[2]+cube1Length > cube1[2]
+					&& cube2[1]-cube2Length < cube1[1] && cube2[1]+cube1Length > cube1[1]
+					&& cube2[0] < cube1[0]) {
+				
+				out[0] += 0.05f;
+				
+			}
+			
+			if(cube2[2]-cube2Length < cube1[2] && cube2[2]+cube1Length > cube1[2]
+					&& cube2[0]-cube2Length < cube1[0] && cube2[0]+cube1Length > cube1[0]
+					&& cube2[1] > cube1[1]) {
+				
+				out[1] -= 0.05f;
+				
+			}
+			
+			if(cube2[2]-cube2Length < cube1[2] && cube2[2]+cube1Length > cube1[2]
+					&& cube2[0]-cube2Length < cube1[0] && cube2[0]+cube1Length > cube1[0]
+					&& cube2[1] < cube1[1]) {
+				
+				out[1] += 0.05f;
+				
+			}
 			
 			//collision between 2 cubes
 			/*
@@ -418,14 +407,19 @@ public class Scene {
 		return out;
 	}
 	
-	public float[] checkCollisions(float movex, float movey, float movez, 
-			float oldmovex, float oldmovey, float oldmovez) {
+	public float[] checkCollisions(float movex, float movey, float movez) {
 		
 		//just adding to the movex, movey or movez to simulate sliding along the side?
 		
 		float[] cube1 = { -movex, -movey, -movez };
 		float[] cube2 = { 2f, 0f, -4f };
 		
+		float[] out1 = hasCollided(cube2, 2, cube1, 3f);
+		movex += out1[0];
+		movey += out1[1];
+		movez += out1[2];
+		
+		/*
 		int topX = 12;
 		int topY = 8;
 		int topZ = 12;
@@ -434,8 +428,6 @@ public class Scene {
 		int posX = 12 * 0;
 		int posY = 2 * 0 + 2 * 0; // to make a hill
 		int posZ = 12 * 0 - 40;
-
-		boolean collision = false;
 		
 		for (float i = 4; i >= 1; i--) { // loop for each box size
 			for (int x = 0; x < topX; x++) { // x coords
@@ -449,7 +441,7 @@ public class Scene {
 							float[] in = {(float)(q*(x+posX) - (q*(i-4)*-0.5)), 
 									(float)(q*(y+posY) - (q*(i-4)*-0.5)), 
 									(float)(q*(z+posZ) - (q*(i-4)*-0.5))};
-							float[] out = hasCollided(in, 0.25f * i, cube1, 2f);
+							float[] out = hasCollided(in, 0.25f * i, cube1, 3f);
 								//collision = true;
 							movex += out[0];
 							movey += out[1];
@@ -459,6 +451,7 @@ public class Scene {
 				}
 			}
 		}
+		*/
 		
 		/*
 		if(!collision) {
@@ -486,7 +479,7 @@ public class Scene {
 		}
 		*/
 		
-		float[] out = {movex, movey, movez, oldmovex, oldmovey, oldmovez};
+		float[] out = {movex, movey, movez};
 		return out;
 	}
 	
@@ -520,7 +513,7 @@ public class Scene {
 
 		for (int x = 0; x < xLength; x++) {
 			for (int y = 0; y < yLength; y++) {
-				coords[x][y] = new Quad(drawable, renderer, 12, 8, 12, 0.5f,  //0.5f
+				coords[x][y] = new Quad(drawable, renderer, 12, 8, 12, 0.0f, //0.5f
 						gl, displayList, x, y);
 			}
 		}
