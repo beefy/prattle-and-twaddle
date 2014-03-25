@@ -112,9 +112,6 @@ public class Renderer implements GLEventListener,
 	public float movex;
 	public float movey;
 	public float movez;
-	public float oldmovex;
-	public float oldmovey;
-	public float oldmovez;
 	private float mouseSensitivity = 0.75f;
 
 	// for (arrow) key movement
@@ -330,8 +327,8 @@ public class Renderer implements GLEventListener,
 
 		gl.glTranslatef(movex, movey, movez);
 
-		terrain.drawScene(gl);
-		//terrain.testLightCube(gl, cubeList, lightPos, textureNum);
+		//terrain.drawScene(gl);
+		terrain.testLightCube(gl, cubeList, lightPos, textureNum);
 
 		// --------- Rendering Code
 		// terrain.drawScene(gl, selectedObject);
@@ -445,7 +442,7 @@ public class Renderer implements GLEventListener,
 				"terrainTextures/White Water Texture.jpeg", ".jpeg");
 
 		if (!initiated)
-			terrain.buildScene(drawable, this, gl, cubeList);
+			//terrain.buildScene(drawable, this, gl, cubeList);
 			//terrain.testLightCube(gl, cubeList, lightPos, 0);
 		initiated = true;
 	}
@@ -517,13 +514,10 @@ public class Renderer implements GLEventListener,
 
 		checkKeysPressed();
 		
-		float[] in = terrain.checkCollisions(movex, movey, movez, oldmovex, oldmovey, oldmovez);
+		float[] in = terrain.checkCollisions(movex, movey, movez);
 		movex = in[0];
 		movey = in[1];
 		movez = in[2];
-		oldmovex = in[3];
-		oldmovey = in[4];
-		oldmovez = in[5];
 		checkMoving();
 		
 
