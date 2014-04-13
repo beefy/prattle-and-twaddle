@@ -129,6 +129,8 @@ public class Renderer implements GLEventListener,
 	private boolean flyUpMove;
 	private boolean flyDownMove;
 
+	private boolean[] collided = {false, false, false};
+
 	int moveDirForward;
 	int moveDirStrife;
 	float moveSpeed = 2f;
@@ -156,7 +158,7 @@ public class Renderer implements GLEventListener,
 	// for user movement
 	public void checkMoving() {
 
-		if (forwardMove && !terrain.collided) { // moving forward or back
+		if (forwardMove) { // moving forward or back
 			movez += Math.cos(180 - view_roty * (Math.PI / 180) + 40) * 0.1
 					* -moveDirForward * moveSpeed;
 			movex -= Math.sin(180 - view_roty * (Math.PI / 180) + 40) * 0.1
@@ -164,7 +166,7 @@ public class Renderer implements GLEventListener,
 
 		}
 
-		if (strifeMove && !terrain.collided) { // moving right or left
+		if (strifeMove) { // moving right or left
 			movez -= Math.cos(180 - view_roty * (Math.PI / 180) + 40 + 80.1
 					* -moveDirStrife)
 					* 0.1 * moveSpeed;
@@ -177,9 +179,6 @@ public class Renderer implements GLEventListener,
 			movey -= 0.1;
 		if (flyDownMove)
 			movey += 0.1;
-
-		if (terrain.collided)
-			System.out.println("COLLISION");
 	}
 
 	/**
@@ -222,7 +221,7 @@ public class Renderer implements GLEventListener,
 	 * @return
 	 */
 	public void startPicking(GL2 gl) {
-		//System.out.println("Start Picking");
+		// System.out.println("Start Picking");
 		IntBuffer viewport = Buffers.newDirectIntBuffer(4);
 		float ratio;
 
@@ -244,14 +243,14 @@ public class Renderer implements GLEventListener,
 
 		ratio = (float) (viewport.get(2) + 0.0f) / (float) viewport.get(3);
 		glu.gluPerspective(45, ratio, 0.1, 1000);
-		//System.out.println("viewport[] = " + viewport.get(0) + ", "
-		//		+ viewport.get(1) + ", " + viewport.get(2));
+		// System.out.println("viewport[] = " + viewport.get(0) + ", "
+		// + viewport.get(1) + ", " + viewport.get(2));
 		gl.glMatrixMode(GL2.GL_MODELVIEW);
 	}
 
 	// returns the name of the picked object
 	public int[][] stopPicking(GL2 gl) {
-		//System.out.println("Stop Picking");
+		// System.out.println("Stop Picking");
 
 		gl.glMatrixMode(GL2.GL_PROJECTION);
 		gl.glPopMatrix();
@@ -261,13 +260,13 @@ public class Renderer implements GLEventListener,
 		hits = gl.glRenderMode(GL2.GL_RENDER);
 
 		if (hits > 0) {
-			//System.out.println("# of hits: " + hits);
-			//System.out.printf("\n\n\n");
+			// System.out.println("# of hits: " + hits);
+			// System.out.printf("\n\n\n");
 			pick = false;
 			return processHits(hits, selectBuf);
 		} else {
-			//System.out.println("no hits");
-			//System.out.printf("\n\n\n");
+			// System.out.println("no hits");
+			// System.out.printf("\n\n\n");
 			pick = false;
 			return new int[0][0];
 		}
@@ -277,41 +276,38 @@ public class Renderer implements GLEventListener,
 
 		int[][] out = new int[hits][10];
 
-		//System.out.println("---------------------------------");
-		//System.out.println(" HITS: " + hits);
+		// System.out.println("---------------------------------");
+		// System.out.println(" HITS: " + hits);
 		int offset = 0;
 		int names;
 		float z1, z2;
 		for (int i = 0; i < hits; i++) {
-			//System.out.println("- - - - - - - - - - - -");
-			//System.out.println(" hit: " + (i + 1));
+			// System.out.println("- - - - - - - - - - - -");
+			// System.out.println(" hit: " + (i + 1));
 			names = buffer.get(offset);
 			offset++;
 			z1 = (float) (buffer.get(offset) & 0xffffffffL) / 0x7fffffff;
 			offset++;
 			z2 = (float) (buffer.get(offset) & 0xffffffffL) / 0x7fffffff;
 			offset++;
-			//System.out.println(" number of names: " + names);
-			//System.out.println(" z1: " + z1);
-			//System.out.println(" z2: " + z2);
-			//System.out.println(" names: ");
+			// System.out.println(" number of names: " + names);
+			// System.out.println(" z1: " + z1);
+			// System.out.println(" z2: " + z2);
+			// System.out.println(" names: ");
 
 			for (int j = 0; j < names; j++) {
 				int q = buffer.get(offset);
-				//System.out.print("       " + q);
+				// System.out.print("       " + q);
 				out[i][j] = q;
 				/*
-				if (j == (names - 1)) {
-					System.out.println("<-");
-				} else {
-					System.out.println();
-				}
-				*/
+				 * if (j == (names - 1)) { System.out.println("<-"); } else {
+				 * System.out.println(); }
+				 */
 				offset++;
 			}
-			//System.out.println("- - - - - - - - - - - -");
+			// System.out.println("- - - - - - - - - - - -");
 		}
-		//System.out.println("---------------------------------");
+		// System.out.println("---------------------------------");
 
 		return out;
 	}
@@ -327,7 +323,7 @@ public class Renderer implements GLEventListener,
 
 		gl.glTranslatef(movex, movey, movez);
 
-		//terrain.drawScene(gl);
+		// terrain.drawScene(gl);
 		terrain.testLightCube(gl, cubeList, lightPos, textureNum);
 
 		// --------- Rendering Code
@@ -442,8 +438,8 @@ public class Renderer implements GLEventListener,
 				"terrainTextures/White Water Texture.jpeg", ".jpeg");
 
 		if (!initiated)
-			//terrain.buildScene(drawable, this, gl, cubeList);
-			//terrain.testLightCube(gl, cubeList, lightPos, 0);
+			// terrain.buildScene(drawable, this, gl, cubeList);
+			terrain.testLightCube(gl, cubeList, lightPos, 0);
 		initiated = true;
 	}
 
@@ -498,28 +494,87 @@ public class Renderer implements GLEventListener,
 
 			System.out.print("( ");
 			for (int i = 0; i < pickedObject.length; i++) {
-				for(int y = 0; y < pickedObject[i].length; y++) {
-					//if (pickedObject[i] == 1 && textureNum < 6) {
-					//textureNum++;
-					//}
+				for (int y = 0; y < pickedObject[i].length; y++) {
+					// if (pickedObject[i] == 1 && textureNum < 6) {
+					// textureNum++;
+					// }
 					System.out.print(pickedObject[i][y] + " , ");
 				}
 			}
 			System.out.println(" )");
 
-			//System.out.println("TEXTURE NUM: " + textureNum);
+			// System.out.println("TEXTURE NUM: " + textureNum);
 		}
 
 		draw(gl, textureNum);
 
 		checkKeysPressed();
-		
+
 		float[] in = terrain.checkCollisions(movex, movey, movez);
-		movex = in[0];
-		movey = in[1];
-		movez = in[2];
-		checkMoving();
 		
+		checkMoving();
+
+		if(in[3] == 1f || in[4] == 1f || in[5] == 1f) {
+			movex = in[0];
+			movey = in[1];
+			movez = in[2];
+		}
+			
+		/*
+		if(in[3] == 1 && in[4] == 0 && in[5] == 0) {
+			collided[0] = true;
+		} else if(in[3] == 0){
+			collided[0] = false;
+		}
+		
+		if(in[3] == 0 && in[4] == 1 && in[5] == 0) {
+			collided[1] = true;
+		} else  if (in[4] == 0){
+			collided[1] = false;
+		}
+		
+		if(in[3] == 0 && in[4] == 0 && in[5] == 1) {
+			collided[2] = true;
+		} else if(in[5] == 0) {
+			collided[2] = false;
+		}
+		*/
+		
+		
+		/*
+		//is this the most efficient way to do this?
+		if (!collided && in[3] == 1) {	//there was a collision
+			collided = true;
+			movex = in[0];
+			movey = in[1];
+			movez = in[2];
+		} else if (collided) {
+			if (movex == in[0] - 0.25 || movex == in[0] + 0.25) {	//change terrain.checkCollisions to return which side collided?
+				movey = in[1];
+				movez = in[2];
+			} else if (movey == in[1] - 0.25 || movey == in[1] + 0.25) {
+				movex = in[0];
+				movez = in[2];
+			} else if (movez == in[2] - 0.25 || movez == in[2] + 0.25) {
+				movex = in[0];
+				movey = in[1];
+			} else {
+				collided = false;
+				//movex = in[0];
+				//movey = in[1];
+				//movez = in[2];
+			}
+		} 
+		*/
+		/*
+		else {
+			movex = in[0];
+			movey = in[1];
+			movez = in[2];
+		}
+		*/
+		
+		//checkMoving();
 
 		oldRotX = view_rotx;
 		oldRotY = view_roty;
@@ -545,65 +600,69 @@ public class Renderer implements GLEventListener,
 
 	public void checkKeysPressed() {
 
-		if (upPressed && !downPressed) {
-			moveDirForward = -1;
-		} else if (downPressed && !upPressed) {
-			moveDirForward = +1;
-		}
+		if (initiated) {
 
-		if (leftPressed && !rightPressed) {
-			moveDirStrife = +1;
-		} else if (rightPressed && !leftPressed) {
-			moveDirStrife = -1;
-		}
+			if (upPressed && !downPressed) {
+				moveDirForward = -1;
+			} else if (downPressed && !upPressed) {
+				moveDirForward = +1;
+			}
 
-		if (!leftPressed && !rightPressed) {
-			strifeMove = false;
-		}
+			if (leftPressed && !rightPressed) {
+				moveDirStrife = +1;
+			} else if (rightPressed && !leftPressed) {
+				moveDirStrife = -1;
+			}
 
-		if (!upPressed && !downPressed) {
-			forwardMove = false;
-		}
+			if (!leftPressed && !rightPressed) {
+				strifeMove = false;
+			}
 
-		if (upPressed || downPressed) {
-			forwardMove = true;
-		}
+			if (!upPressed && !downPressed) {
+				forwardMove = false;
+			}
 
-		if (rightPressed || leftPressed) {
-			strifeMove = true;
-		}
+			if (upPressed || downPressed) {
+				forwardMove = true;
+			}
 
-		if (upPressed && downPressed) {
-			forwardMove = false;
-		}
+			if (rightPressed || leftPressed) {
+				strifeMove = true;
+			}
 
-		if (rightPressed && leftPressed) {
-			strifeMove = false;
-		}
+			if (upPressed && downPressed) {
+				forwardMove = false;
+			}
 
-		if (flyUpPressed && !flyDownPressed) {
-			flyUpMove = true;
-		}
+			if (rightPressed && leftPressed) {
+				strifeMove = false;
+			}
 
-		if (flyDownPressed && !flyUpPressed) {
-			flyDownMove = true;
-		}
+			if (flyUpPressed && !flyDownPressed) {
+				flyUpMove = true;
+			}
 
-		if (!flyUpPressed) {
-			flyUpMove = false;
-		}
+			if (flyDownPressed && !flyUpPressed) {
+				flyDownMove = true;
+			}
 
-		if (!flyDownPressed) {
-			flyDownMove = false;
-		}
+			if (!flyUpPressed) {
+				flyUpMove = false;
+			}
 
-		if (audioOn) {
-			// for walking audio
-			if (!forwardMove && !strifeMove) {
-				audio.stop(walkNum);
-			} else if ((forwardMove || strifeMove) && !audio.isPlaying(walkNum)) {
-				walkNum = (int) (Math.random() * 4);
-				audio.play(walkNum);
+			if (!flyDownPressed) {
+				flyDownMove = false;
+			}
+
+			if (audioOn) {
+				// for walking audio
+				if (!forwardMove && !strifeMove) {
+					audio.stop(walkNum);
+				} else if ((forwardMove || strifeMove)
+						&& !audio.isPlaying(walkNum)) {
+					walkNum = (int) (Math.random() * 4);
+					audio.play(walkNum);
+				}
 			}
 		}
 	}
@@ -633,54 +692,58 @@ public class Renderer implements GLEventListener,
 
 	@Override
 	public void mouseMoved(com.jogamp.newt.event.MouseEvent e) {
-		/**
-		 * To prevent the mouse from hitting the edge of the screen we have to
-		 * move the mouse to the center of the screen every other iteration and
-		 * keep track of the mouse position ourselves
-		 * 
-		 * mouseInMiddle == false when we are iterating just to keep the mouse
-		 * in the middle
-		 */
+		if (initiated) {
+			/**
+			 * To prevent the mouse from hitting the edge of the screen we have
+			 * to move the mouse to the center of the screen every other
+			 * iteration and keep track of the mouse position ourselves
+			 * 
+			 * mouseInMiddle == false when we are iterating just to keep the
+			 * mouse in the middle
+			 */
 
-		mouseXGlobal = e.getX();
-		mouseYGlobal = e.getY();
+			mouseXGlobal = e.getX();
+			mouseYGlobal = e.getY();
 
-		if (!mouseInMiddle)
-			return;
+			if (!mouseInMiddle)
+				return;
 
-		prevMouseY = height / 2; // because the mouse is always in the middle of
-		prevMouseX = width / 2; // the screen, the prevMouseX/Y is also always
-								// the middle of the screen
-		float thetaY;
-		float thetaX;
+			prevMouseY = height / 2; // because the mouse is always in the
+										// middle of
+			prevMouseX = width / 2; // the screen, the prevMouseX/Y is also
+									// always
+									// the middle of the screen
+			float thetaY;
+			float thetaX;
 
-		mouseY = prevMouseY - e.getY();
-		mouseX = prevMouseX - e.getX();
+			mouseY = prevMouseY - e.getY();
+			mouseX = prevMouseX - e.getX();
 
-		thetaY = 360.0f * ((float) (mouseX) / (float) width);
-		thetaX = 360.0f * ((float) (mouseY) / (float) height);
+			thetaY = 360.0f * ((float) (mouseX) / (float) width);
+			thetaX = 360.0f * ((float) (mouseY) / (float) height);
 
-		prevMouseX = mouseX;
-		prevMouseY = mouseY;
+			prevMouseX = mouseX;
+			prevMouseY = mouseY;
 
-		// restricting x rotation movement to make physical sense
-		// DOESNT WORK
-		if (view_rotx + thetaX * mouseSensitivity < 180
-				&& view_rotx + thetaX * mouseSensitivity > -180) {
-			view_rotx += thetaX * mouseSensitivity;
+			// restricting x rotation movement to make physical sense
+			// DOESNT WORK
+			if (view_rotx + thetaX * mouseSensitivity < 180
+					&& view_rotx + thetaX * mouseSensitivity > -180) {
+				view_rotx += thetaX * mouseSensitivity;
+			}
+
+			view_roty += thetaY * mouseSensitivity;
+
+			view_roty = view_roty % 360;
+
+			mouseInMiddle = false;
+
+			// both robot.mouseMove and window.warpPointer work
+			// robot.mouseMove(width / 2, height / 2);
+			window.warpPointer(width / 2, height / 2);
+
+			mouseInMiddle = true;
 		}
-
-		view_roty += thetaY * mouseSensitivity;
-
-		view_roty = view_roty % 360;
-
-		mouseInMiddle = false;
-
-		// both robot.mouseMove and window.warpPointer work
-		// robot.mouseMove(width / 2, height / 2);
-		window.warpPointer(width / 2, height / 2);
-
-		mouseInMiddle = true;
 	}
 
 	@Override
@@ -704,73 +767,76 @@ public class Renderer implements GLEventListener,
 	@Override
 	public void keyPressed(com.jogamp.newt.event.KeyEvent e) {
 
-		// press esc to quit
-		int keyCode = e.getKeyCode();
-		switch (keyCode) {
-		case com.jogamp.newt.event.KeyEvent.VK_ESCAPE: // quit
-			// Use a dedicate thread to run the stop() to ensure that the
-			// animator stops before program exits.
-			new Thread() {
-				@Override
-				public void run() {
-					GLAnimatorControl animator = window.getAnimator();
-					if (animator.isStarted())
-						animator.stop();
-					System.exit(0);
-				}
-			}.start();
-			break;
-		}
+		if (initiated) {
+			// press esc to quit
+			int keyCode = e.getKeyCode();
+			switch (keyCode) {
+			case com.jogamp.newt.event.KeyEvent.VK_ESCAPE: // quit
+				// Use a dedicate thread to run the stop() to ensure that the
+				// animator stops before program exits.
+				new Thread() {
+					@Override
+					public void run() {
+						GLAnimatorControl animator = window.getAnimator();
+						if (animator.isStarted())
+							animator.stop();
+						System.exit(0);
+					}
+				}.start();
+				break;
+			}
 
-		// to move
-		if (keyCode == com.jogamp.newt.event.KeyEvent.VK_LEFT
-				|| keyCode == com.jogamp.newt.event.KeyEvent.VK_A)
-			leftPressed = true;
-		if (keyCode == com.jogamp.newt.event.KeyEvent.VK_RIGHT
-				|| keyCode == com.jogamp.newt.event.KeyEvent.VK_D)
-			rightPressed = true;
-		if (keyCode == com.jogamp.newt.event.KeyEvent.VK_UP
-				|| keyCode == com.jogamp.newt.event.KeyEvent.VK_W)
-			upPressed = true;
-		if (keyCode == com.jogamp.newt.event.KeyEvent.VK_DOWN
-				|| keyCode == com.jogamp.newt.event.KeyEvent.VK_S)
-			downPressed = true;
+			// to move
+			if (keyCode == com.jogamp.newt.event.KeyEvent.VK_LEFT
+					|| keyCode == com.jogamp.newt.event.KeyEvent.VK_A)
+				leftPressed = true;
+			if (keyCode == com.jogamp.newt.event.KeyEvent.VK_RIGHT
+					|| keyCode == com.jogamp.newt.event.KeyEvent.VK_D)
+				rightPressed = true;
+			if (keyCode == com.jogamp.newt.event.KeyEvent.VK_UP
+					|| keyCode == com.jogamp.newt.event.KeyEvent.VK_W)
+				upPressed = true;
+			if (keyCode == com.jogamp.newt.event.KeyEvent.VK_DOWN
+					|| keyCode == com.jogamp.newt.event.KeyEvent.VK_S)
+				downPressed = true;
 
-		// flying up and down (for debugging)
-		if (keyCode == com.jogamp.newt.event.KeyEvent.VK_SHIFT) {
-			flyUpPressed = true;
-		}
+			// flying up and down (for debugging)
+			if (keyCode == com.jogamp.newt.event.KeyEvent.VK_SHIFT) {
+				flyUpPressed = true;
+			}
 
-		if (keyCode == com.jogamp.newt.event.KeyEvent.VK_CONTROL) {
-			flyDownPressed = true;
+			if (keyCode == com.jogamp.newt.event.KeyEvent.VK_CONTROL) {
+				flyDownPressed = true;
+			}
 		}
 	}
 
 	@Override
 	public void keyReleased(com.jogamp.newt.event.KeyEvent e) {
+		if (initiated) {
+			if (e.isAutoRepeat())
+				return;
 
-		if (e.isAutoRepeat())
-			return;
+			int kc = e.getKeyCode();
+			if (kc == com.jogamp.newt.event.KeyEvent.VK_LEFT
+					|| kc == com.jogamp.newt.event.KeyEvent.VK_A)
+				leftPressed = false;
+			else if (kc == com.jogamp.newt.event.KeyEvent.VK_RIGHT
+					|| kc == com.jogamp.newt.event.KeyEvent.VK_D)
+				rightPressed = false;
+			else if (kc == com.jogamp.newt.event.KeyEvent.VK_UP
+					|| kc == com.jogamp.newt.event.KeyEvent.VK_W)
+				upPressed = false;
+			else if (kc == com.jogamp.newt.event.KeyEvent.VK_DOWN
+					|| kc == com.jogamp.newt.event.KeyEvent.VK_S)
+				downPressed = false;
 
-		int kc = e.getKeyCode();
-		if (kc == com.jogamp.newt.event.KeyEvent.VK_LEFT
-				|| kc == com.jogamp.newt.event.KeyEvent.VK_A)
-			leftPressed = false;
-		else if (kc == com.jogamp.newt.event.KeyEvent.VK_RIGHT
-				|| kc == com.jogamp.newt.event.KeyEvent.VK_D)
-			rightPressed = false;
-		else if (kc == com.jogamp.newt.event.KeyEvent.VK_UP
-				|| kc == com.jogamp.newt.event.KeyEvent.VK_W)
-			upPressed = false;
-		else if (kc == com.jogamp.newt.event.KeyEvent.VK_DOWN
-				|| kc == com.jogamp.newt.event.KeyEvent.VK_S)
-			downPressed = false;
-
-		// flying up and down (for debugging)
-		if (kc == com.jogamp.newt.event.KeyEvent.VK_SHIFT) {
-			flyUpPressed = false;
-		} else if (kc == com.jogamp.newt.event.KeyEvent.VK_CONTROL) {
-			flyDownPressed = false;
+			// flying up and down (for debugging)
+			if (kc == com.jogamp.newt.event.KeyEvent.VK_SHIFT) {
+				flyUpPressed = false;
+			} else if (kc == com.jogamp.newt.event.KeyEvent.VK_CONTROL) {
+				flyDownPressed = false;
+			}
 		}
 	}
 }

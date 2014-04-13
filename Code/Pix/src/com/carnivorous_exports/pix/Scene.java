@@ -328,6 +328,10 @@ public class Scene {
 	public float[] hasCollided(float[] cube1, float cube1Length, float[] cube2, float cube2Length) {
 		
 		float[] out = new float[3];
+		float reactionSpeed = 0.1f;
+		float diffx = cube1[0] - cube2[0];
+		float diffy = cube1[1] - cube2[1];
+		float diffz = cube1[2] - cube2[2];
 		
 		
 		/*
@@ -342,53 +346,87 @@ public class Scene {
 				&& (cube1[2] - cube2Length > cube2[2] && cube1[2] + cube2Length < cube2[2]))) {
 		*/
 		
+		if(((cube1[0] > cube2[0] - cube2Length && cube1[0] < cube2[0] + cube2Length)
+				&& (cube1[1] > cube2[1] - cube2Length  && cube1[1] < cube2[1] + cube2Length)
+				&& (cube1[2] > cube2[2] - cube2Length  && cube1[2] < cube2[2] + cube2Length))
+			
+				||
+		
+				((cube1[0] - cube2Length > cube2[0] && cube1[0] + cube2Length < cube2[0])
+				&& (cube1[1] - cube2Length > cube2[1] && cube1[1] + cube2Length < cube2[1])
+				&& (cube1[2] - cube2Length > cube2[2] && cube1[2] + cube2Length < cube2[2]))) {
+			
+			if(diffz > diffx && diffz > diffy) {
+				out[2] -= reactionSpeed;
+			} else if(diffz < diffx && diffz < diffy){
+				out[2] += reactionSpeed;
+			} else if(diffx > diffz && diffx > diffy) {
+				out[0] -= reactionSpeed;
+			} else if(diffx < diffz && diffx < diffy) {
+				out[0] += reactionSpeed;
+			} else if(diffy > diffz && diffy > diffx) {
+				out[1] -= reactionSpeed;
+			} else if(diffy < diffz && diffy < diffx) {
+				out[1] += reactionSpeed;
+			}
+		}
+		
+		/*
 			if(cube2[0]-cube2Length < cube1[0] && cube2[0]+cube1Length > cube1[0]
-					&& cube2[1]-cube2Length < cube1[1] && cube2[1]+cube1Length > cube1[1]
-					&& cube2[2] > cube1[2]) {
+					&& cube2[1]-cube2Length < cube1[1] && cube2[1]+cube1Length > cube1[1]) {
+					//&& cube2[2]-cube1[2] > cube2[0]-cube1[0] && cube2[2]-cube1[2] > cube2[1]-cube1[1]) {
+					//&& cube1[0] - cube2[0] > cube2[1]-cube1[1] && cube1[0] - cube2[0] > cube2[2] - cube1[2]) {
 				
 				out[2] -= 0.05f;
 				
 			}
 			
 			if(cube2[0]-cube2Length < cube1[0] && cube2[0]+cube1Length > cube1[0]
-					&& cube2[1]-cube2Length < cube1[1] && cube2[1]+cube1Length > cube1[1]
-					&& cube2[2] < cube1[2]) {
+					&& cube2[1]-cube2Length < cube1[1] && cube2[1]+cube1Length > cube1[1]) {
+					//&& cube2[2]-cube1[2] > cube2[0]-cube1[0] && cube2[2]-cube1[2] > cube2[1]-cube1[1]) {
+					//&& cube2[0] - cube1[0] > cube2[1]-cube1[1] && cube2[0] - cube1[0] > cube2[2] - cube1[2]) {
 				
 				out[2] += 0.05f;
 				
 			}
 			
 			if(cube2[2]-cube2Length < cube1[2] && cube2[2]+cube1Length > cube1[2]
-					&& cube2[1]-cube2Length < cube1[1] && cube2[1]+cube1Length > cube1[1]
-					&& cube2[0] > cube1[0]) {
+					&& cube2[1]-cube2Length < cube1[1] && cube2[1]+cube1Length > cube1[1]) {
+					//&& cube2[0]-cube1[0] > cube2[2]-cube1[2] && cube2[0]-cube1[0] > cube2[1]-cube1[1]) {
+					//&& cube1[2] - cube2[2] > cube2[1]-cube1[1] && cube1[2] - cube2[2] > cube2[0] - cube1[0]) {
 				
 				out[0] -= 0.05f;
 				
 			}
 			
 			if(cube2[2]-cube2Length < cube1[2] && cube2[2]+cube1Length > cube1[2]
-					&& cube2[1]-cube2Length < cube1[1] && cube2[1]+cube1Length > cube1[1]
-					&& cube2[0] < cube1[0]) {
+					&& cube2[1]-cube2Length < cube1[1] && cube2[1]+cube1Length > cube1[1]) {
+					//&& cube2[0]-cube1[0] > cube2[2]-cube1[2] && cube2[0]-cube1[0] > cube2[1]-cube1[1]) {
+					//&& cube2[2] - cube1[2] > cube2[1]-cube1[1] && cube2[2] - cube1[2] > cube2[0] - cube1[0]) {
 				
 				out[0] += 0.05f;
 				
 			}
 			
 			if(cube2[2]-cube2Length < cube1[2] && cube2[2]+cube1Length > cube1[2]
-					&& cube2[0]-cube2Length < cube1[0] && cube2[0]+cube1Length > cube1[0]
-					&& cube2[1] > cube1[1]) {
+					&& cube2[0]-cube2Length < cube1[0] && cube2[0]+cube1Length > cube1[0]) {
+					//&& cube2[1]-cube1[1] > cube2[2]-cube1[2] && cube2[1]-cube1[1] > cube2[0]-cube1[0]) {
+					//&& cube1[1] - cube2[1] > cube2[0]-cube1[0] && cube1[1] - cube2[1] > cube2[2] - cube1[2]) {
 				
 				out[1] -= 0.05f;
 				
 			}
 			
 			if(cube2[2]-cube2Length < cube1[2] && cube2[2]+cube1Length > cube1[2]
-					&& cube2[0]-cube2Length < cube1[0] && cube2[0]+cube1Length > cube1[0]
-					&& cube2[1] < cube1[1]) {
+					&& cube2[0]-cube2Length < cube1[0] && cube2[0]+cube1Length > cube1[0]) {
+					//&& cube2[1]-cube1[1] > cube2[2]-cube1[2] && cube2[1]-cube1[1] > cube2[0]-cube1[0]) {
+					//&& cube2[1] - cube1[1] > cube2[0]-cube1[0] && cube2[1] - cube1[1] > cube2[2] - cube1[2]) {
 				
 				out[1] += 0.05f;
 				
 			}
+		
+		*/
 			
 			//collision between 2 cubes
 			/*
@@ -414,7 +452,7 @@ public class Scene {
 		float[] cube1 = { -movex, -movey, -movez };
 		float[] cube2 = { 2f, 0f, -4f };
 		
-		float[] out1 = hasCollided(cube2, 2, cube1, 3f);
+		float[] out1 = hasCollided(cube1, 2, cube2, 2f);
 		movex += out1[0];
 		movey += out1[1];
 		movez += out1[2];
@@ -479,7 +517,13 @@ public class Scene {
 		}
 		*/
 		
-		float[] out = {movex, movey, movez};
+		//0 if no collision
+		//1 if yes collision
+		int[] collision = {0, 0, 0};
+		if(out1[0] != 0f) collision[0] = 1;
+		if(out1[1] != 0f) collision[1] = 1;
+		if(out1[2] != 0f) collision[2] = 1;
+		float[] out = {movex, movey, movez, collision[0], collision[1], collision[2]};
 		return out;
 	}
 	
