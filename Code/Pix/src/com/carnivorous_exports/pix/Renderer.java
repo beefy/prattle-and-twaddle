@@ -2,54 +2,17 @@ package com.carnivorous_exports.pix;
 
 import java.awt.AWTException;
 import java.awt.Robot;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
-import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Vector;
 
-import javax.media.nativewindow.CapabilitiesChooser;
-import javax.media.nativewindow.CapabilitiesImmutable;
-import javax.media.nativewindow.NativeSurface;
-import javax.media.nativewindow.NativeWindow;
-import javax.media.nativewindow.NativeWindowException;
-import javax.media.nativewindow.SurfaceUpdatedListener;
-import javax.media.nativewindow.util.InsetsImmutable;
-import javax.media.nativewindow.util.Point;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
-import javax.media.opengl.GL3;
 import javax.media.opengl.GLAnimatorControl;
 import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCapabilities;
-import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
-import javax.media.opengl.GLProfile;
-import javax.media.opengl.GLRunnable;
-import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.glu.GLU;
 
 import com.jogamp.common.nio.Buffers;
-import com.jogamp.newt.MonitorDevice;
-import com.jogamp.newt.Screen;
-import com.jogamp.newt.Window;
-import com.jogamp.newt.event.GestureHandler;
-import com.jogamp.newt.event.GestureHandler.GestureListener;
-import com.jogamp.newt.event.InputEvent;
-import com.jogamp.newt.event.MouseAdapter;
-import com.jogamp.newt.event.NEWTEvent;
-import com.jogamp.newt.event.WindowListener;
-import com.jogamp.newt.event.awt.AWTKeyAdapter;
-import com.jogamp.newt.event.awt.AWTMouseAdapter;
 import com.jogamp.newt.opengl.GLWindow;
-import com.jogamp.opengl.math.VectorUtil;
-import com.jogamp.opengl.util.Animator;
 
 import static javax.media.opengl.GL.*; // GL constants
 import static javax.media.opengl.GL2.*; // GL2 constants
@@ -57,7 +20,6 @@ import static javax.media.opengl.GL2ES1.GL_PERSPECTIVE_CORRECTION_HINT;
 import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_AMBIENT;
 import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_COLOR_MATERIAL;
 import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_DIFFUSE;
-import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_LIGHT0;
 import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_LIGHT1;
 import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_POSITION;
 
@@ -66,15 +28,12 @@ public class Renderer implements GLEventListener,
 		com.jogamp.newt.event.MouseListener, com.jogamp.newt.event.KeyListener {
 
 	private static GLWindow window;
-	private GLU glu; // for the GL Utility\
+	private GLU glu; // for the GL Utility
 	public boolean audioOn = false;
 	private int[] cubeList; // display list for cube
 	private Scene terrain = new Scene();
 	private boolean initiated = false;
 	GLAutoDrawable drawable;
-
-	// GLPbuffer is deprecated
-	// private GLPbuffer glpBuffer;
 
 	public static Audio audio = new Audio();
 	int walkNum = 0;
@@ -85,9 +44,7 @@ public class Renderer implements GLEventListener,
 	float[] lightDif = { 0.6f, 0.6f, 0.6f, 1.0f };
 	float[] lightColorAmbient = { 0.2f, 0.2f, 0.2f, 1f };
 	float[] lightColorSpecular = { 0.8f, 0.8f, 0.8f, 1f };
-
 	float cameraPos[] = { 5.0f, 5.0f, 10.0f, 0.0f };
-
 	float[] colorWhite = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 	Robot robot;
@@ -114,7 +71,7 @@ public class Renderer implements GLEventListener,
 	public float movez;
 	private float mouseSensitivity = 0.75f;
 
-	// for (arrow) key movement
+	// for movement
 	private boolean upPressed;
 	private boolean downPressed;
 	private boolean rightPressed;
@@ -129,7 +86,7 @@ public class Renderer implements GLEventListener,
 	private boolean flyUpMove;
 	private boolean flyDownMove;
 
-	private boolean[] collided = {false, false, false};
+	//private boolean[] collided = {false, false, false};
 
 	int moveDirForward;
 	int moveDirStrife;
@@ -150,8 +107,6 @@ public class Renderer implements GLEventListener,
 		window.addGLEventListener(this);
 		window.addMouseListener(this);
 		window.addKeyListener(this);
-		// window.
-		// window.
 		window.requestFocus();
 	}
 
@@ -175,6 +130,7 @@ public class Renderer implements GLEventListener,
 					* 0.1 * moveSpeed;
 		}
 
+		//moving up or down
 		if (flyUpMove)
 			movey -= 0.1;
 		if (flyDownMove)
@@ -182,8 +138,8 @@ public class Renderer implements GLEventListener,
 	}
 
 	/**
-	 * Get the current mouse position in world coordinates using gluUnProject d
-	 * is the distance away from the screen d == 0.0 is at the screen, d == 1.0
+	 * Get the current mouse position in world coordinates using gluUnProject. "d"
+	 * is the distance away from the screen: d == 0.0 is at the screen, d == 1.0
 	 * is very far away from the screen
 	 * 
 	 * @return
@@ -204,10 +160,6 @@ public class Renderer implements GLEventListener,
 		winX = (float) mouseX;
 		winY = (float) viewport[3] - (float) mouseY;
 
-		float[] depth = new float[1];
-		// gl.glReadPixels(winX, winY, 1, 1, gl.GL_DEPTH_COMPONENT,
-		// GL2.GL_FLOAT, depth);
-
 		glu.gluUnProject(winX, winY, d, modelview, 0, projection, 0, viewport,
 				0, mouse3DPos, 0);
 
@@ -215,22 +167,18 @@ public class Renderer implements GLEventListener,
 	}
 
 	/**
-	 * Get the current mouse position in world coordinates using gluPickMatrix
-	 * Call startPicking() before drawing and stopPicking() after drawing
-	 * 
+	 * Get the names of objects that are picked using gluPickMatrix.
+	 * Call startPicking() before drawing and stopPicking() after drawing.
+	 * Name objects in Scene.java
 	 * @return
 	 */
 	public void startPicking(GL2 gl) {
-		// System.out.println("Start Picking");
 		IntBuffer viewport = Buffers.newDirectIntBuffer(4);
 		float ratio;
 
 		gl.glSelectBuffer(BUFSIZE, selectBuf);
-
 		gl.glGetIntegerv(GL2.GL_VIEWPORT, viewport);
-
 		gl.glRenderMode(GL2.GL_SELECT);
-
 		gl.glInitNames();
 
 		gl.glMatrixMode(GL2.GL_PROJECTION);
@@ -243,75 +191,53 @@ public class Renderer implements GLEventListener,
 
 		ratio = (float) (viewport.get(2) + 0.0f) / (float) viewport.get(3);
 		glu.gluPerspective(45, ratio, 0.1, 1000);
-		// System.out.println("viewport[] = " + viewport.get(0) + ", "
-		// + viewport.get(1) + ", " + viewport.get(2));
 		gl.glMatrixMode(GL2.GL_MODELVIEW);
 	}
 
 	// returns the name of the picked object
-	public int[][] stopPicking(GL2 gl) {
-		// System.out.println("Stop Picking");
-
+	public int[] stopPicking(GL2 gl) {
 		gl.glMatrixMode(GL2.GL_PROJECTION);
 		gl.glPopMatrix();
 		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		gl.glFlush();
 
 		hits = gl.glRenderMode(GL2.GL_RENDER);
-
+		
 		if (hits > 0) {
-			// System.out.println("# of hits: " + hits);
-			// System.out.printf("\n\n\n");
 			pick = false;
 			return processHits(hits, selectBuf);
 		} else {
-			// System.out.println("no hits");
-			// System.out.printf("\n\n\n");
 			pick = false;
-			return new int[0][0];
+			return new int[0];
 		}
 	}
 
-	public int[][] processHits(int hits, IntBuffer buffer) {
+	public int[] processHits(int hits, IntBuffer buffer) {
 
-		int[][] out = new int[hits][10];
+		int[] out = new int[hits];
 
-		// System.out.println("---------------------------------");
-		// System.out.println(" HITS: " + hits);
 		int offset = 0;
 		int names;
 		float z1, z2;
 		for (int i = 0; i < hits; i++) {
-			// System.out.println("- - - - - - - - - - - -");
-			// System.out.println(" hit: " + (i + 1));
 			names = buffer.get(offset);
 			offset++;
 			z1 = (float) (buffer.get(offset) & 0xffffffffL) / 0x7fffffff;
 			offset++;
 			z2 = (float) (buffer.get(offset) & 0xffffffffL) / 0x7fffffff;
 			offset++;
-			// System.out.println(" number of names: " + names);
-			// System.out.println(" z1: " + z1);
-			// System.out.println(" z2: " + z2);
-			// System.out.println(" names: ");
 
 			for (int j = 0; j < names; j++) {
 				int q = buffer.get(offset);
-				// System.out.print("       " + q);
-				out[i][j] = q;
-				/*
-				 * if (j == (names - 1)) { System.out.println("<-"); } else {
-				 * System.out.println(); }
-				 */
+				out[i] = q;
 				offset++;
 			}
-			// System.out.println("- - - - - - - - - - - -");
 		}
-		// System.out.println("---------------------------------");
 
 		return out;
 	}
 
+	//draw the scene
 	public void draw(GL2 gl, int textureNum) {
 
 		gl.glPushMatrix();
@@ -325,11 +251,6 @@ public class Renderer implements GLEventListener,
 
 		// terrain.drawScene(gl);
 		terrain.testLightCube(gl, cubeList, lightPos, textureNum);
-
-		// --------- Rendering Code
-		// terrain.drawScene(gl, selectedObject);
-		// terrain.drawScene(gl);
-		// terrain.testLightCube(gl, cubeList, lightPos);
 
 		gl.glLightfv(GL_LIGHT1, GL_AMBIENT, lightColorAmbient, 0);
 		gl.glLightfv(GL_LIGHT1, GL_DIFFUSE, lightDif, 0);
@@ -352,8 +273,6 @@ public class Renderer implements GLEventListener,
 		audio.newFile(4, "SoundEffects/Groups/Humanoids/Walking4.wav", false,
 				new float[3], 1.0f, 500);
 	}
-
-	// ------ Implement methods declared in GLEventListener ------
 
 	/**
 	 * Called back immediately after the OpenGL context is initialized. Can be
@@ -485,7 +404,7 @@ public class Renderer implements GLEventListener,
 																// and depth
 																// buffers
 
-		int[][] pickedObject = null;
+		int[] pickedObject = null;
 
 		if (pick) {
 			startPicking(gl);
@@ -494,12 +413,10 @@ public class Renderer implements GLEventListener,
 
 			System.out.print("( ");
 			for (int i = 0; i < pickedObject.length; i++) {
-				for (int y = 0; y < pickedObject[i].length; y++) {
-					// if (pickedObject[i] == 1 && textureNum < 6) {
-					// textureNum++;
-					// }
-					System.out.print(pickedObject[i][y] + " , ");
+				if (pickedObject[i] == 1 && textureNum < 6) {
+					textureNum++;
 				}
+				System.out.print(pickedObject[i] + " , ");
 			}
 			System.out.println(" )");
 
@@ -520,69 +437,12 @@ public class Renderer implements GLEventListener,
 			movez = in[2];
 		}
 			
-		/*
-		if(in[3] == 1 && in[4] == 0 && in[5] == 0) {
-			collided[0] = true;
-		} else if(in[3] == 0){
-			collided[0] = false;
-		}
-		
-		if(in[3] == 0 && in[4] == 1 && in[5] == 0) {
-			collided[1] = true;
-		} else  if (in[4] == 0){
-			collided[1] = false;
-		}
-		
-		if(in[3] == 0 && in[4] == 0 && in[5] == 1) {
-			collided[2] = true;
-		} else if(in[5] == 0) {
-			collided[2] = false;
-		}
-		*/
-		
-		
-		/*
-		//is this the most efficient way to do this?
-		if (!collided && in[3] == 1) {	//there was a collision
-			collided = true;
-			movex = in[0];
-			movey = in[1];
-			movez = in[2];
-		} else if (collided) {
-			if (movex == in[0] - 0.25 || movex == in[0] + 0.25) {	//change terrain.checkCollisions to return which side collided?
-				movey = in[1];
-				movez = in[2];
-			} else if (movey == in[1] - 0.25 || movey == in[1] + 0.25) {
-				movex = in[0];
-				movez = in[2];
-			} else if (movez == in[2] - 0.25 || movez == in[2] + 0.25) {
-				movex = in[0];
-				movey = in[1];
-			} else {
-				collided = false;
-				//movex = in[0];
-				//movey = in[1];
-				//movez = in[2];
-			}
-		} 
-		*/
-		/*
-		else {
-			movex = in[0];
-			movey = in[1];
-			movez = in[2];
-		}
-		*/
-		
-		//checkMoving();
-
 		oldRotX = view_rotx;
 		oldRotY = view_roty;
 		oldRotZ = view_rotz;
 
 		long drawNanos = System.nanoTime() - startNanos;
 		// System.out.println("drawn in " + drawNanos);
-
 		// System.out.println(drawable.getAnimator().getLastFPS());
 
 		drawable.swapBuffers();
