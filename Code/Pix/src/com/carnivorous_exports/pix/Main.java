@@ -1,33 +1,20 @@
 package com.carnivorous_exports.pix;
 
-import java.awt.*;
-import java.awt.image.BufferedImage;
-
 import javax.swing.*;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLProfile;
-import javax.media.opengl.awt.GLCanvas;
 
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.util.FPSAnimator;
 
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLEventListener;
-import javax.media.opengl.GLProfile;
-import javax.media.opengl.GLCapabilities;
-import javax.media.opengl.awt.GLCanvas;
-
 import java.awt.Frame;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-
 
 @SuppressWarnings("serial")
 public class Main extends Frame {
 	// Define constants for the top-level container
 	private static String TITLE = "Pix"; // window's title
-	private static final int CANVAS_WIDTH = 640; // width of the drawable
-	private static final int CANVAS_HEIGHT = 480; // height of the drawable
+	private static final int CANVAS_WIDTH = 500; // width of the drawable
+	private static final int CANVAS_HEIGHT = 500; // height of the drawable
 	private static final int FPS = 50; // animator's target frames per second
 	private boolean fullScreen = true;
 	private boolean cursorVisible = false;
@@ -35,10 +22,6 @@ public class Main extends Frame {
 	/** Constructor to setup the top-level container and animator */
 	public Main() {
 	
-		//for GLWindow
-		GLProfile glprofile = GLProfile.getDefault();
-		GLProfile.initSingleton();
-			
 		// Run the GUI codes in the event-dispatching thread for thread safety
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
@@ -65,7 +48,7 @@ public class Main extends Frame {
 
 				if(!fullScreen) {
 					window.setFullscreen(false);
-					window.setSize(500,500);
+					window.setSize(CANVAS_WIDTH,CANVAS_HEIGHT);
 				}
 				else window.setFullscreen(true);
 				window.setVisible(true);
