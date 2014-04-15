@@ -11,25 +11,28 @@ import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_SHININESS;
 import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_SPECULAR;
 
 import java.io.IOException;
-import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.ArrayList;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
-import javax.media.opengl.GL3;
-import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLException;
-import javax.media.opengl.GLRunnable;
 import javax.media.opengl.fixedfunc.GLLightingFunc;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUquadric;
 
-import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureCoords;
 import com.jogamp.opengl.util.texture.TextureIO;
 
+/**
+ * 
+ * This class contains the methods that draw the scene, 
+ * assign textures and materials of objects, and
+ * check for collision detection.
+ * 
+ * @author Nathaniel Schultz
+ *
+ */
 public class Scene {
 
 	GL2 gl;
@@ -41,12 +44,6 @@ public class Scene {
 	float tempRot;
 
 	Texture texture;
-
-	private int xLength = 1;
-	private int yLength = 1;
-	private Quad[][] coords = new Quad[xLength][yLength];
-
-	private float[] treeSize;
 
 	// Texture image flips vertically. Shall use TextureCoords class to retrieve
 	// the top, bottom, left and right coordinates.
@@ -73,6 +70,17 @@ public class Scene {
 	
 	IntBuffer vertexArray = IntBuffer.allocate(1);
 
+	/**
+	 * This method returns a display list for a cube with a specific texture.
+	 * Display lists can let you replace all the vertex calls for an object with one line.
+	 * It's especially useful if you have to draw many of the same kind of primitive object.
+	 * 
+	 * @param gl				the current GL
+	 * @param textureFileName	the path to the texture file
+	 * @param textureFileType	the type of file that the texture file is 
+	 * 							(.jpg, .png, etc)
+	 * @return		the display list
+	 */
 	public int getCubeList(GL2 gl, String textureFileName,
 			String textureFileType) {
 		
@@ -91,9 +99,9 @@ public class Scene {
 		int base = gl.glGenLists(1);
 
 		// Create a new list for box (with open-top), pre-compile for efficiency
-		int cubeDList = base;
+		int cubeList = base;
 
-		gl.glNewList(cubeDList, GL_COMPILE);
+		gl.glNewList(cubeList, GL_COMPILE);
 
 		// Enables this texture's target in the current GL context's state.
 		texture.enable(gl); // same as gl.glEnable(texture.getTarget());
@@ -184,7 +192,7 @@ public class Scene {
 		//gl.glEnd();
 		gl.glEndList();
 
-		return cubeDList;
+		return cubeList;
 	}
 
 	public void loadTexture(GL2 gl) {
@@ -219,68 +227,20 @@ public class Scene {
 		}
 	}
 	
-	
-	public void vertexArrayBuild(GL2 gl) {
-		
-		/*
-		int vertices = 3;
-
-		int vertex_size = 3; // X, Y, Z,
-		int color_size = 3; // R, G, B,
-
-		IntBuffer vertex_data = Buffers.newDirectIntBuffer(vertices * vertex_size);
-		vertex_data.put(new int[] { -1, -1, 0, });
-		vertex_data.put(new int[] { 1, -1, 0, });
-		vertex_data.put(new int[] { 1, 1, 0, });
-		vertex_data.flip();
-
-		FloatBuffer color_data = Buffers.newDirectFloatBuffer(vertices * color_size);
-		color_data.put(new float[] { 1f, 0f, 0f, });
-		color_data.put(new float[] { 0f, 1f, 0f, });
-		color_data.put(new float[] { 0f, 0f, 1f, });
-		color_data.flip();
-
-		int vbo_vertex_handle = gl.glGenBuffers(0, vertex_data);
-		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, vbo_vertex_handle);
-		gl.glBufferData(GL2.GL_ARRAY_BUFFER, vbo_vertex_handle, vertex_data, GL2.GL_STATIC_DRAW);
-		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, 0);
-
-		int vbo_color_handle = gl.glGenBuffers();
-		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, vbo_color_handle);
-		gl.glBufferData(GL2.GL_ARRAY_BUFFER, vbo_color_handle, color_data, GL2.GL_STATIC_DRAW);
-		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, 0);
+	/**
+	 * 
+	 * This method lays out everything in the scene. In this case, it's
+	 * only a cube and a sphere. If the objects have to be picked, they
+	 * also have to be named too.
+	 * 
+	 * @param gl			the current GL
+	 * @param displayList	an array of the display lists 
+	 * 						(of cubes with different textures)
+	 * @param i				the texture that the cube should be
+	 */
+	public void drawScene(GL2 gl, int[] displayList, int i) {
 		
 		
-		
-		// Create Vertex Array.
-		gl.glGenVertexArrays(1, vertexArray);
-		gl.glBindVertexArray(vertexArray.get(0));
-
-		// Specify how data should be sent to the Program.
-
-		// VertexAttribArray 0 corresponds with location 0 in the vertex shader.
-		gl.glEnableVertexAttribArray(0);
-		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, buffers.get(0));
-		gl.glVertexAttribPointer(0, 2, GL.GL_FLOAT, false, 0, 0);
-
-		// VertexAttribArray 1 corresponds with location 1 in the vertex shader.
-		gl.glEnableVertexAttribArray(1);
-		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, buffers.get(1));
-		gl.glVertexAttribPointer(1, 3, GL.GL_FLOAT, false, 0, 0);
-		*/
-	}
-	
-	public void vertexArrayDraw() {
-		
-	}
-	
-	public void testLightCube(GL2 gl, int[] displayList, float[] lightPos, int i) {
-		
-		
-		//if(mode == GL2.GL_SELECT) gl.glRenderMode(GL2.GL_RENDER);
-		//if (mode == GL2.GL_SELECT) gl.glLoadName(0);
-		//if (mode == GL2.GL_SELECT) 
-		//	gl.glPushName(1);
 		//cube
 		final int EVERYTHING = 0;
 		final int CUBE = 1;
@@ -325,6 +285,17 @@ public class Scene {
 		gl.glPopName();
 	}
 	
+	/**
+	 * 
+	 * Determines whether a cube has collided with another cube
+	 * 
+	 * @param cube1			the 3D position of the first cube
+	 * @param cube1Length	the length of one side of the first cube
+	 * @param cube2			the 3D position of the second cube
+	 * @param cube2Length	the length of one side of the second cube
+	 * @return		An array with the respective reaction an object should take.
+	 * 				If the objects did not collide, there is no reaction.
+	 */
 	public float[] hasCollided(float[] cube1, float cube1Length, float[] cube2, float cube2Length) {
 		
 		float[] out = new float[3];
@@ -332,20 +303,7 @@ public class Scene {
 		float diffx = cube1[0] - cube2[0];
 		float diffy = cube1[1] - cube2[1];
 		float diffz = cube1[2] - cube2[2];
-		
-		
-		/*
-		if(((cube1[0] > cube2[0] - cube2Length && cube1[0] < cube2[0] + cube2Length)
-				&& (cube1[1] > cube2[1] - cube2Length  && cube1[1] < cube2[1] + cube2Length)
-				&& (cube1[2] > cube2[2] - cube2Length  && cube1[2] < cube2[2] + cube2Length))
-			
-				||
-		
-				((cube1[0] - cube2Length > cube2[0] && cube1[0] + cube2Length < cube2[0])
-				&& (cube1[1] - cube2Length > cube2[1] && cube1[1] + cube2Length < cube2[1])
-				&& (cube1[2] - cube2Length > cube2[2] && cube1[2] + cube2Length < cube2[2]))) {
-		*/
-		
+
 		if(((cube1[0] > cube2[0] - cube2Length && cube1[0] < cube2[0] + cube2Length)
 				&& (cube1[1] > cube2[1] - cube2Length  && cube1[1] < cube2[1] + cube2Length)
 				&& (cube1[2] > cube2[2] - cube2Length  && cube1[2] < cube2[2] + cube2Length))
@@ -370,84 +328,18 @@ public class Scene {
 				out[1] += reactionSpeed;
 			}
 		}
-		
-		/*
-			if(cube2[0]-cube2Length < cube1[0] && cube2[0]+cube1Length > cube1[0]
-					&& cube2[1]-cube2Length < cube1[1] && cube2[1]+cube1Length > cube1[1]) {
-					//&& cube2[2]-cube1[2] > cube2[0]-cube1[0] && cube2[2]-cube1[2] > cube2[1]-cube1[1]) {
-					//&& cube1[0] - cube2[0] > cube2[1]-cube1[1] && cube1[0] - cube2[0] > cube2[2] - cube1[2]) {
-				
-				out[2] -= 0.05f;
-				
-			}
-			
-			if(cube2[0]-cube2Length < cube1[0] && cube2[0]+cube1Length > cube1[0]
-					&& cube2[1]-cube2Length < cube1[1] && cube2[1]+cube1Length > cube1[1]) {
-					//&& cube2[2]-cube1[2] > cube2[0]-cube1[0] && cube2[2]-cube1[2] > cube2[1]-cube1[1]) {
-					//&& cube2[0] - cube1[0] > cube2[1]-cube1[1] && cube2[0] - cube1[0] > cube2[2] - cube1[2]) {
-				
-				out[2] += 0.05f;
-				
-			}
-			
-			if(cube2[2]-cube2Length < cube1[2] && cube2[2]+cube1Length > cube1[2]
-					&& cube2[1]-cube2Length < cube1[1] && cube2[1]+cube1Length > cube1[1]) {
-					//&& cube2[0]-cube1[0] > cube2[2]-cube1[2] && cube2[0]-cube1[0] > cube2[1]-cube1[1]) {
-					//&& cube1[2] - cube2[2] > cube2[1]-cube1[1] && cube1[2] - cube2[2] > cube2[0] - cube1[0]) {
-				
-				out[0] -= 0.05f;
-				
-			}
-			
-			if(cube2[2]-cube2Length < cube1[2] && cube2[2]+cube1Length > cube1[2]
-					&& cube2[1]-cube2Length < cube1[1] && cube2[1]+cube1Length > cube1[1]) {
-					//&& cube2[0]-cube1[0] > cube2[2]-cube1[2] && cube2[0]-cube1[0] > cube2[1]-cube1[1]) {
-					//&& cube2[2] - cube1[2] > cube2[1]-cube1[1] && cube2[2] - cube1[2] > cube2[0] - cube1[0]) {
-				
-				out[0] += 0.05f;
-				
-			}
-			
-			if(cube2[2]-cube2Length < cube1[2] && cube2[2]+cube1Length > cube1[2]
-					&& cube2[0]-cube2Length < cube1[0] && cube2[0]+cube1Length > cube1[0]) {
-					//&& cube2[1]-cube1[1] > cube2[2]-cube1[2] && cube2[1]-cube1[1] > cube2[0]-cube1[0]) {
-					//&& cube1[1] - cube2[1] > cube2[0]-cube1[0] && cube1[1] - cube2[1] > cube2[2] - cube1[2]) {
-				
-				out[1] -= 0.05f;
-				
-			}
-			
-			if(cube2[2]-cube2Length < cube1[2] && cube2[2]+cube1Length > cube1[2]
-					&& cube2[0]-cube2Length < cube1[0] && cube2[0]+cube1Length > cube1[0]) {
-					//&& cube2[1]-cube1[1] > cube2[2]-cube1[2] && cube2[1]-cube1[1] > cube2[0]-cube1[0]) {
-					//&& cube2[1] - cube1[1] > cube2[0]-cube1[0] && cube2[1] - cube1[1] > cube2[2] - cube1[2]) {
-				
-				out[1] += 0.05f;
-				
-			}
-		
-		*/
-			
-			//collision between 2 cubes
-			/*
-			if(((cube1[0] > cube2[0] - cube2Length && cube1[0] < cube2[0] + cube2Length)
-				&& (cube1[1] > cube2[1] - cube2Length  && cube1[1] < cube2[1] + cube2Length)
-				&& (cube1[2] > cube2[2] - cube2Length  && cube1[2] < cube2[2] + cube2Length))
-			
-				||
-		
-				((cube1[0] - cube2Length > cube2[0] && cube1[0] + cube2Length < cube2[0])
-				&& (cube1[1] - cube2Length > cube2[1] && cube1[1] + cube2Length < cube2[1])
-				&& (cube1[2] - cube2Length > cube2[2] && cube1[2] + cube2Length < cube2[2])))
-				out = true;
-			*/
 			
 		return out;
 	}
 	
+	/**
+	 * 
+	 * @param movex		the X position of the user
+	 * @param movey		the Y position of the user
+	 * @param movez		the Z position of the user
+	 * @return			the new 3D position of the user after they collided
+	 */
 	public float[] checkCollisions(float movex, float movey, float movez) {
-		
-		//just adding to the movex, movey or movez to simulate sliding along the side?
 		
 		float[] cube1 = { -movex, -movey, -movez };
 		float[] cube2 = { 2f, 0f, -4f };
@@ -457,68 +349,6 @@ public class Scene {
 		movey += out1[1];
 		movez += out1[2];
 		
-		/*
-		int topX = 12;
-		int topY = 8;
-		int topZ = 12;
-		
-		// position of this Quad
-		int posX = 12 * 0;
-		int posY = 2 * 0 + 2 * 0; // to make a hill
-		int posZ = 12 * 0 - 40;
-		
-		for (float i = 4; i >= 1; i--) { // loop for each box size
-			for (int x = 0; x < topX; x++) { // x coords
-				for (int y = 0; y < topY; y++) { // y coords
-					for (int z = 0; z < topZ; z++) { // z coords
-
-						// if a box is placed there
-						if (coords[0][0].placement[(int)(i - 1)][x][y][z]) {
-							
-							float q = 2/i;
-							float[] in = {(float)(q*(x+posX) - (q*(i-4)*-0.5)), 
-									(float)(q*(y+posY) - (q*(i-4)*-0.5)), 
-									(float)(q*(z+posZ) - (q*(i-4)*-0.5))};
-							float[] out = hasCollided(in, 0.25f * i, cube1, 3f);
-								//collision = true;
-							movex += out[0];
-							movey += out[1];
-							movez += out[2];
-						}
-					}
-				}
-			}
-		}
-		*/
-		
-		/*
-		if(!collision) {
-			oldmovex = movex;
-			oldmovey = movey;
-			oldmovez = movez;
-		} else {
-			movex = oldmovex;
-			movey = oldmovey;
-			movez = oldmovez;
-		}
-		*/
-		
-		/*
-		if (!hasCollided(cube1, 1.5f, cube2, 2f)) {
-			
-			oldmovex = movex;
-			oldmovey = movey;
-			oldmovez = movez;
-		} else {
-
-			movex = oldmovex;
-			movey = oldmovey;
-			movez = oldmovez;
-		}
-		*/
-		
-		//0 if no collision
-		//1 if yes collision
 		int[] collision = {0, 0, 0};
 		if(out1[0] != 0f) collision[0] = 1;
 		if(out1[1] != 0f) collision[1] = 1;
@@ -527,6 +357,12 @@ public class Scene {
 		return out;
 	}
 	
+	/**
+	 * 
+	 * @param x		the X position of the sphere
+	 * @param y		the Y position of the sphere
+	 * @param z		the Z position of the sphere
+	 */
 	public void drawSphere(double x, double y, double z) {
 		
 		gl.glPushMatrix();
@@ -549,39 +385,12 @@ public class Scene {
 		gl.glPopMatrix();
 	}
 
-	public void buildScene(GLAutoDrawable drawable, Renderer renderer,
-			GL2 gl, int[] displayList) {
-
-		this.gl = gl;
-		this.displayList = displayList;
-
-		for (int x = 0; x < xLength; x++) {
-			for (int y = 0; y < yLength; y++) {
-				coords[x][y] = new Quad(drawable, renderer, 12, 8, 12, 0.0f, //0.5f
-						gl, displayList, x, y);
-			}
-		}
-
-		// terrainBuilt = true;
-		System.out.println("terrain built");
-	}
-
-	public void drawScene(GL2 gl) {
-		//this.selectedObject = selectedObject;
-		for (int x = 0; x < xLength; x++) {
-			for (int y = 0; y < yLength; y++) {
-				coords[x][y].refreshQuad(gl, selectedObject);
-				if(coords[x][y].collided) collided = true;
-			}
-		}
-		
-		for (int x = 0; x < xLength; x++) {
-			for (int y = 0; y < yLength; y++) {
-				coords[x][y].collided = false;
-			}
-		}
-	}
-
+	/**
+	 * This method draws a box where the light should be.
+	 * 
+	 * @param gl		the current GL
+	 * @param lightPos	the position of the Light
+	 */
 	public void testLight(GL2 gl, float[] lightPos) {
 		// draw a cube where the light is
 		gl.glPushMatrix();
@@ -591,37 +400,5 @@ public class Scene {
 		gl.glCallList(displayList[0]);
 
 		gl.glPopMatrix();
-	}
-
-	public void makeTree(GL2 gl, int[] displayList, double branchOdds, float x,
-			float y, float z) {
-		if (treeSize == null) {
-			treeSize = new float[1];
-			treeSize[0] = (float) Math.random() * 5f + 5f;
-		}
-
-		for (int y2 = (int) y; y2 < treeSize[0]; y2++) {
-
-			if (Math.random() < branchOdds)
-				makeTree(gl, displayList, branchOdds - 0.1, x - 2f - 3f, y2, z);
-			if (Math.random() < branchOdds)
-				makeTree(gl, displayList, branchOdds - 0.1, x + 2f - 3f, y2, z);
-			if (Math.random() < branchOdds)
-				makeTree(gl, displayList, branchOdds - 0.1, x, y2, z - 2f - 3f);
-			if (Math.random() < branchOdds)
-				makeTree(gl, displayList, branchOdds - 0.1, x, y2, z + 2f - 3f);
-
-			gl.glPushMatrix();
-
-			gl.glScalef(0.25f, 0.25f, 0.25f);
-
-			gl.glTranslatef(x, y + 2f * y2 - 3f, z);
-
-			// draw the cube
-			gl.glCallList(displayList[0]);
-
-			gl.glPopMatrix();
-
-		}
 	}
 }
