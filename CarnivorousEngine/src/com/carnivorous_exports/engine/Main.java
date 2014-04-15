@@ -1,4 +1,4 @@
-package com.carnivorous_exports.pix;
+package com.carnivorous_exports.engine;
 
 import javax.swing.*;
 import javax.media.opengl.GLCapabilities;

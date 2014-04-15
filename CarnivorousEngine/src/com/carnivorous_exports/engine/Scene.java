@@ -1,4 +1,4 @@
-package com.carnivorous_exports.pix;
+package com.carnivorous_exports.engine;
 
 import static javax.media.opengl.GL.GL_LINEAR;
 import static javax.media.opengl.GL.GL_TEXTURE_2D;
