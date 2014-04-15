@@ -1,22 +1,27 @@
 package com.carnivorous_exports.pix;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
 
 import com.jogamp.openal.AL;
-import com.jogamp.openal.ALC;
-import com.jogamp.openal.ALCcontext;
-import com.jogamp.openal.ALCdevice;
 import com.jogamp.openal.ALFactory;
 import com.jogamp.openal.util.ALut;
 
-//Only construct Audio() once.
-// To add files/play multiple songs use addFile().
-// There is a limit of 1 million audio files.
-// The variable audioNumber must be different for every audio file.
+/**
+ * Only construct this class once (there is no way of getting around that, 
+ * it is a part of openGL). To add files/play multiple songs use
+ * addFile(). Change the variable "audioNumber" for each different audio file. 
+ * There is a limit of 1 million audio files (I think), but 
+ * I would not recommend testing that.
+ * <p>
+ * Audio in JOGL is a little sensitive and there is not much stupid-proofing 
+ * done in this class yet. Most things in this class do not make sense with a 
+ * Java context (because openGL is written in C) and you just have to take 
+ * for granted that calls to openGL objects do weird things sometimes.
+ * 
+ * 
+ * @author Nathaniel Schultz
+ *
+ */
 public class Audio {
 
 	static final int MAX_FILES = 1000000; // 1 million
@@ -44,6 +49,21 @@ public class Audio {
 		startInit();
 	}
 
+	/**
+	 * 
+	 * Call this method to construct a new audio file.
+	 * 
+	 * @param audioNumber	this must be unique to each audio file
+	 * @param filePath		the path to the audio file
+	 * @param autoRepeat	true if the audio file repeats automatically
+	 * @param position		the position of the audio source in 3D space
+	 * @param volume		how loud the file plays: ranges from 0.0f (very quiet)
+	 * 						to 1.0f (very loud)
+	 * @param length		How long the file plays for. If you enter a length longer
+	 * 						than the track itself, it will fill with no sound. If you
+	 * 						enter a length shorter than the track, it will cut the
+	 * 						track short.
+	 */
 	public void newFile(int audioNumber, String filePath, boolean autoRepeat,
 			float[] position, float volume, long length) {
 		this.filePath[audioNumber] = filePath;
@@ -61,14 +81,27 @@ public class Audio {
 		init(audioNumber);
 	}
 
-	// startInit() is only called once
+	/**
+	 * This method is called only once. The openAL can only be
+	 * initialized once per thread and that is why you only construct this
+	 * audio class once.
+	 * <p>
+	 * Beware, don't try to make a multithreaded audio system, it is overly
+	 * complicated and will not work as well as a single thread because you
+	 * can only hear audio from one thread at a time (as far as I know).
+	 * 
+	 */
 	public static void startInit() {
-		// Initialize OpenAL
-		// This can only be done once per thread
-		// and that is why you only construct this audio class once
 		ALut.alutInit();
 	}
 
+	/**
+	 * This method is called by newFile(). Do not use this method to
+	 * initiate a new audio file directly, call newFile() instead.
+	 * 
+	 * @see		Audio#newFile(int, String, boolean, float[], float, long)
+	 * @param audioNumber this must be unique to each audio file
+	 */
 	public static void init(int audioNumber) {
 
 		al = ALFactory.getAL();
@@ -148,6 +181,13 @@ public class Audio {
 		al.alListenerfv(AL.AL_ORIENTATION, listenerOrientation, 0);
 	}
 
+	/**
+	 * This should be called when the audio file is done being used.
+	 * This must be called before you initialize another AL if you
+	 * are so inclined to do so.
+	 * 
+	 * @param audioNumber	this must be unique to each audio file
+	 */
 	static void killALData(int audioNumber) {
 		
 		al.alDeleteSources(1, source[audioNumber], 0);
@@ -173,6 +213,12 @@ public class Audio {
 
 	int audioNumberTemp; //only used in play()
 	
+	/**
+	 * 
+	 * Call this method to play a specific audio file.
+	 * 
+	 * @param audioNumber	this must be unique to each audio file
+	 */
 	public void play(int audioNumber) {
 
 		isPlaying[audioNumber] = true;
@@ -198,6 +244,14 @@ public class Audio {
 		t.start();
 	}
 
+	/**
+	 * Call this method to stop a specific audio file. This is different
+	 * from pausing a file.
+	 * 
+	 * @see Audio#pause(int)
+	 * 
+	 * @param audioNumber	this must be unique to each audio file
+	 */
 	public void stop(int audioNumber) {
 
 		al.alSourceStop(source[audioNumber][0]);
@@ -207,6 +261,11 @@ public class Audio {
 		//killALData(audioNumber);
 	}
 
+	/**
+	 * Call this method to pause a specific audio file.
+	 * 
+	 * @param audioNumber	this must be unique to each audio file
+	 */
 	public void pause(int audioNumber) {
 
 		al.alSourcePause(source[audioNumber][0]);

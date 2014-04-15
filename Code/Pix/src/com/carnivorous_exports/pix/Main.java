@@ -9,10 +9,16 @@ import com.jogamp.opengl.util.FPSAnimator;
 
 import java.awt.Frame;
 
-@SuppressWarnings("serial")
+/**
+ * Starts the project by setting up the animator and window.
+ * It also creates an instance of Renderer, the most important class
+ * in this engine.
+ * 
+ * @author		Nathaniel Schultz
+ * @see         Renderer
+ */
 public class Main extends Frame {
-	// Define constants for the top-level container
-	private static String TITLE = "Pix"; // window's title
+	
 	private static final int CANVAS_WIDTH = 500; // width of the drawable
 	private static final int CANVAS_HEIGHT = 500; // height of the drawable
 	private static final int FPS = 50; // animator's target frames per second

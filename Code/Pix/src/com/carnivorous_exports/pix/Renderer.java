@@ -23,13 +23,41 @@ import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_DIFFUSE;
 import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_LIGHT1;
 import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_POSITION;
 
-@SuppressWarnings("serial")
+/**
+ * This is the base class that does all the stuff. It controls the Audio,
+ * the Scene, the mouse and key listeners. Basically it makes all the other
+ * classes it's bitch. This is because it implements GLEventListener and the
+ * methods "init", "reshape", "display", and "dispose". Those are the meat and
+ * potatoes of this class, this engine, and openGL in general.
+ * <p>
+ * Use "WASD" or the arrow keys to move and shift and control to fly up and down.
+ * Use the mouse to look around. Click the Cube and it's textures will change.
+ * <p>
+ * This engine includes:
+ * A First Person Perspective,
+ * Basic Lighting (Shadows appear on objects, but are not cast onto others),
+ * Sound (Walking),
+ * Picking (Click the Cube), and
+ * Incomplete Collision Detection (Walk into the Cube).
+ * <p>
+ * If this javadoc does not provide enough information, I suggest consulting the
+ * JOGL or openGL javadoc(s) as well.
+ * 
+ * @author		Nathaniel Schultz
+ * @see         Main
+ * @see			Audio
+ * @see			Scene
+ * @see			#init(GLAutoDrawable)
+ * @see			#reshape(GLAutoDrawable, int, int, int, int)
+ * @see			#display(GLAutoDrawable)
+ * @see			#dispose(GLAutoDrawable)
+ */
 public class Renderer implements GLEventListener,
 		com.jogamp.newt.event.MouseListener, com.jogamp.newt.event.KeyListener {
 
 	private static GLWindow window;
 	private GLU glu; // for the GL Utility
-	public boolean audioOn = false;
+	public boolean audioOn = true;
 	private int[] cubeList; // display list for cube
 	private Scene terrain = new Scene();
 	private boolean initiated = false;
@@ -101,6 +129,15 @@ public class Renderer implements GLEventListener,
 	public static int hits;
 	int textureNum = 0; // picking test variable
 
+	/**
+	 * A very simple constructor. All it does is add the event listeners to
+	 * the window.
+	 * 
+	 * @param window	The window object that the frame is based from.
+	 * 					This is passed in from Main, but all of the listeners
+	 * 					are added in this method
+	 * @see Main
+	 */
 	public Renderer(GLWindow window) {
 
 		this.window = window;
@@ -110,7 +147,12 @@ public class Renderer implements GLEventListener,
 		window.requestFocus();
 	}
 
-	// for user movement
+	/**
+	 * Checks for user movement. It first determines if you are moving
+	 * forward and back or if you are moving side to side, and then it
+	 * determines how much to add to your Z and X coordinates based on the
+	 * camera angle. This gives an excellent 3D walking perspective.
+	 */
 	public void checkMoving() {
 
 		if (forwardMove) { // moving forward or back
@@ -138,11 +180,17 @@ public class Renderer implements GLEventListener,
 	}
 
 	/**
-	 * Get the current mouse position in world coordinates using gluUnProject. "d"
-	 * is the distance away from the screen: d == 0.0 is at the screen, d == 1.0
-	 * is very far away from the screen
+	 * Get the current mouse position in world coordinates using gluUnProject.
+	 * Do not use this for picking, use processHits instead
 	 * 
-	 * @return
+	 * @see			#processHits(int, IntBuffer)
+	 * @see			#startPicking(GL2)
+	 * @see			#stopPicking(GL2)
+	 * @param gl	the current GL2
+	 * @param d		The distance away from the screen. d == 0.0 is at the screen
+	 * 				whereas d == 1.0 is very far away from the screen. Only use numbers
+	 * 				between 0.0 and 1.0. 
+	 * @return 		the position of the mouse in 3D coordinates
 	 */
 	public double[] getPositionUnProject(GL2 gl, float d) {
 
@@ -167,10 +215,9 @@ public class Renderer implements GLEventListener,
 	}
 
 	/**
-	 * Get the names of objects that are picked using gluPickMatrix.
-	 * Call startPicking() before drawing and stopPicking() after drawing.
-	 * Name objects in Scene.java
-	 * @return
+	 * Call before picking.
+	 * 
+	 * @param gl the current GL
 	 */
 	public void startPicking(GL2 gl) {
 		IntBuffer viewport = Buffers.newDirectIntBuffer(4);
@@ -194,7 +241,12 @@ public class Renderer implements GLEventListener,
 		gl.glMatrixMode(GL2.GL_MODELVIEW);
 	}
 
-	// returns the name of the picked object
+	/**
+	 * Call after picking.
+	 * 
+	 * @param gl	the current GL
+	 * @return	an array containing the names of hit objects
+	 */
 	public int[] stopPicking(GL2 gl) {
 		gl.glMatrixMode(GL2.GL_PROJECTION);
 		gl.glPopMatrix();
@@ -212,6 +264,18 @@ public class Renderer implements GLEventListener,
 		}
 	}
 
+	/**
+	 * Get the names of objects that are picked using gluPickMatrix.
+	 * Call startPicking() before drawing and stopPicking() after drawing.
+	 * "Name" objects in Scene.
+	 * 
+	 * @see	#startPicking(GL2)
+	 * @see	#stopPicking(GL2)
+	 * @see	Scene
+	 * @param 	hits	the number of hits
+	 * @param	buffer	the buffer containing the names of hit objects
+	 * @return	an array containing the names of the hit objects
+	 */
 	public int[] processHits(int hits, IntBuffer buffer) {
 
 		int[] out = new int[hits];
@@ -237,7 +301,15 @@ public class Renderer implements GLEventListener,
 		return out;
 	}
 
-	//draw the scene
+	/**
+	 * This method draws the scene and the lighting. It also moves the scene
+	 * around based on the users position and rotation.
+	 * 
+	 * @see		Scene
+	 * @param gl	the current GL
+	 * @param textureNum	The texture to draw on the cube.
+	 * 						This is set to 0 when picking.
+	 */
 	public void draw(GL2 gl, int textureNum) {
 
 		gl.glPushMatrix();
@@ -249,8 +321,7 @@ public class Renderer implements GLEventListener,
 
 		gl.glTranslatef(movex, movey, movez);
 
-		// terrain.drawScene(gl);
-		terrain.testLightCube(gl, cubeList, lightPos, textureNum);
+		terrain.drawScene(gl, cubeList, textureNum);
 
 		gl.glLightfv(GL_LIGHT1, GL_AMBIENT, lightColorAmbient, 0);
 		gl.glLightfv(GL_LIGHT1, GL_DIFFUSE, lightDif, 0);
@@ -258,10 +329,14 @@ public class Renderer implements GLEventListener,
 		gl.glLightfv(GL_LIGHT1, GL_POSITION, lightPos, 0);
 
 		// terrain.testLight(gl, lightPos);
+		//^^^uncomment to put a box where the light is
 
 		gl.glPopMatrix();
 	}
 
+	/**
+	 * Call before using audio.
+	 */
 	public static void initAudio() {
 
 		audio.newFile(1, "SoundEffects/Groups/Humanoids/Walking1.wav", false,
@@ -275,8 +350,8 @@ public class Renderer implements GLEventListener,
 	}
 
 	/**
-	 * Called back immediately after the OpenGL context is initialized. Can be
-	 * used to perform one-time initialization. Run only once.
+	 * Called only once at the very begging.
+	 * This method initializes the audio, lighting and display lists.
 	 */
 	@Override
 	public void init(GLAutoDrawable drawable) {
@@ -356,15 +431,12 @@ public class Renderer implements GLEventListener,
 		cubeList[6] = terrain.getCubeList(gl,
 				"terrainTextures/White Water Texture.jpeg", ".jpeg");
 
-		if (!initiated)
-			// terrain.buildScene(drawable, this, gl, cubeList);
-			terrain.testLightCube(gl, cubeList, lightPos, 0);
 		initiated = true;
 	}
 
 	/**
-	 * Call-back handler for window re-size event. Also called when the drawable
-	 * is first set to visible.
+	 * Called when the window size is changed by the user. This method
+	 * is kindof pointless if the program is always in full-screen.
 	 */
 	@Override
 	public void reshape(GLAutoDrawable drawable, int x, int y, int width,
@@ -390,7 +462,9 @@ public class Renderer implements GLEventListener,
 	}
 
 	/**
-	 * Called back by the animator to perform rendering.
+	 * Called every frame, this is probably the most useful of the 4 GLEventListener
+	 * classes. This method draws everything, checks for picking, checks for a change
+	 * in the keys that are pressed, and updates the user position (with checkMoving).
 	 */
 	@Override
 	public void display(GLAutoDrawable drawable) {
@@ -450,14 +524,22 @@ public class Renderer implements GLEventListener,
 	}
 
 	/**
-	 * Called back before the OpenGL context is destroyed. Release resource such
-	 * as buffers.
+	 * Called once before the OpenGL context is destroyed. This method
+	 * releases resources such as buffers (usually), but for now, 
+	 * this method does nothing.
 	 */
 	@Override
 	public void dispose(GLAutoDrawable drawable) {
 
 	}
 
+	/**
+	 * Checks the keys that are pressed and determines which
+	 * way the user is moving. This method also turns audio on and off
+	 * depending on if the user is walking or not.
+	 * <p>
+	 * For efficiency, this method is called after keyPressed and keyReleased
+	 */
 	public void checkKeysPressed() {
 
 		if (initiated) {
@@ -550,17 +632,18 @@ public class Renderer implements GLEventListener,
 
 	}
 
+	/**
+	 * To prevent the mouse from hitting the edge of the screen we have
+	 * to move the mouse to the center of the screen every other
+	 * iteration. You look around based on the difference between the mouse
+	 * position of the last frame and the current mouse position.
+	 * <p>
+	 * For 2D games, this method will have to be completely redecorated.
+	 */
 	@Override
 	public void mouseMoved(com.jogamp.newt.event.MouseEvent e) {
+		
 		if (initiated) {
-			/**
-			 * To prevent the mouse from hitting the edge of the screen we have
-			 * to move the mouse to the center of the screen every other
-			 * iteration and keep track of the mouse position ourselves
-			 * 
-			 * mouseInMiddle == false when we are iterating just to keep the
-			 * mouse in the middle
-			 */
 
 			mouseXGlobal = e.getX();
 			mouseYGlobal = e.getY();
@@ -602,7 +685,8 @@ public class Renderer implements GLEventListener,
 			// robot.mouseMove(width / 2, height / 2);
 			window.warpPointer(width / 2, height / 2);
 
-			mouseInMiddle = true;
+			mouseInMiddle = true;	//false when we are iterating just to keep the
+									//mouse in the middle
 		}
 	}
 
