@@ -42,6 +42,12 @@ public class Scene {
 	// for testing rotation
 	float tempRotX;
 	float tempRot;
+	
+	//the collision reaction
+	float reactionSpeed = 0.1f;
+	
+	//should be the same as moveSpeed in Renderer
+	float moveSpeed = 2.0f;
 
 	Texture texture;
 
@@ -299,7 +305,6 @@ public class Scene {
 	public float[] hasCollided(float[] cube1, float cube1Length, float[] cube2, float cube2Length) {
 		
 		float[] out = new float[3];
-		float reactionSpeed = 0.1f;
 		float diffx = cube1[0] - cube2[0];
 		float diffy = cube1[1] - cube2[1];
 		float diffz = cube1[2] - cube2[2];
@@ -337,10 +342,12 @@ public class Scene {
 	 * @param movex		the X position of the user
 	 * @param movey		the Y position of the user
 	 * @param movez		the Z position of the user
+	 * @param moveSpeed	the same as the moveSpeed variable in Renderer
 	 * @return			the new 3D position of the user after they collided
 	 */
-	public float[] checkCollisions(float movex, float movey, float movez) {
+	public float[] checkCollisions(float movex, float movey, float movez, float moveSpeed) {
 		
+		this.moveSpeed = moveSpeed;
 		float[] cube1 = { -movex, -movey, -movez };
 		float[] cube2 = { 2f, 0f, -4f };
 		
@@ -353,7 +360,31 @@ public class Scene {
 		if(out1[0] != 0f) collision[0] = 1;
 		if(out1[1] != 0f) collision[1] = 1;
 		if(out1[2] != 0f) collision[2] = 1;
-		float[] out = {movex, movey, movez, collision[0], collision[1], collision[2]};
+		
+		float[] out2 = processHits(movex, movey, movez, collision[0] == 1, 
+				collision[1] == 1, collision[2] == 1);
+		
+		float[] out = {out2[0], out2[1], out2[2], collision[0], collision[1], collision[2]};
+		return out;
+	}
+	
+
+	public float[] processHits(float movex, float movey, float movez, boolean collidedx,
+				boolean collidedy, boolean collidedz) {
+		
+		if(collidedx && !collidedy && !collidedz) {
+			// A^2 + B^2 = C^2 solving for A
+			movex = (float) Math.sqrt(Math.pow(moveSpeed, 2) - Math.pow(reactionSpeed, 2));
+		} else if(collidedy && !collidedx && !collidedz) {
+			System.out.println("collided w/ y");
+			movey = (float) Math.sqrt(Math.pow(moveSpeed, 2) - Math.pow(reactionSpeed, 2));
+		} else if(collidedz && !collidedx && !collidedy) {
+			System.out.println("collided w/ z");
+			movez = (float) Math.sqrt(Math.pow(moveSpeed, 2) - Math.pow(reactionSpeed, 2));
+		}
+		
+		float[] out = {movex, movey, movez};
+		
 		return out;
 	}
 	
