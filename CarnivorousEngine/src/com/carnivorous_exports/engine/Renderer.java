@@ -57,7 +57,7 @@ public class Renderer implements GLEventListener,
 
 	private static GLWindow window;
 	private GLU glu; // for the GL Utility
-	public boolean audioOn = true;
+	public boolean audioOn = false;
 	private int[] cubeList; // display list for cube
 	private Scene terrain = new Scene();
 	private boolean initiated = false;
@@ -501,15 +501,21 @@ public class Renderer implements GLEventListener,
 
 		checkKeysPressed();
 
-		float[] in = terrain.checkCollisions(movex, movey, movez);
-		
-		checkMoving();
+		float[] in = terrain.checkCollisions(movex, movey, movez, moveSpeed);
 
+		if(in[3] == 1f) movex = in[0];
+		if(in[4] == 1f) movey = in[1];
+		if(in[5] == 1f) movez = in[2];
+		
+		/*
 		if(in[3] == 1f || in[4] == 1f || in[5] == 1f) {
 			movex = in[0];
 			movey = in[1];
 			movez = in[2];
 		}
+		*/
+		
+		checkMoving();
 			
 		oldRotX = view_rotx;
 		oldRotY = view_roty;
