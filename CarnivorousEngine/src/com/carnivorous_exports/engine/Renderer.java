@@ -503,9 +503,15 @@ public class Renderer implements GLEventListener,
 
 		float[] in = terrain.checkCollisions(movex, movey, movez, moveSpeed);
 
+		movex = in[0];
+		movey = in[1];
+		movez = in[2];
+		
+		/*
 		if(in[3] == 1f) movex = in[0];
 		if(in[4] == 1f) movey = in[1];
 		if(in[5] == 1f) movez = in[2];
+		*/
 		
 		/*
 		if(in[3] == 1f || in[4] == 1f || in[5] == 1f) {
