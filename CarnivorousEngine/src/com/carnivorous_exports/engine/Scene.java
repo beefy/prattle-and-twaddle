@@ -348,20 +348,71 @@ public class Scene {
 			//Regardless, the right side moves back whereas the front side moves
 			//perfectly when it collides correctly
 			
+			/*
+			float x1 = diffx - diffz;
+			float x2 = diffx - diffy;
+			float z1 = diffz - diffx;
+			float z2 = diffz - diffy;
+			float y1 = diffy - diffx;
+			float y2 = diffy - diffz;
+			*/
 			
+			if(Math.abs(diffx) > Math.abs(diffz) && Math.abs(diffx) > Math.abs(diffy)) {
+				if(cube1[0] < cube2[0]) {
+					out[0] += reactionSpeed;
+					System.out.println("LEFT");
+				}
+				else {
+					out[0] -= reactionSpeed;
+					System.out.println("RIGHT");
+				}
+			} else if(Math.abs(diffy) > Math.abs(diffz) && Math.abs(diffy) > Math.abs(diffx)) {
+				if(cube1[1] < cube2[1]) out[1] += reactionSpeed;
+				else out[1] -= reactionSpeed;
+			} else if(Math.abs(diffz) > Math.abs(diffx) && Math.abs(diffz) > Math.abs(diffy)) {
+				if(cube1[2] < cube2[2]) out[2] += reactionSpeed;
+				else out[2] -= reactionSpeed;
+			}
+			
+			/*
+			if(cube1[0] > cube2[0] && diffx > diffz && diffx > diffy) {
+				out[0] -= reactionSpeed;
+			}
+			
+			if(cube1[1] > cube2[1] && diffy > diffz && diffy > diffx) {
+				out[1] -= reactionSpeed;
+			}
+			
+			if(cube1[2] > cube2[2] && diffz > diffx && diffz > diffy) {
+				out[2] -= reactionSpeed;
+			}
+			*/
+			
+			/*
 			if(diffx > diffz && diffx > diffy) {
 				out[0] -= reactionSpeed;
-			} else if(diffx < diffz && diffx < diffy) {
-				out[0] += reactionSpeed;
-			} else if(diffz > diffx && diffz > diffy) {
-				out[2] -= reactionSpeed;
-			} else if(diffz < diffx && diffz < diffy){
-				out[2] += reactionSpeed;
-			} else if(diffy > diffz && diffy > diffx) {
-				out[1] -= reactionSpeed;
-			} else if(diffy < diffz && diffy < diffx) {
-				out[1] += reactionSpeed;
 			}
+			
+			//if(diffx < diffz && diffx < diffy) {
+			//	out[0] += reactionSpeed;
+			//}
+			
+			if(diffz > diffx && diffz > diffy) {
+				out[2] -= reactionSpeed;
+			}
+			
+			//if(diffz < diffx && diffz < diffy){
+			//	out[2] += reactionSpeed;
+			//}
+			
+			if(diffy > diffz && diffy > diffx) {
+				out[1] -= reactionSpeed;
+			}
+			
+			//if(diffy < diffz && diffy < diffx) {
+			//	out[1] += reactionSpeed;
+			//}
+			*/
 			
 			
 			/*
@@ -441,35 +492,37 @@ public class Scene {
 		//System.out.println("collision x");
 		//movex = (float) Math.sqrt(Math.pow(moveSpeed, 2) - Math.pow(reactionSpeed, 2));
 		
-		//collided[0] = front side
-		//collided[1] = back side
-		//etc.
 		
 		if(collided[0]) {
 			movex = cubePos[0]-cubeLength;
+			System.out.println("Left side");
 		}
 		
 		if(collided[1]) {
-			movex = cubePos[0]+cubeLength;
+			movex = cubePos[2]+cubeLength*2;
+			System.out.println("Right side");
 		}
 		
 		if(collided[2]) {
-			movey = cubePos[1]-cubeLength;
+			movey = cubePos[1]+cubeLength;
+			System.out.println("Bottom side");
 		}
 		
 		if(collided[3]) {
-			movey = cubePos[1]+cubeLength;
+			movey = cubePos[1]-cubeLength;
+			System.out.println("Top side");
 		}
 		
 		if(collided[4]) {
-			movez = cubePos[1]-cubeLength*3;
-			System.out.println("wierd");
+			movez = cubePos[0]+cubeLength*4;
+			System.out.println("Back side");
 		}
 		
 		if(collided[5]) {
 			movez = cubePos[1]+cubeLength*3;
-			System.out.println("wierder");
+			System.out.println("Front side");
 		}
+		
 		
 		/*
 		if(collidedy) {
