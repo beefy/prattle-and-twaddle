@@ -258,7 +258,7 @@ public class Scene {
 		gl.glPushMatrix();
 		
 		//gl.glTranslatef(lightPos[0], lightPos[1], lightPos[2]);
-		gl.glTranslatef(2f, 0f, -8f);
+		gl.glTranslatef(2,0,-4);
 		
 		//gl.glRotatef(180, 1, 0, 0);
 		//gl.glRotatef(tempRot, 1.0f, 0.0f, 0);
@@ -460,7 +460,7 @@ public class Scene {
 		
 		this.moveSpeed = moveSpeed;
 		float[] cube1 = { -movex, -movey, -movez };
-		float[] cube2 = { 2f, 0f, -8f };
+		float[] cube2 = { 2,0,-4 };
 		
 		float cube2Length = 4f;
 		
@@ -494,32 +494,32 @@ public class Scene {
 		
 		
 		if(collided[0]) {
-			movex = cubePos[0]-cubeLength;
+			movex = cubePos[0]+cubeLength-(cubeLength*cubePos[0]);
 			System.out.println("Left side");
 		}
 		
 		if(collided[1]) {
-			movex = cubePos[2]+cubeLength*2;
+			movex = cubePos[0]-cubeLength-(cubeLength*cubePos[0]);
 			System.out.println("Right side");
 		}
 		
 		if(collided[2]) {
-			movey = cubePos[1]+cubeLength;
+			movey = cubePos[1]+cubeLength-(cubeLength*cubePos[1]);
 			System.out.println("Bottom side");
 		}
 		
 		if(collided[3]) {
-			movey = cubePos[1]-cubeLength;
+			movey = cubePos[1]-cubeLength-(cubeLength*cubePos[1]);
 			System.out.println("Top side");
 		}
 		
 		if(collided[4]) {
-			movez = cubePos[0]+cubeLength*4;
+			movez = cubePos[2]+cubeLength-(cubeLength*cubePos[2]);
 			System.out.println("Back side");
 		}
 		
 		if(collided[5]) {
-			movez = cubePos[1]+cubeLength*3;
+			movez = cubePos[2]-cubeLength-(cubeLength*cubePos[2]);
 			System.out.println("Front side");
 		}
 		
