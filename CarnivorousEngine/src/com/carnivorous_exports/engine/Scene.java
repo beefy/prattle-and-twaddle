@@ -43,9 +43,6 @@ public class Scene {
 	float tempRotX;
 	float tempRot;
 	
-	//the collision reaction
-	float reactionSpeed = 0.05f;
-	
 	//should be the same as moveSpeed in Renderer
 	float moveSpeed = 2.0f;
 
@@ -242,9 +239,10 @@ public class Scene {
 	 * @param gl			the current GL
 	 * @param displayList	an array of the display lists 
 	 * 						(of cubes with different textures)
+	 * @param cube			the position of the cube
 	 * @param i				the texture that the cube should be
 	 */
-	public void drawScene(GL2 gl, int[] displayList, int i) {
+	public void drawScene(GL2 gl, int[] displayList, float[] cube, int i) {
 		
 		
 		//cube
@@ -291,6 +289,43 @@ public class Scene {
 		gl.glPopName();
 	}
 	
+	
+	/**
+	 * This is the main collision detection method. The other collision
+	 * detection methods(hasCollided() and processCollision()) are only 
+	 * called from within this method.
+	 * 
+	 * @param movex		the X position of the user
+	 * @param movey		the Y position of the user
+	 * @param movez		the Z position of the user
+	 * @param cube2		the collision box
+	 * @param moveSpeed	the same as the moveSpeed variable in Renderer
+	 * @return			the new 3D position of the user after they collided
+	 */
+	public float[] checkCollisions(float movex, float movey, float movez, float[] cube2, float moveSpeed) {
+		
+		this.moveSpeed = moveSpeed;
+		float[] cube1 = { -movex, -movey, -movez };
+		
+		float cube2Length = 4f;
+		
+		float[] out1 = hasCollided(cube1, 4f, cube2, cube2Length);
+		
+		boolean[] collision = {false, false, false, false, false, false};
+		if(out1[0] > 0f) collision[0] = true;
+		if(out1[0] < 0f) collision[1] = true;
+		if(out1[1] > 0f) collision[2] = true;
+		if(out1[1] < 0f) collision[3] = true;
+		if(out1[2] > 0f) collision[4] = true;
+		if(out1[2] < 0f) collision[5] = true;
+			
+		
+		float[] out2 = processCollision(movex, movey, movez, collision, cube2, cube2Length/2);
+		
+		float[] out = {out2[0], out2[1], out2[2]};
+		return out;
+	}
+	
 	/**
 	 * 
 	 * Determines whether a cube has collided with another cube.
@@ -304,25 +339,14 @@ public class Scene {
 	 */
 	public float[] hasCollided(float[] cube1, float cube1Length, float[] cube2, float cube2Length) {
 		
+		float x = 0.05f;
 		float[] out = new float[3];
 		float diffx = cube1[0] - cube2[0];
 		float diffy = cube1[1] - cube2[1];
 		float diffz = cube1[2] - cube2[2];
 		float cube1Length2 = cube1Length/2;
 		float cube2Length2 = cube2Length/2;
-		
-		/*
-		if(((cube1[0] > cube2[0] - cube2Length/2 && cube1[0] < cube2[0] + cube2Length/2)
-				&& (cube1[1] > cube2[1] - cube2Length/2  && cube1[1] < cube2[1] + cube2Length/2)
-				&& (cube1[2] > cube2[2] - cube2Length/2  && cube1[2] < cube2[2] + cube2Length/2))
-			
-				||
-		
-				((cube1[0] - cube2Length/2 > cube2[0] && cube1[0] + cube2Length/2 < cube2[0])
-				&& (cube1[1] - cube2Length/2 > cube2[1] && cube1[1] + cube2Length/2 < cube2[1])
-				&& (cube1[2] - cube2Length/2 > cube2[2] && cube1[2] + cube2Length/2 < cube2[2]))) {
-		*/
-		
+				
 														//You may only need one of the
 														//two below depending on your situation.
 		
@@ -339,205 +363,54 @@ public class Scene {
 				cube2[1] > cube1[1] - cube1Length2 &&
 				cube2[2] < cube1[2] + cube1Length2 &&
 				cube2[2] > cube1[2] - cube1Length2)) {
-		
-			//there is a problem here: when you ask for diffz before diffx,
-			//the front side is perfect, but the right side is off. When you ask
-			//for diffx before diffz, the right side is perfect, but the front side
-			//is off.
-			
-			//Regardless, the right side moves back whereas the front side moves
-			//perfectly when it collides correctly
-			
-			/*
-			float x1 = diffx - diffz;
-			float x2 = diffx - diffy;
-			float z1 = diffz - diffx;
-			float z2 = diffz - diffy;
-			float y1 = diffy - diffx;
-			float y2 = diffy - diffz;
-			*/
 			
 			if(Math.abs(diffx) > Math.abs(diffz) && Math.abs(diffx) > Math.abs(diffy)) {
-				if(cube1[0] < cube2[0]) {
-					out[0] += reactionSpeed;
-					System.out.println("LEFT");
-				}
-				else {
-					out[0] -= reactionSpeed;
-					System.out.println("RIGHT");
-				}
+				if(cube1[0] < cube2[0]) out[0] += x;
+				else out[0] -= x;
 			} else if(Math.abs(diffy) > Math.abs(diffz) && Math.abs(diffy) > Math.abs(diffx)) {
-				if(cube1[1] < cube2[1]) out[1] += reactionSpeed;
-				else out[1] -= reactionSpeed;
+				if(cube1[1] < cube2[1]) out[1] += x;
+				else out[1] -= x;
 			} else if(Math.abs(diffz) > Math.abs(diffx) && Math.abs(diffz) > Math.abs(diffy)) {
-				if(cube1[2] < cube2[2]) out[2] += reactionSpeed;
-				else out[2] -= reactionSpeed;
+				if(cube1[2] < cube2[2]) out[2] += x;
+				else out[2] -= x;
 			}
-			
-			/*
-			if(cube1[0] > cube2[0] && diffx > diffz && diffx > diffy) {
-				out[0] -= reactionSpeed;
-			}
-			
-			if(cube1[1] > cube2[1] && diffy > diffz && diffy > diffx) {
-				out[1] -= reactionSpeed;
-			}
-			
-			if(cube1[2] > cube2[2] && diffz > diffx && diffz > diffy) {
-				out[2] -= reactionSpeed;
-			}
-			*/
-			
-			/*
-			if(diffx > diffz && diffx > diffy) {
-				out[0] -= reactionSpeed;
-			}
-			
-			//if(diffx < diffz && diffx < diffy) {
-			//	out[0] += reactionSpeed;
-			//}
-			
-			if(diffz > diffx && diffz > diffy) {
-				out[2] -= reactionSpeed;
-			}
-			
-			//if(diffz < diffx && diffz < diffy){
-			//	out[2] += reactionSpeed;
-			//}
-			
-			if(diffy > diffz && diffy > diffx) {
-				out[1] -= reactionSpeed;
-			}
-			
-			//if(diffy < diffz && diffy < diffx) {
-			//	out[1] += reactionSpeed;
-			//}
-			*/
-			
-			
-			/*
-			if(cube1[0] > cube2[0] && diffx > diffy && diffx > diffz &&  		//collided with x
-					diffy < cube2Length2 && diffz < cube2Length2) {
-				out[0] += reactionSpeed;
-				System.out.println("right side");
-			//} else if(cube1[0] < cube2[0] && diffx > diffy && diffx > diffz &&
-			} else if(cube1[0] < cube2[0] && diffx > diffy && diffx > diffz &&
-					diffy < cube2Length2 && diffz < cube2Length2) {
-				out[0] -= reactionSpeed;
-				System.out.println("left side");
-			} else if(cube1[1] > cube2[1] && diffy > diffx && diffy > diffz && //collided with y
-					diffx < cube2Length2 && diffz < cube2Length2) {
-				out[1] += reactionSpeed;
-				System.out.println("bottom side");
-			} else if(cube1[1] < cube2[1] && diffy > diffx && diffy > diffz && 
-					diffx < cube2Length2 && diffz < cube2Length2) {
-				out[1] -= reactionSpeed;
-				System.out.println("top side");
-			} else if(cube1[2] > cube2[2] && diffz > diffy && diffz > diffx && //collided with z
-					diffy < cube2Length2 && diffx < cube2Length2) {
-				out[2] += reactionSpeed;
-				System.out.println("front side");
-			} else if(cube1[2] < cube2[2] && diffz > diffy && diffz > diffx &&  
-					diffy < cube2Length2 && diffx < cube2Length2) {
-				out[2] -= reactionSpeed;
-				System.out.println("back side");
-			}
-			*/
 		}
 			
-		return out;
-	}
-	
-	/**
-	 * 
-	 * @param movex		the X position of the user
-	 * @param movey		the Y position of the user
-	 * @param movez		the Z position of the user
-	 * @param moveSpeed	the same as the moveSpeed variable in Renderer
-	 * @return			the new 3D position of the user after they collided
-	 */
-	public float[] checkCollisions(float movex, float movey, float movez, float moveSpeed) {
-		
-		this.moveSpeed = moveSpeed;
-		float[] cube1 = { -movex, -movey, -movez };
-		float[] cube2 = { 2,0,-4 };
-		
-		float cube2Length = 4f;
-		
-		float[] out1 = hasCollided(cube1, 4f, cube2, cube2Length);
-		//movex += out1[0];
-		//movey += out1[1];
-		//movez += out1[2];
-		
-		boolean[] collision = {false, false, false, false, false, false};
-		if(out1[0] > 0f) collision[0] = true;
-		if(out1[0] < 0f) collision[1] = true;
-		if(out1[1] > 0f) collision[2] = true;
-		if(out1[1] < 0f) collision[3] = true;
-		if(out1[2] > 0f) collision[4] = true;
-		if(out1[2] < 0f) collision[5] = true;
-			
-		
-		float[] out2 = processHits(movex, movey, movez, collision, cube2, cube2Length/2);
-		
-		float[] out = {out2[0], out2[1], out2[2]};
 		return out;
 	}
 	
 	// A^2 + B^2 = C^2 solving for A\
-	public float[] processHits(float movex, float movey, float movez, 
+	/**
+	 * 
+	 * This method processes the collision that the user had. The movex, movey,
+	 * or movez is changed to make it look like you collided with the cube.
+	 * 
+	 * @param movex			the x position of the user
+	 * @param movey			the y position of the user
+	 * @param movez			the z position of the user
+	 * @param collided		This array corresponds to the sides of the collision cube.
+	 * 						collided[0] is the left side, collided[1] is the right side,
+	 * 						etc.. Knowing which side is being hit is important for the
+	 * 						collision reaction.
+	 * @param cubePos		The position of the cube that the user is colliding with.
+	 * @param cubeLength	Half of the width of the cube. 
+	 * @return
+	 */
+	public float[] processCollision(float movex, float movey, float movez, 
 			boolean[] collided, float [] cubePos, float cubeLength) {
 		
-		//moves back too far
-		//System.out.println("collision x");
-		//movex = (float) Math.sqrt(Math.pow(moveSpeed, 2) - Math.pow(reactionSpeed, 2));
-		
-		
-		if(collided[0]) {
-			movex = cubePos[0]+cubeLength-(cubeLength*cubePos[0]);
-			System.out.println("Left side");
-		}
-		
-		if(collided[1]) {
-			movex = cubePos[0]-cubeLength-(cubeLength*cubePos[0]);
-			System.out.println("Right side");
-		}
-		
-		if(collided[2]) {
-			movey = cubePos[1]+cubeLength-(cubeLength*cubePos[1]);
-			System.out.println("Bottom side");
-		}
-		
-		if(collided[3]) {
-			movey = cubePos[1]-cubeLength-(cubeLength*cubePos[1]);
-			System.out.println("Top side");
-		}
-		
-		if(collided[4]) {
-			movez = cubePos[2]+cubeLength-(cubeLength*cubePos[2]);
-			System.out.println("Back side");
-		}
-		
-		if(collided[5]) {
-			movez = cubePos[2]-cubeLength-(cubeLength*cubePos[2]);
-			System.out.println("Front side");
-		}
-		
-		
-		/*
-		if(collidedy) {
-			//System.out.println("collision y");
-			//movey = (float) Math.sqrt(Math.pow(moveSpeed, 2) - Math.pow(reactionSpeed, 2));
-			movey = cubePos[1];
-		}
-		
-		if(collidedz) {
-			//sometimes z collisions are thrown when they should be x collisions
-			//System.out.println("collision z");
-			//movez = (float) Math.sqrt(Math.pow(moveSpeed, 2) - Math.pow(reactionSpeed, 2));
-			movez = cubePos[2];
-		}
-		*/
+		//left side
+		if(collided[0]) movex = cubePos[0]+cubeLength-(cubeLength*cubePos[0]);
+		//right side
+		if(collided[1]) movex = cubePos[0]-cubeLength-(cubeLength*cubePos[0]);
+		//bottom side
+		if(collided[2]) movey = cubePos[1]+cubeLength-(cubeLength*cubePos[1]);
+		//top side
+		if(collided[3]) movey = cubePos[1]-cubeLength-(cubeLength*cubePos[1]);
+		//back side
+		if(collided[4]) movez = cubePos[2]+cubeLength-(cubeLength*cubePos[2]);
+		//front side
+		if(collided[5]) movez = cubePos[2]-cubeLength-(cubeLength*cubePos[2]);
 		
 		float[] out = {movex, movey, movez};
 		
