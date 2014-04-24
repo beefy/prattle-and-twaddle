@@ -128,6 +128,8 @@ public class Renderer implements GLEventListener,
 	boolean pick = false;
 	public static int hits;
 	int textureNum = 0; // picking test variable
+	
+	float[] cube = {2f,0f,-4f};
 
 	/**
 	 * A very simple constructor. All it does is add the event listeners to
@@ -321,7 +323,7 @@ public class Renderer implements GLEventListener,
 
 		gl.glTranslatef(movex, movey, movez);
 
-		terrain.drawScene(gl, cubeList, textureNum);
+		terrain.drawScene(gl, cubeList, cube, textureNum);
 
 		gl.glLightfv(GL_LIGHT1, GL_AMBIENT, lightColorAmbient, 0);
 		gl.glLightfv(GL_LIGHT1, GL_DIFFUSE, lightDif, 0);
@@ -501,7 +503,7 @@ public class Renderer implements GLEventListener,
 
 		checkKeysPressed();
 
-		float[] in = terrain.checkCollisions(movex, movey, movez, moveSpeed);
+		float[] in = terrain.checkCollisions(movex, movey, movez, cube, moveSpeed);
 
 		movex = in[0];
 		movey = in[1];
