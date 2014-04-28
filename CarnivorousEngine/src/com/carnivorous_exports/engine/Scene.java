@@ -330,7 +330,7 @@ public class Scene {
 		
 		this.moveSpeed = moveSpeed;
 		float[] userPos = { -movex, -movey, -movez };
-		float[] userCubeLength = {4f, 8f, 4f};
+		float[] userCubeLength = {4f, 4f, 4f};
 		float[] cubeLength = {4f, 4f, 4f};
 		float[] floorPos = {0f, -5f, 0f};
 		float[] floorLength = {4f*3, 4f, 4f*3f};
@@ -384,11 +384,14 @@ public class Scene {
 	public float[] hasCollided(float[] cube1Pos, float[] cube1Length, 
 			float[] cube2Pos, float[] cube2Length) {
 		
-		float x = 0.05f;
+		float i = 0.05f;
 		float[] out = new float[3];
-		float diffx = cube1Pos[0] - cube2Pos[0];
-		float diffy = cube1Pos[1] - cube2Pos[1];
-		float diffz = cube1Pos[2] - cube2Pos[2];
+		//float diffxnorm = Math.abs(cube1Pos[0] - cube2Pos[0]);
+		//float diffynorm = Math.abs(cube1Pos[1] - cube2Pos[1]);
+		//float diffznorm = Math.abs(cube1Pos[2] - cube2Pos[2]);
+		float diffx = Math.abs(cube1Pos[0] - cube2Pos[0]) - cube2Length[0]/4+1 - cube1Length[0]/4+1;
+		float diffy = Math.abs(cube1Pos[1] - cube2Pos[1]) - cube2Length[1]/4+1 - cube1Length[1]/4+1;
+		float diffz = Math.abs(cube1Pos[2] - cube2Pos[2]) - cube2Length[2]/4+1 - cube1Length[2]/4+1;
 		 
 				
 		//determine if the middle of the first cube collides with the second cube
@@ -406,32 +409,19 @@ public class Scene {
 				cube2Pos[1] > cube1Pos[1] - cube1Length[1]/2 - (cube2Length[1]/4-1)&&
 				cube2Pos[2] < cube1Pos[2] + cube1Length[2]/2 + (cube2Length[2]/4-1)&&
 				cube2Pos[2] > cube1Pos[2] - cube1Length[2]/2 - (cube2Length[2]/4-1))) {
-
-			/*
-			if((Math.abs(diffx1) > Math.abs(diffz1) && Math.abs(diffx1) > Math.abs(diffy1)) ||
-					(Math.abs(diffx2) > Math.abs(diffz2) && Math.abs(diffx2) > Math.abs(diffy2))) {
-				if(cube1Pos[0] < cube2Pos[0]) out[0] += x;
-				else out[0] -= x;
-			} else if((Math.abs(diffy1) > Math.abs(diffz1) && Math.abs(diffy1) > Math.abs(diffx1)) ||
-					(Math.abs(diffy2) > Math.abs(diffz2) && Math.abs(diffy2) > Math.abs(diffx2))) {
-				if(cube1Pos[1] < cube2Pos[1]) out[1] += x;
-				else out[1] -= x;
-			} else if((Math.abs(diffz1) > Math.abs(diffx1) && Math.abs(diffz1) > Math.abs(diffy1)) ||
-					(Math.abs(diffz2) > Math.abs(diffx2) && Math.abs(diffz2) > Math.abs(diffy2))) {
-				if(cube1Pos[2] < cube2Pos[2]) out[2] += x;
-				else out[2] -= x;
-			}
-			*/
 			
-			if(Math.abs(diffx) > Math.abs(diffz) && Math.abs(diffx) > Math.abs(diffy)) {
-				if(cube1Pos[0] < cube2Pos[0]) out[0] += x;
-				else out[0] -= x;
-			} else if(Math.abs(diffy) > Math.abs(diffz) && Math.abs(diffy) > Math.abs(diffx)) {
-				if(cube1Pos[1] < cube2Pos[1]) out[1] += x;
-				else out[1] -= x;
-			} else if(Math.abs(diffz) > Math.abs(diffx) && Math.abs(diffz) > Math.abs(diffy)) {
-				if(cube1Pos[2] < cube2Pos[2]) out[2] += x;
-				else out[2] -= x;
+			if(diffx > diffz && diffx > diffy) {
+				//	diffxnorm > diffznorm && diffxnorm > diffynorm) {
+				if(cube1Pos[0] < cube2Pos[0]) out[0] += i;
+				else out[0] -= i;
+			} else if(diffy > diffz && diffy > diffx) {
+				//	diffynorm > diffznorm && diffynorm > diffxnorm) {
+				if(cube1Pos[1] < cube2Pos[1]) out[1] += i;
+				else out[1] -= i;
+			} else if(diffz > diffx && diffz > diffy) {
+				//	diffznorm > diffxnorm && diffznorm > diffynorm) {
+				if(cube1Pos[2] < cube2Pos[2]) out[2] += i;
+				else out[2] -= i;
 			}
 		}
 			
