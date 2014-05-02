@@ -129,7 +129,7 @@ public class Renderer implements GLEventListener,
 	public static int hits;
 	int textureNum = 0; // picking test variable
 	
-	float[] cube1 = {2f,0f,-4f};
+	float[] cube1 = {-8f,0f,-4f};
 	float[] cube2 = {6f,0f,-4f};
 	float[][] cubeArray = {cube1, cube2};
 
