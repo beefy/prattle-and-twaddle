@@ -257,7 +257,7 @@ public class Scene {
 		gl.glPushName(CUBE);
 		gl.glPushMatrix();
 		
-		gl.glTranslatef(cube[0][0], cube[0][1], cube[0][2]);
+		gl.glTranslatef(cube[0][0],cube[0][1],cube[0][2]);
 		
 		// draw the cube
 		gl.glCallList(displayList[i]);
@@ -272,7 +272,10 @@ public class Scene {
 		gl.glPushMatrix();
 		
 		gl.glScalef(1.25f, 1.25f, 1.25f);
-		gl.glTranslatef(cube[1][0], cube[1][1], cube[1][2]);
+
+		gl.glTranslatef(cube[1][0]-(cube[1][0]/4), 
+						cube[1][1]-(cube[1][1]/4), 
+						cube[1][2]-(cube[1][2]/4));
 		
 		// draw the cube
 		gl.glCallList(displayList[2]);
@@ -305,8 +308,13 @@ public class Scene {
 		gl.glPushName(FLOOR);
 		gl.glPushMatrix();
 		
-		gl.glTranslatef(0f, -5f, 0f);
-		gl.glScalef(30f, 1f, 30f);
+		float floorx = 0f;
+		float floory = -5-45f;
+		float floorz = 0f;
+		gl.glTranslatef(floorx-(floorx/4), 
+				floory-(floory/4), 
+				floorz-(floorz/4));
+		gl.glScalef(30f, 30f, 30f);
 		
 		gl.glCallList(displayList[4]);
 		
@@ -334,8 +342,8 @@ public class Scene {
 		float[] userCubeLength = {4f, 4f, 4f};
 		float[] cubeLength = {4f, 4f, 4f};
 		float[] cubeLength2 = {5f, 5f, 5f};
-		float[] floorPos = {0f, -5f, 0f};
-		float[] floorLength = {4f*30f, 4f, 4f*30f};
+		float[] floorPos = {0f, -35f, 0f};
+		float[] floorLength = {4f*30f, 4f*30f, 4f*30f};
 		 
 		float[] out1 = new float[6];	//from hasCollided
 		float[] out2 = new float[3];	//from ProcessCollision
@@ -387,7 +395,6 @@ public class Scene {
 	public float[] hasCollided(float[] cube1Pos, float[] cube1Length, 
 			float[] cube2Pos, float[] cube2Length) {
 		
-		
 		for(int x = 0; x < 3; x++) {
 			cube2Length[x]+=cube1Length[x]-4f;
 			cube1Length[x]=4f;
@@ -396,26 +403,25 @@ public class Scene {
 		
 		float i = 0.05f;
 		float[] out = new float[3];
-		float diffx = Math.abs(cube1Pos[0] - cube2Pos[0]) - cube2Length[0]/4+1;
-		float diffy = Math.abs(cube1Pos[1] - cube2Pos[1]) - cube2Length[1]/4+1;
-		float diffz = Math.abs(cube1Pos[2] - cube2Pos[2]) - cube2Length[2]/4+1;
-		 
-				
+		float diffx = Math.abs(cube1Pos[0] - cube2Pos[0]);
+		float diffy = Math.abs(cube1Pos[1] - cube2Pos[1]);
+		float diffz = Math.abs(cube1Pos[2] - cube2Pos[2]);
+		
 		//determine if the middle of the first cube collides with the second cube
-		if((cube1Pos[0] < cube2Pos[0] + cube2Length[0]/2 + (cube1Length[0]-4)&&
-				cube1Pos[0] > cube2Pos[0] - cube2Length[0]/2 - (cube1Length[0]+4)&&
-				cube1Pos[1] < cube2Pos[1] + cube2Length[1]/2 + (cube1Length[1]-4)&&
-				cube1Pos[1] > cube2Pos[1] - cube2Length[1]/2 - (cube1Length[1]+4)&&
-				cube1Pos[2] < cube2Pos[2] + cube2Length[2]/2 + (cube1Length[2]-4)&&
-				cube1Pos[2] > cube2Pos[2] - cube2Length[2]/2 - (cube1Length[2]+4)) &&
+		if((cube1Pos[0] < cube2Pos[0] +(cube2Length[0]/4)+0.75f&&//+ (cube2Length[0]/2)&&//+(cube1Length[0]-4)/2&&
+				cube1Pos[0] > cube2Pos[0]-(cube2Length[0]/4)-0.75f&&// - (cube2Length[0]/2)&&//+(cube1Length[0]-4)/2&&
+				cube1Pos[1] < cube2Pos[1]+(cube2Length[1]/4)+0.75f&&// + (cube2Length[1]/2)&&//+(cube1Length[1]-4)/2&&
+				cube1Pos[1] > cube2Pos[1]-(cube2Length[1]/4)-0.75f&&// - (cube2Length[1]/2)&&//+(cube1Length[1]-4)/2&&
+				cube1Pos[2] < cube2Pos[2]+(cube2Length[2]/4)+0.75f&&// + (cube2Length[2]/2)&&//+(cube1Length[2]-4)/2&&
+				cube1Pos[2] > cube2Pos[2]-(cube2Length[2]/4)-0.75f)||// - (cube2Length[2]/2))||//+(cube1Length[2]-4)/2 ||
 				
 		//determine if the middle of the second cube collides with the first cube
-			(cube2Pos[0] < cube1Pos[0] + cube1Length[0]/2 + (cube2Length[0]-4)&&
-				cube2Pos[0] > cube1Pos[0] - cube1Length[0]/2 - (cube2Length[0]+4)&&		
-				cube2Pos[1] < cube1Pos[1] + cube1Length[1]/2 + (cube2Length[1]-4)&&		
-				cube2Pos[1] > cube1Pos[1] - cube1Length[1]/2 - (cube2Length[1]+4)&&
-				cube2Pos[2] < cube1Pos[2] + cube1Length[2]/2 + (cube2Length[2]-4)&&
-				cube2Pos[2] > cube1Pos[2] - cube1Length[2]/2 - (cube2Length[2]+4))) {
+			(cube2Pos[0] < cube1Pos[0]+(cube1Length[0]/4)+0.75f&& //+ (cube1Length[0]/2)&&//+(cube2Length[0]-4)/2&&
+				cube2Pos[0] > cube1Pos[0]-(cube1Length[0]/4)-0.75f&&// - (cube1Length[0]/2)&&//+(cube2Length[0]-4)/2&&		
+				cube2Pos[1] < cube1Pos[1]+(cube1Length[1]/4)+0.75f&&// + (cube1Length[1]/2)&&//+(cube2Length[1]-4)/2&&		
+				cube2Pos[1] > cube1Pos[1]-(cube1Length[1]/4)-0.75f&&// - (cube1Length[1]/2)&&//+(cube2Length[1]-4)/2&&
+				cube2Pos[2] < cube1Pos[2]+(cube1Length[2]/4)+0.75f&&// + (cube1Length[2]/2)&&//+(cube2Length[2]-4)/2&&
+				cube2Pos[2] > cube1Pos[2]-(cube1Length[2]/4)-0.75f)){ //- (cube1Length[2]/2))) {//+(cube2Length[2]-4)/2))) {
 			
 			if(diffx > diffz && diffx > diffy) {
 				if(cube1Pos[0] < cube2Pos[0]) out[0] += i;
@@ -463,22 +469,22 @@ public class Scene {
 				collision[4] || collision[5]) {
 			//left side
 			if(collision[0])
-				movex = -cubePos[0]+(cubeLength[0]/2);
+				movex = -cubePos[0]+(cubeLength[0]/4)+0.75f;
 			//right side
 			if(collision[1]) 
-				movex = -cubePos[0]-(cubeLength[0]/2);
+				movex = -cubePos[0]-(cubeLength[0]/4)-0.75f;
 			//bottom side
 			if(collision[2]) 
-				movey = -cubePos[1]+(cubeLength[1]/2);
+				movey = -cubePos[1]+(cubeLength[1]/4)+0.75f;
 			//top side
 			if(collision[3]) 
-				movey = -cubePos[1]-(cubeLength[1]/2);
+				movey = -cubePos[1]-(cubeLength[1]/4)-0.75f;
 			//back side
 			if(collision[4]) 
-				movez = -cubePos[2]+(cubeLength[2]/2);
+				movez = -cubePos[2]+(cubeLength[2]/4)+0.75f;
 			//front side
 			if(collision[5]) 
-				movez = -cubePos[2]-(cubeLength[2]/2);
+				movez = -cubePos[2]-(cubeLength[2]/4)-0.75f;
 		}
 		float[] out = {movex, movey, movez};
 		
