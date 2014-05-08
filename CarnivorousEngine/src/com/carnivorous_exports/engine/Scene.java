@@ -248,8 +248,9 @@ public class Scene {
 		final int EVERYTHING = 0;
 		final int CUBE = 1;
 		final int CUBE2 = 2;
-		final int SPHERE = 3;
-		final int FLOOR = 4;
+		final int CUBE3 = 3;
+		final int SPHERE = 4;
+		final int FLOOR = 5;
 		
 		gl.glLoadName(EVERYTHING);
 		
@@ -267,7 +268,7 @@ public class Scene {
 		
 		////////////////////////////
 		
-		//cube2
+		//cube2 (slightly larger cube)
 		gl.glPushName(CUBE2);
 		gl.glPushMatrix();
 		
@@ -280,6 +281,24 @@ public class Scene {
 		// draw the cube
 		gl.glCallList(displayList[2]);
 		
+		gl.glPopMatrix();
+		gl.glPopName();
+		
+		////////////////////////////
+		
+		//cube3 (rectangle)
+		gl.glPushName(CUBE3);
+		gl.glPushMatrix();
+				
+		gl.glScalef(3f, 2.3f, 1.1f);
+
+		gl.glTranslatef(cube[2][0]-(cube[2][0]/4), 
+						cube[2][1]-(cube[2][1]/4), 
+						cube[2][2]-(cube[2][2]/4));
+				
+		// draw the cube
+		gl.glCallList(displayList[3]);
+				
 		gl.glPopMatrix();
 		gl.glPopName();
 		
@@ -328,6 +347,11 @@ public class Scene {
 	 * detection methods(hasCollided() and processCollision()) are only 
 	 * called from within this method.
 	 * 
+	 * Each box in the display list is made to be a 4f by 4f by 4f cube, so 
+	 * that is why there are many "4"s in these methods. Keep in mind when altering
+	 * that the scale of a box is different from the length of each side. For
+	 * example, when scaling a box to (1, 1, 1), the length of each side is (4, 4, 4).
+	 * 
 	 * @param movex		the X position of the user
 	 * @param movey		the Y position of the user
 	 * @param movez		the Z position of the user
@@ -339,9 +363,10 @@ public class Scene {
 		
 		this.moveSpeed = moveSpeed;
 		float[] userPos = { -movex, -movey, -movez };
-		float[] userCubeLength = {4f, 4f, 4f};
+		float[] userCubeLength = {4f, 8f, 4f};
 		float[] cubeLength = {4f, 4f, 4f};
 		float[] cubeLength2 = {5f, 5f, 5f};
+		float[] cubeLength3 = {4f*3f, 4f*2.3f, 4f*1.1f};
 		float[] floorPos = {0f, -35f, 0f};
 		float[] floorLength = {4f*30f, 4f*30f, 4f*30f};
 		 
@@ -352,22 +377,35 @@ public class Scene {
 		//////////////////////////
 		
 		//cube1
+		
 		out1 = hasCollided(userPos, userCubeLength, cubePos[0], cubeLength);
-		out2 = processCollision(movex, movey, movez, out1, cubePos[0], cubeLength);
+		out2 = processCollision(movex, movey, movez, out1, cubePos[0], 
+				cubeLength, userCubeLength);
 		out3[0] += out2[0]-movex;
 		out3[1] += out2[1]-movey;
 		out3[2] += out2[2]-movez;
 		
+		
 		//cube2
 		out1 = hasCollided(userPos, userCubeLength, cubePos[1], cubeLength2);
-		out2 = processCollision(movex, movey, movez, out1, cubePos[1], cubeLength2);
+		out2 = processCollision(movex, movey, movez, out1, cubePos[1], 
+				cubeLength2, userCubeLength);
+		out3[0] += out2[0]-movex;
+		out3[1] += out2[1]-movey;
+		out3[2] += out2[2]-movez;
+		
+		//cube3
+		out1 = hasCollided(userPos, userCubeLength, cubePos[2], cubeLength3);
+		out2 = processCollision(movex, movey, movez, out1, cubePos[2], 
+				cubeLength2, userCubeLength);
 		out3[0] += out2[0]-movex;
 		out3[1] += out2[1]-movey;
 		out3[2] += out2[2]-movez;
 		
 		//floor
 		out1 = hasCollided(userPos, userCubeLength, floorPos, floorLength);
-		out2 = processCollision(movex, movey, movez, out1, floorPos, floorLength);
+		out2 = processCollision(movex, movey, movez, out1, floorPos, 
+				floorLength, userCubeLength);
 		out3[0] += out2[0]-movex;
 		out3[1] += out2[1]-movey;
 		out3[2] += out2[2]-movez;
@@ -395,33 +433,29 @@ public class Scene {
 	public float[] hasCollided(float[] cube1Pos, float[] cube1Length, 
 			float[] cube2Pos, float[] cube2Length) {
 		
-		for(int x = 0; x < 3; x++) {
-			cube2Length[x]+=cube1Length[x]-4f;
-			cube1Length[x]=4f;
-		}
-		
-		
 		float i = 0.05f;
 		float[] out = new float[3];
-		float diffx = Math.abs(cube1Pos[0] - cube2Pos[0]);
-		float diffy = Math.abs(cube1Pos[1] - cube2Pos[1]);
-		float diffz = Math.abs(cube1Pos[2] - cube2Pos[2]);
+		float diffx = Math.abs(cube1Pos[0] - cube2Pos[0])-cube1Length[0]-cube2Length[0];
+		float diffy = Math.abs(cube1Pos[1] - cube2Pos[1])-cube1Length[1]-cube2Length[1];
+		float diffz = Math.abs(cube1Pos[2] - cube2Pos[2])-cube1Length[2]-cube2Length[2];
 		
 		//determine if the middle of the first cube collides with the second cube
-		if((cube1Pos[0] < cube2Pos[0] +(cube2Length[0]/4)+0.75f&&//+ (cube2Length[0]/2)&&//+(cube1Length[0]-4)/2&&
-				cube1Pos[0] > cube2Pos[0]-(cube2Length[0]/4)-0.75f&&// - (cube2Length[0]/2)&&//+(cube1Length[0]-4)/2&&
-				cube1Pos[1] < cube2Pos[1]+(cube2Length[1]/4)+0.75f&&// + (cube2Length[1]/2)&&//+(cube1Length[1]-4)/2&&
-				cube1Pos[1] > cube2Pos[1]-(cube2Length[1]/4)-0.75f&&// - (cube2Length[1]/2)&&//+(cube1Length[1]-4)/2&&
-				cube1Pos[2] < cube2Pos[2]+(cube2Length[2]/4)+0.75f&&// + (cube2Length[2]/2)&&//+(cube1Length[2]-4)/2&&
-				cube1Pos[2] > cube2Pos[2]-(cube2Length[2]/4)-0.75f)||// - (cube2Length[2]/2))||//+(cube1Length[2]-4)/2 ||
+		if((cube1Pos[0] < cube2Pos[0] +(cube2Length[0]/4)+0.75f+(cube1Length[0]-4)&&
+				cube1Pos[0] > cube2Pos[0]-(cube2Length[0]/4)-0.75f-(cube1Length[0]-4)&&
+				cube1Pos[1] < cube2Pos[1]+(cube2Length[1]/4)+0.75f+(cube1Length[1]-4)&&
+				cube1Pos[1] > cube2Pos[1]-(cube2Length[1]/4)-0.75f-(cube1Length[1]-4)&&
+				cube1Pos[2] < cube2Pos[2]+(cube2Length[2]/4)+0.75f+(cube1Length[2]-4)&&
+				cube1Pos[2] > cube2Pos[2]-(cube2Length[2]/4)-0.75f-(cube1Length[2]-4))){
 				
+			/*
 		//determine if the middle of the second cube collides with the first cube
-			(cube2Pos[0] < cube1Pos[0]+(cube1Length[0]/4)+0.75f&& //+ (cube1Length[0]/2)&&//+(cube2Length[0]-4)/2&&
-				cube2Pos[0] > cube1Pos[0]-(cube1Length[0]/4)-0.75f&&// - (cube1Length[0]/2)&&//+(cube2Length[0]-4)/2&&		
-				cube2Pos[1] < cube1Pos[1]+(cube1Length[1]/4)+0.75f&&// + (cube1Length[1]/2)&&//+(cube2Length[1]-4)/2&&		
-				cube2Pos[1] > cube1Pos[1]-(cube1Length[1]/4)-0.75f&&// - (cube1Length[1]/2)&&//+(cube2Length[1]-4)/2&&
-				cube2Pos[2] < cube1Pos[2]+(cube1Length[2]/4)+0.75f&&// + (cube1Length[2]/2)&&//+(cube2Length[2]-4)/2&&
-				cube2Pos[2] > cube1Pos[2]-(cube1Length[2]/4)-0.75f)){ //- (cube1Length[2]/2))) {//+(cube2Length[2]-4)/2))) {
+			(cube2Pos[0] < cube1Pos[0]+(cube1Length[0]/4)+0.75f+(cube2Length[0]-4)&&
+				cube2Pos[0] > cube1Pos[0]-(cube1Length[0]/4)-0.75f-(cube2Length[0]-4)&&		
+				cube2Pos[1] < cube1Pos[1]+(cube1Length[1]/4)+0.75f+(cube2Length[1]-4)&&	
+				cube2Pos[1] > cube1Pos[1]-(cube1Length[1]/4)-0.75f-(cube2Length[1]-4)&&
+				cube2Pos[2] < cube1Pos[2]+(cube1Length[2]/4)+0.75f+(cube2Length[2]-4)&&
+				cube2Pos[2] > cube1Pos[2]-(cube1Length[2]/4)-0.75f-(cube2Length[2]-4))){ 
+			*/
 			
 			if(diffx > diffz && diffx > diffy) {
 				if(cube1Pos[0] < cube2Pos[0]) out[0] += i;
@@ -454,8 +488,7 @@ public class Scene {
 	 * @return
 	 */
 	public float[] processCollision(float movex, float movey, float movez, 
-			float[] out1, float [] cubePos, float[] cubeLength) {
-		
+			float[] out1, float [] cubePos, float[] cubeLength, float[] cubeLengthTemp) {
 		
 		boolean[] collision = new boolean[6];	//this array corresponds
 		if(out1[0] > 0f) collision[0] = true;	//to the sides of the collision cube
@@ -469,22 +502,22 @@ public class Scene {
 				collision[4] || collision[5]) {
 			//left side
 			if(collision[0])
-				movex = -cubePos[0]+(cubeLength[0]/4)+0.75f;
+				movex = -cubePos[0]+(cubeLength[0]/4)+0.75f+(cubeLengthTemp[0]-4);
 			//right side
 			if(collision[1]) 
-				movex = -cubePos[0]-(cubeLength[0]/4)-0.75f;
+				movex = -cubePos[0]-(cubeLength[0]/4)-0.75f-(cubeLengthTemp[0]-4);
 			//bottom side
 			if(collision[2]) 
-				movey = -cubePos[1]+(cubeLength[1]/4)+0.75f;
+				movey = -cubePos[1]+(cubeLength[1]/4)+0.75f+(cubeLengthTemp[1]-4);
 			//top side
 			if(collision[3]) 
-				movey = -cubePos[1]-(cubeLength[1]/4)-0.75f;
+				movey = -cubePos[1]-(cubeLength[1]/4)-0.75f-(cubeLengthTemp[1]-4);
 			//back side
 			if(collision[4]) 
-				movez = -cubePos[2]+(cubeLength[2]/4)+0.75f;
+				movez = -cubePos[2]+(cubeLength[2]/4)+0.75f+(cubeLengthTemp[2]-4);
 			//front side
 			if(collision[5]) 
-				movez = -cubePos[2]-(cubeLength[2]/4)-0.75f;
+				movez = -cubePos[2]-(cubeLength[2]/4)-0.75f-(cubeLengthTemp[2]-4);
 		}
 		float[] out = {movex, movey, movez};
 		
