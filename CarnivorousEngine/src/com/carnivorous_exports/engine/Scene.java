@@ -290,11 +290,14 @@ public class Scene {
 		gl.glPushName(CUBE3);
 		gl.glPushMatrix();
 				
-		gl.glScalef(3f, 2.3f, 1.1f);
+		float scalex = 3f;
+		float scaley = 3f;
+		float scalez = 3f;
+		gl.glScalef(scalex, scaley, scalez);
 
-		gl.glTranslatef(cube[2][0]-(cube[2][0]/4), 
-						cube[2][1]-(cube[2][1]/4), 
-						cube[2][2]-(cube[2][2]/4));
+		gl.glTranslatef(cube[2][0]-(cube[2][0]/4),//-(scalex*1.5f), 
+						cube[2][1]-(cube[2][1]/4),//-(scaley*1.5f), 
+						cube[2][2]-(cube[2][2]/4)+(scalez*1.5f));
 				
 		// draw the cube
 		gl.glCallList(displayList[3]);
@@ -327,13 +330,16 @@ public class Scene {
 		gl.glPushName(FLOOR);
 		gl.glPushMatrix();
 		
-		float floorx = 0f;
-		float floory = -5-45f;
-		float floorz = 0f;
+		float scalex2 = 30f;
+		float scaley2 = 30f;
+		float scalez2 = 30f;
+		float floorx = 0f;//-(scalex2*1.5f);
+		float floory = -5-(scaley2*1.5f);
+		float floorz = 0f;//-(scalez2*1.5f);
 		gl.glTranslatef(floorx-(floorx/4), 
 				floory-(floory/4), 
 				floorz-(floorz/4));
-		gl.glScalef(30f, 30f, 30f);
+		gl.glScalef(scalex2, scaley2, scalez2);
 		
 		gl.glCallList(displayList[4]);
 		
@@ -363,10 +369,10 @@ public class Scene {
 		
 		this.moveSpeed = moveSpeed;
 		float[] userPos = { -movex, -movey, -movez };
-		float[] userCubeLength = {4f, 8f, 4f};
+		float[] userCubeLength = {4f, 4f, 4f};
 		float[] cubeLength = {4f, 4f, 4f};
 		float[] cubeLength2 = {5f, 5f, 5f};
-		float[] cubeLength3 = {4f*3f, 4f*2.3f, 4f*1.1f};
+		float[] cubeLength3 = {4f*3f, 4f*3f, 4f*3f};
 		float[] floorPos = {0f, -35f, 0f};
 		float[] floorLength = {4f*30f, 4f*30f, 4f*30f};
 		 
@@ -397,7 +403,7 @@ public class Scene {
 		//cube3
 		out1 = hasCollided(userPos, userCubeLength, cubePos[2], cubeLength3);
 		out2 = processCollision(movex, movey, movez, out1, cubePos[2], 
-				cubeLength2, userCubeLength);
+				cubeLength3, userCubeLength);
 		out3[0] += out2[0]-movex;
 		out3[1] += out2[1]-movey;
 		out3[2] += out2[2]-movez;
@@ -435,9 +441,9 @@ public class Scene {
 		
 		float i = 0.05f;
 		float[] out = new float[3];
-		float diffx = Math.abs(cube1Pos[0] - cube2Pos[0])-cube1Length[0]-cube2Length[0];
-		float diffy = Math.abs(cube1Pos[1] - cube2Pos[1])-cube1Length[1]-cube2Length[1];
-		float diffz = Math.abs(cube1Pos[2] - cube2Pos[2])-cube1Length[2]-cube2Length[2];
+		float diffx = Math.abs(cube1Pos[0] - cube2Pos[0]);
+		float diffy = Math.abs(cube1Pos[1] - cube2Pos[1]);
+		float diffz = Math.abs(cube1Pos[2] - cube2Pos[2]);
 		
 		//determine if the middle of the first cube collides with the second cube
 		if((cube1Pos[0] < cube2Pos[0] +(cube2Length[0]/4)+0.75f+(cube1Length[0]-4)&&
