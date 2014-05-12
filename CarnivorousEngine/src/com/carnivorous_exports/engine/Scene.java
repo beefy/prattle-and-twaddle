@@ -290,14 +290,14 @@ public class Scene {
 		gl.glPushName(CUBE3);
 		gl.glPushMatrix();
 				
-		float scalex = 3f;
+		float scalex = 2f;
 		float scaley = 3f;
 		float scalez = 3f;
 		gl.glScalef(scalex, scaley, scalez);
 
 		gl.glTranslatef(cube[2][0]-(cube[2][0]/4),//-(scalex*1.5f), 
-						cube[2][1]-(cube[2][1]/4),//-(scaley*1.5f), 
-						cube[2][2]-(cube[2][2]/4)+(scalez*1.5f));
+						cube[2][1]-(cube[2][1]/4)-0.25f,//-(scaley*1.5f), 
+						cube[2][2]-(cube[2][2]/4)+(scalez*1.5f)-0.25f);
 				
 		// draw the cube
 		gl.glCallList(displayList[3]);
@@ -369,10 +369,10 @@ public class Scene {
 		
 		this.moveSpeed = moveSpeed;
 		float[] userPos = { -movex, -movey, -movez };
-		float[] userCubeLength = {4f, 4f, 4f};
+		float[] userCubeLength = {4f, 8f, 4f};
 		float[] cubeLength = {4f, 4f, 4f};
 		float[] cubeLength2 = {5f, 5f, 5f};
-		float[] cubeLength3 = {4f*3f, 4f*3f, 4f*3f};
+		float[] cubeLength3 = {4f*2f, 4f*3f, 4f*3f};
 		float[] floorPos = {0f, -35f, 0f};
 		float[] floorLength = {4f*30f, 4f*30f, 4f*30f};
 		 
@@ -441,9 +441,9 @@ public class Scene {
 		
 		float i = 0.05f;
 		float[] out = new float[3];
-		float diffx = Math.abs(cube1Pos[0] - cube2Pos[0]);
-		float diffy = Math.abs(cube1Pos[1] - cube2Pos[1]);
-		float diffz = Math.abs(cube1Pos[2] - cube2Pos[2]);
+		float diffx = Math.abs(cube1Pos[0] - cube2Pos[0]) - cube2Length[0]/2 - cube1Length[0]/2;
+		float diffy = Math.abs(cube1Pos[1] - cube2Pos[1]) - cube2Length[1]/2 - cube1Length[1]/2;
+		float diffz = Math.abs(cube1Pos[2] - cube2Pos[2]) - cube2Length[2]/2 - cube1Length[2]/2;
 		
 		//determine if the middle of the first cube collides with the second cube
 		if((cube1Pos[0] < cube2Pos[0] +(cube2Length[0]/4)+0.75f+(cube1Length[0]-4)&&
@@ -462,6 +462,7 @@ public class Scene {
 				cube2Pos[2] < cube1Pos[2]+(cube1Length[2]/4)+0.75f+(cube2Length[2]-4)&&
 				cube2Pos[2] > cube1Pos[2]-(cube1Length[2]/4)-0.75f-(cube2Length[2]-4))){ 
 			*/
+			
 			
 			if(diffx > diffz && diffx > diffy) {
 				if(cube1Pos[0] < cube2Pos[0]) out[0] += i;

@@ -57,7 +57,7 @@ public class Renderer implements GLEventListener,
 
 	private static GLWindow window;
 	private GLU glu; // for the GL Utility
-	public boolean audioOn = false;
+	public boolean audioOn = true;
 	private int[] cubeList; // display list for cube
 	private Scene terrain = new Scene();
 	private boolean initiated = false;
