@@ -58,6 +58,10 @@ public class Renderer implements GLEventListener,
 	private static GLWindow window;
 	private GLU glu; // for the GL Utility
 	public boolean audioOn = true;
+	public float gravity = 1f; //how far to go down every frame
+	public boolean jumping = false;
+	public float jumpHeight = 0.0f;
+	public int jumpTime = 0; //used to keep track of how long the user has been jumping for
 	private int[] cubeList; // display list for cube
 	private Scene terrain = new Scene();
 	private boolean initiated = false;
@@ -179,11 +183,30 @@ public class Renderer implements GLEventListener,
 
 		//moving up or down
 		if (flyUpMove)
-			movey -= 0.1;
+			movey -= 0.1+gravity;
 		if (flyDownMove)
-			movey += 0.1;
+			movey += 0.1-gravity;
+		
+		//for gravity
+		if(jumping) movey += -jumpHeight;
+		else movey += gravity;
 	}
-
+	
+	/**
+	 * Called every frame when jumping.
+	 * This method changes the value of the variable jumpHeight
+	 * to make it seam like the user is jumping (quadratically).
+	 */
+	public void updateJumpHeight() {
+		jumpTime++;
+		jumpHeight += -0.025*Math.pow(jumpTime/5, 1.05) + gravity/20;
+		if(jumpTime >= 34){
+			jumpTime = 0;
+			jumpHeight = 0;
+			jumping = false;
+		}
+	}
+	
 	/**
 	 * Get the current mouse position in world coordinates using gluUnProject.
 	 * Do not use this for picking, use processHits instead
@@ -504,6 +527,7 @@ public class Renderer implements GLEventListener,
 
 		draw(gl, textureNum);
 
+		if(jumping) updateJumpHeight();
 		checkKeysPressed();
 
 		float[] in = terrain.checkCollisions(movex, movey, movez, cubeArray, moveSpeed);
@@ -761,13 +785,18 @@ public class Renderer implements GLEventListener,
 					|| keyCode == com.jogamp.newt.event.KeyEvent.VK_S)
 				downPressed = true;
 
-			// flying up and down (for debugging)
+			// flying up and down (for debugging/fun)
 			if (keyCode == com.jogamp.newt.event.KeyEvent.VK_SHIFT) {
 				flyUpPressed = true;
 			}
 
 			if (keyCode == com.jogamp.newt.event.KeyEvent.VK_CONTROL) {
 				flyDownPressed = true;
+			}
+			
+			//for jumping
+			if( keyCode == com.jogamp.newt.event.KeyEvent.VK_SPACE) {
+				jumping = true;
 			}
 		}
 	}
