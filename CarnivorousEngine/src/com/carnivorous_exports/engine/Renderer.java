@@ -136,7 +136,8 @@ public class Renderer implements GLEventListener,
 	float[] cube1 = {-8f,0f,-4f};
 	float[] cube2 = {6f,0f,-4f};
 	float[] cube3 = {0f,1f,-10f};
-	float[][] cubeArray = {cube1, cube2, cube3};
+	float[] cube4 = {-10f,0f,-4f};
+	float[][] cubeArray = {cube1, cube2, cube3, cube4};
 
 	/**
 	 * A very simple constructor. All it does is add the event listeners to

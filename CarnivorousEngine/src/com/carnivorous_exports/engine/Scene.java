@@ -307,6 +307,20 @@ public class Scene {
 		
 		////////////////////////////
 		
+		//cube4 (almost the same as cube1)
+		gl.glPushName(CUBE);
+		gl.glPushMatrix();
+		
+		gl.glTranslatef(cube[3][0],cube[3][1],cube[3][2]);
+		
+		// draw the cube
+		gl.glCallList(displayList[i]);
+		
+		gl.glPopMatrix();
+		gl.glPopName();
+		
+		////////////////////////////
+		
 		//sphere
 		gl.glPushName(SPHERE);
 		gl.glPushMatrix();
@@ -387,34 +401,42 @@ public class Scene {
 		out1 = hasCollided(userPos, userCubeLength, cubePos[0], cubeLength);
 		out2 = processCollision(movex, movey, movez, out1, cubePos[0], 
 				cubeLength, userCubeLength);
-		out3[0] += out2[0]-movex;
-		out3[1] += out2[1]-movey;
-		out3[2] += out2[2]-movez;
+		if(out3[0] == 0) out3[0] += out2[0]-movex;
+		if(out3[1] == 0) out3[1] += out2[1]-movey;
+		if(out3[2] == 0) out3[2] += out2[2]-movez;
 		
 		
 		//cube2
 		out1 = hasCollided(userPos, userCubeLength, cubePos[1], cubeLength2);
 		out2 = processCollision(movex, movey, movez, out1, cubePos[1], 
 				cubeLength2, userCubeLength);
-		out3[0] += out2[0]-movex;
-		out3[1] += out2[1]-movey;
-		out3[2] += out2[2]-movez;
+		if(out3[0] == 0) out3[0] += out2[0]-movex;
+		if(out3[1] == 0) out3[1] += out2[1]-movey;
+		if(out3[2] == 0) out3[2] += out2[2]-movez;
 		
 		//cube3
 		out1 = hasCollided(userPos, userCubeLength, cubePos[2], cubeLength3);
 		out2 = processCollision(movex, movey, movez, out1, cubePos[2], 
 				cubeLength3, userCubeLength);
-		out3[0] += out2[0]-movex;
-		out3[1] += out2[1]-movey;
-		out3[2] += out2[2]-movez;
+		if(out3[0] == 0) out3[0] += out2[0]-movex;
+		if(out3[1] == 0) out3[1] += out2[1]-movey;
+		if(out3[2] == 0) out3[2] += out2[2]-movez;
+		
+		//cube4
+		out1 = hasCollided(userPos, userCubeLength, cubePos[3], cubeLength);
+		out2 = processCollision(movex, movey, movez, out1, cubePos[3], 
+				cubeLength, userCubeLength);
+		if(out3[0] == 0) out3[0] += out2[0]-movex;
+		if(out3[1] == 0) out3[1] += out2[1]-movey;
+		if(out3[2] == 0) out3[2] += out2[2]-movez;
 		
 		//floor
 		out1 = hasCollided(userPos, userCubeLength, floorPos, floorLength);
 		out2 = processCollision(movex, movey, movez, out1, floorPos, 
 				floorLength, userCubeLength);
-		out3[0] += out2[0]-movex;
-		out3[1] += out2[1]-movey;
-		out3[2] += out2[2]-movez;
+		if(out3[0] == 0) out3[0] += out2[0]-movex;
+		if(out3[1] == 0) out3[1] += out2[1]-movey;
+		if(out3[2] == 0) out3[2] += out2[2]-movez;
 		
 		///////////////////////////////////
 		
@@ -509,22 +531,22 @@ public class Scene {
 				collision[4] || collision[5]) {
 			//left side
 			if(collision[0])
-				movex = -cubePos[0]+(cubeLength[0]/4)+0.75f+(cubeLengthTemp[0]-4);
+				movex = -cubePos[0]+(cubeLength[0]/4)+(cubeLengthTemp[0]-4)+0.75f;
 			//right side
 			if(collision[1]) 
-				movex = -cubePos[0]-(cubeLength[0]/4)-0.75f-(cubeLengthTemp[0]-4);
+				movex = -cubePos[0]-(cubeLength[0]/4)-(cubeLengthTemp[0]-4)-0.75f;
 			//bottom side
 			if(collision[2]) 
-				movey = -cubePos[1]+(cubeLength[1]/4)+0.75f+(cubeLengthTemp[1]-4);
+				movey = -cubePos[1]+(cubeLength[1]/4)+(cubeLengthTemp[1]-4)+0.75f;
 			//top side
 			if(collision[3]) 
-				movey = -cubePos[1]-(cubeLength[1]/4)-0.75f-(cubeLengthTemp[1]-4);
+				movey = -cubePos[1]-(cubeLength[1]/4)-(cubeLengthTemp[1]-4)-0.75f;
 			//back side
 			if(collision[4]) 
-				movez = -cubePos[2]+(cubeLength[2]/4)+0.75f+(cubeLengthTemp[2]-4);
+				movez = -cubePos[2]+(cubeLength[2]/4)+(cubeLengthTemp[2]-4)+0.75f;
 			//front side
 			if(collision[5]) 
-				movez = -cubePos[2]-(cubeLength[2]/4)-0.75f-(cubeLengthTemp[2]-4);
+				movez = -cubePos[2]-(cubeLength[2]/4)-(cubeLengthTemp[2]-4)-0.75f;
 		}
 		float[] out = {movex, movey, movez};
 		
