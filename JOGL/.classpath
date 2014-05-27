@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="JOGL/lib"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="lib" path="jogl-all.jar"/>
+	<classpathentry exported="true" kind="lib" path="gluegen-rt-natives-windows-amd64.jar"/>
+	<classpathentry exported="true" kind="lib" path="jogl-all-natives-windows-amd64.jar"/>
+	<classpathentry exported="true" kind="lib" path="jar/joal.jar"/>
+	<classpathentry exported="true" kind="lib" path="jar/gluegen-rt.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
