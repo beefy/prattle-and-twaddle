@@ -401,42 +401,42 @@ public class Scene {
 		out1 = hasCollided(userPos, userCubeLength, cubePos[0], cubeLength);
 		out2 = processCollision(movex, movey, movez, out1, cubePos[0], 
 				cubeLength, userCubeLength);
-		if(out3[0] == 0) out3[0] += out2[0]-movex;
-		if(out3[1] == 0) out3[1] += out2[1]-movey;
-		if(out3[2] == 0) out3[2] += out2[2]-movez;
+		out3[0] += out2[0]-movex;
+		out3[1] += out2[1]-movey;
+		out3[2] += out2[2]-movez;
 		
 		
 		//cube2
 		out1 = hasCollided(userPos, userCubeLength, cubePos[1], cubeLength2);
 		out2 = processCollision(movex, movey, movez, out1, cubePos[1], 
 				cubeLength2, userCubeLength);
-		if(out3[0] == 0) out3[0] += out2[0]-movex;
-		if(out3[1] == 0) out3[1] += out2[1]-movey;
-		if(out3[2] == 0) out3[2] += out2[2]-movez;
+		out3[0] += out2[0]-movex;
+		out3[1] += out2[1]-movey;
+		out3[2] += out2[2]-movez;
 		
 		//cube3
 		out1 = hasCollided(userPos, userCubeLength, cubePos[2], cubeLength3);
 		out2 = processCollision(movex, movey, movez, out1, cubePos[2], 
 				cubeLength3, userCubeLength);
-		if(out3[0] == 0) out3[0] += out2[0]-movex;
-		if(out3[1] == 0) out3[1] += out2[1]-movey;
-		if(out3[2] == 0) out3[2] += out2[2]-movez;
+		out3[0] += out2[0]-movex;
+		out3[1] += out2[1]-movey;
+		out3[2] += out2[2]-movez;
 		
 		//cube4
 		out1 = hasCollided(userPos, userCubeLength, cubePos[3], cubeLength);
 		out2 = processCollision(movex, movey, movez, out1, cubePos[3], 
 				cubeLength, userCubeLength);
-		if(out3[0] == 0) out3[0] += out2[0]-movex;
-		if(out3[1] == 0) out3[1] += out2[1]-movey;
-		if(out3[2] == 0) out3[2] += out2[2]-movez;
+		out3[0] += out2[0]-movex;
+		out3[1] += out2[1]-movey;
+		out3[2] += out2[2]-movez;
 		
 		//floor
 		out1 = hasCollided(userPos, userCubeLength, floorPos, floorLength);
 		out2 = processCollision(movex, movey, movez, out1, floorPos, 
 				floorLength, userCubeLength);
-		if(out3[0] == 0) out3[0] += out2[0]-movex;
-		if(out3[1] == 0) out3[1] += out2[1]-movey;
-		if(out3[2] == 0) out3[2] += out2[2]-movez;
+		out3[0] += out2[0]-movex;
+		out3[1] += out2[1]-movey;
+		out3[2] += out2[2]-movez;
 		
 		///////////////////////////////////
 		
@@ -467,6 +467,29 @@ public class Scene {
 		float diffy = Math.abs(cube1Pos[1] - cube2Pos[1]) - cube2Length[1]/2 - cube1Length[1]/2;
 		float diffz = Math.abs(cube1Pos[2] - cube2Pos[2]) - cube2Length[2]/2 - cube1Length[2]/2;
 		
+		if((cube1Pos[0] < cube2Pos[0] +(cube2Length[0]/4)+0.75f+(cube1Length[0]-4)&&
+				cube1Pos[0] > cube2Pos[0]-(cube2Length[0]/4)-0.75f-(cube1Length[0]-4)&&
+				cube1Pos[1] < cube2Pos[1]+(cube2Length[1]/4)+(cube1Length[1]-4)&&
+				cube1Pos[1] > cube2Pos[1]-(cube2Length[1]/4)-(cube1Length[1]-4)&&
+				cube1Pos[2] < cube2Pos[2]+(cube2Length[2]/4)+(cube1Length[2]-4)&&
+				cube1Pos[2] > cube2Pos[2]-(cube2Length[2]/4)-(cube1Length[2]-4)) ||
+				
+				(cube1Pos[0] < cube2Pos[0] +(cube2Length[0]/4)+(cube1Length[0]-4)&&
+				cube1Pos[0] > cube2Pos[0]-(cube2Length[0]/4)-(cube1Length[0]-4)&&
+				cube1Pos[1] < cube2Pos[1]+(cube2Length[1]/4)+0.75f+(cube1Length[1]-4)&&
+				cube1Pos[1] > cube2Pos[1]-(cube2Length[1]/4)-0.75f-(cube1Length[1]-4)&&
+				cube1Pos[2] < cube2Pos[2]+(cube2Length[2]/4)+(cube1Length[2]-4)&&
+				cube1Pos[2] > cube2Pos[2]-(cube2Length[2]/4)-(cube1Length[2]-4)) ||
+				
+				(cube1Pos[0] < cube2Pos[0] +(cube2Length[0]/4)+(cube1Length[0]-4)&&
+				cube1Pos[0] > cube2Pos[0]-(cube2Length[0]/4)-(cube1Length[0]-4)&&
+				cube1Pos[1] < cube2Pos[1]+(cube2Length[1]/4)+(cube1Length[1]-4)&&
+				cube1Pos[1] > cube2Pos[1]-(cube2Length[1]/4)-(cube1Length[1]-4)&&
+				cube1Pos[2] < cube2Pos[2]+(cube2Length[2]/4)+0.75f+(cube1Length[2]-4)&&
+				cube1Pos[2] > cube2Pos[2]-(cube2Length[2]/4)-0.75f-(cube1Length[2]-4))) {
+		
+		
+		/*
 		//determine if the middle of the first cube collides with the second cube
 		if((cube1Pos[0] < cube2Pos[0] +(cube2Length[0]/4)+0.75f+(cube1Length[0]-4)&&
 				cube1Pos[0] > cube2Pos[0]-(cube2Length[0]/4)-0.75f-(cube1Length[0]-4)&&
@@ -474,7 +497,7 @@ public class Scene {
 				cube1Pos[1] > cube2Pos[1]-(cube2Length[1]/4)-0.75f-(cube1Length[1]-4)&&
 				cube1Pos[2] < cube2Pos[2]+(cube2Length[2]/4)+0.75f+(cube1Length[2]-4)&&
 				cube1Pos[2] > cube2Pos[2]-(cube2Length[2]/4)-0.75f-(cube1Length[2]-4))){
-				
+		*/
 			/*
 		//determine if the middle of the second cube collides with the first cube
 			(cube2Pos[0] < cube1Pos[0]+(cube1Length[0]/4)+0.75f+(cube2Length[0]-4)&&
