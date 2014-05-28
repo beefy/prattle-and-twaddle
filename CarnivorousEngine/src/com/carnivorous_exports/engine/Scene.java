@@ -401,42 +401,42 @@ public class Scene {
 		out1 = hasCollided(userPos, userCubeLength, cubePos[0], cubeLength);
 		out2 = processCollision(movex, movey, movez, out1, cubePos[0], 
 				cubeLength, userCubeLength);
-		out3[0] += out2[0]-movex;
-		out3[1] += out2[1]-movey;
-		out3[2] += out2[2]-movez;
+		if(out3[0] == 0) out3[0] += out2[0]-movex;
+		if(out3[1] == 0) out3[1] += out2[1]-movey;
+		if(out3[2] == 0) out3[2] += out2[2]-movez;
 		
 		
 		//cube2
 		out1 = hasCollided(userPos, userCubeLength, cubePos[1], cubeLength2);
 		out2 = processCollision(movex, movey, movez, out1, cubePos[1], 
 				cubeLength2, userCubeLength);
-		out3[0] += out2[0]-movex;
-		out3[1] += out2[1]-movey;
-		out3[2] += out2[2]-movez;
+		if(out3[0] == 0) out3[0] += out2[0]-movex;
+		if(out3[1] == 0) out3[1] += out2[1]-movey;
+		if(out3[2] == 0) out3[2] += out2[2]-movez;
 		
 		//cube3
 		out1 = hasCollided(userPos, userCubeLength, cubePos[2], cubeLength3);
 		out2 = processCollision(movex, movey, movez, out1, cubePos[2], 
 				cubeLength3, userCubeLength);
-		out3[0] += out2[0]-movex;
-		out3[1] += out2[1]-movey;
-		out3[2] += out2[2]-movez;
+		if(out3[0] == 0) out3[0] += out2[0]-movex;
+		if(out3[1] == 0) out3[1] += out2[1]-movey;
+		if(out3[2] == 0) out3[2] += out2[2]-movez;
 		
 		//cube4
 		out1 = hasCollided(userPos, userCubeLength, cubePos[3], cubeLength);
 		out2 = processCollision(movex, movey, movez, out1, cubePos[3], 
 				cubeLength, userCubeLength);
-		out3[0] += out2[0]-movex;
-		out3[1] += out2[1]-movey;
-		out3[2] += out2[2]-movez;
+		if(out3[0] == 0) out3[0] += out2[0]-movex;
+		if(out3[1] == 0) out3[1] += out2[1]-movey;
+		if(out3[2] == 0) out3[2] += out2[2]-movez;
 		
 		//floor
 		out1 = hasCollided(userPos, userCubeLength, floorPos, floorLength);
 		out2 = processCollision(movex, movey, movez, out1, floorPos, 
 				floorLength, userCubeLength);
-		out3[0] += out2[0]-movex;
-		out3[1] += out2[1]-movey;
-		out3[2] += out2[2]-movez;
+		if(out3[0] == 0) out3[0] += out2[0]-movex;
+		if(out3[1] == 0) out3[1] += out2[1]-movey;
+		if(out3[2] == 0) out3[2] += out2[2]-movez;
 		
 		///////////////////////////////////
 		
