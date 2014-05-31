@@ -38,6 +38,11 @@ public class Scene {
 	GL2 gl;
 	int[] displayList;
 	boolean terrainBuilt;
+	
+	//for collision
+	boolean boxX;
+	boolean boxY;
+	boolean boxZ;
 
 	// for testing rotation
 	float tempRotX;
@@ -467,26 +472,32 @@ public class Scene {
 		float diffy = Math.abs(cube1Pos[1] - cube2Pos[1]) - cube2Length[1]/2 - cube1Length[1]/2;
 		float diffz = Math.abs(cube1Pos[2] - cube2Pos[2]) - cube2Length[2]/2 - cube1Length[2]/2;
 		
-		if((cube1Pos[0] < cube2Pos[0] +(cube2Length[0]/4)+0.75f+(cube1Length[0]-4)&&
+		if(cube1Pos[0] < cube2Pos[0] +(cube2Length[0]/4)+0.75f+(cube1Length[0]-4)&&
 				cube1Pos[0] > cube2Pos[0]-(cube2Length[0]/4)-0.75f-(cube1Length[0]-4)&&
 				cube1Pos[1] < cube2Pos[1]+(cube2Length[1]/4)+(cube1Length[1]-4)&&
 				cube1Pos[1] > cube2Pos[1]-(cube2Length[1]/4)-(cube1Length[1]-4)&&
 				cube1Pos[2] < cube2Pos[2]+(cube2Length[2]/4)+(cube1Length[2]-4)&&
-				cube1Pos[2] > cube2Pos[2]-(cube2Length[2]/4)-(cube1Length[2]-4)) ||
+				cube1Pos[2] > cube2Pos[2]-(cube2Length[2]/4)-(cube1Length[2]-4)) {
+			boxX = true;
+		}
 				
-				(cube1Pos[0] < cube2Pos[0] +(cube2Length[0]/4)+(cube1Length[0]-4)&&
+		if(cube1Pos[0] < cube2Pos[0] +(cube2Length[0]/4)+(cube1Length[0]-4)&&
 				cube1Pos[0] > cube2Pos[0]-(cube2Length[0]/4)-(cube1Length[0]-4)&&
 				cube1Pos[1] < cube2Pos[1]+(cube2Length[1]/4)+0.75f+(cube1Length[1]-4)&&
 				cube1Pos[1] > cube2Pos[1]-(cube2Length[1]/4)-0.75f-(cube1Length[1]-4)&&
 				cube1Pos[2] < cube2Pos[2]+(cube2Length[2]/4)+(cube1Length[2]-4)&&
-				cube1Pos[2] > cube2Pos[2]-(cube2Length[2]/4)-(cube1Length[2]-4)) ||
+				cube1Pos[2] > cube2Pos[2]-(cube2Length[2]/4)-(cube1Length[2]-4)) {
+			boxY = true;
+		}
 				
-				(cube1Pos[0] < cube2Pos[0] +(cube2Length[0]/4)+(cube1Length[0]-4)&&
+		if(cube1Pos[0] < cube2Pos[0] +(cube2Length[0]/4)+(cube1Length[0]-4)&&
 				cube1Pos[0] > cube2Pos[0]-(cube2Length[0]/4)-(cube1Length[0]-4)&&
 				cube1Pos[1] < cube2Pos[1]+(cube2Length[1]/4)+(cube1Length[1]-4)&&
 				cube1Pos[1] > cube2Pos[1]-(cube2Length[1]/4)-(cube1Length[1]-4)&&
 				cube1Pos[2] < cube2Pos[2]+(cube2Length[2]/4)+0.75f+(cube1Length[2]-4)&&
-				cube1Pos[2] > cube2Pos[2]-(cube2Length[2]/4)-0.75f-(cube1Length[2]-4))) {
+				cube1Pos[2] > cube2Pos[2]-(cube2Length[2]/4)-0.75f-(cube1Length[2]-4)) {
+			boxZ = true;
+		}
 		
 		
 		/*
@@ -508,7 +519,7 @@ public class Scene {
 				cube2Pos[2] > cube1Pos[2]-(cube1Length[2]/4)-0.75f-(cube2Length[2]-4))){ 
 			*/
 			
-			
+		if(boxX || boxY || boxZ) {
 			if(diffx > diffz && diffx > diffy) {
 				if(cube1Pos[0] < cube2Pos[0]) out[0] += i;
 				else out[0] -= i;
@@ -552,27 +563,38 @@ public class Scene {
 		
 		if(collision[0] || collision[1] || collision[2] || collision[3] ||
 				collision[4] || collision[5]) {
+			float xPlus = 0;
+			float yPlus = 0;
+			float zPlus = 0;
+			
+			if(boxX) xPlus = 0.75f;
+			if(boxY) yPlus = 0.75f;
+			if(boxZ) zPlus = 0.75f;
+
 			//left side
 			if(collision[0])
-				movex = -cubePos[0]+(cubeLength[0]/4)+(cubeLengthTemp[0]-4)+0.75f;
+				movex = -cubePos[0]+(cubeLength[0]/4)+(cubeLengthTemp[0]-4)+xPlus;
 			//right side
 			if(collision[1]) 
-				movex = -cubePos[0]-(cubeLength[0]/4)-(cubeLengthTemp[0]-4)-0.75f;
+				movex = -cubePos[0]-(cubeLength[0]/4)-(cubeLengthTemp[0]-4)-xPlus;
 			//bottom side
 			if(collision[2]) 
-				movey = -cubePos[1]+(cubeLength[1]/4)+(cubeLengthTemp[1]-4)+0.75f;
+				movey = -cubePos[1]+(cubeLength[1]/4)+(cubeLengthTemp[1]-4)+yPlus;
 			//top side
 			if(collision[3]) 
-				movey = -cubePos[1]-(cubeLength[1]/4)-(cubeLengthTemp[1]-4)-0.75f;
+				movey = -cubePos[1]-(cubeLength[1]/4)-(cubeLengthTemp[1]-4)-yPlus;
 			//back side
 			if(collision[4]) 
-				movez = -cubePos[2]+(cubeLength[2]/4)+(cubeLengthTemp[2]-4)+0.75f;
+				movez = -cubePos[2]+(cubeLength[2]/4)+(cubeLengthTemp[2]-4)+zPlus;
 			//front side
 			if(collision[5]) 
-				movez = -cubePos[2]-(cubeLength[2]/4)-(cubeLengthTemp[2]-4)-0.75f;
+				movez = -cubePos[2]-(cubeLength[2]/4)-(cubeLengthTemp[2]-4)-zPlus;
 		}
 		float[] out = {movex, movey, movez};
 		
+		boxX = false;
+		boxY = false;
+		boxZ = false;
 		return out;
 	}
 	
