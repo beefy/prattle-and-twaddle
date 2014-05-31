@@ -132,6 +132,7 @@ public class Renderer implements GLEventListener,
 	boolean pick = false;
 	public static int hits;
 	int textureNum = 0; // picking test variable
+	int textureNum2 = 0;
 	
 	float[] cube1 = {-8f,0f,-4f};
 	float[] cube2 = {6f,0f,-4f};
@@ -339,7 +340,7 @@ public class Renderer implements GLEventListener,
 	 * @param textureNum	The texture to draw on the cube.
 	 * 						This is set to 0 when picking.
 	 */
-	public void draw(GL2 gl, int textureNum) {
+	public void draw(GL2 gl, int textureNum, int textureNum2) {
 
 		gl.glPushMatrix();
 
@@ -350,7 +351,7 @@ public class Renderer implements GLEventListener,
 
 		gl.glTranslatef(movex, movey, movez);
 
-		terrain.drawScene(gl, cubeList, cubeArray, textureNum);
+		terrain.drawScene(gl, cubeList, cubeArray, textureNum, textureNum2);
 
 		gl.glLightfv(GL_LIGHT1, GL_AMBIENT, lightColorAmbient, 0);
 		gl.glLightfv(GL_LIGHT1, GL_DIFFUSE, lightDif, 0);
@@ -511,22 +512,21 @@ public class Renderer implements GLEventListener,
 
 		if (pick) {
 			startPicking(gl);
-			draw(gl, 0);
+			draw(gl, 0, 0);
 			pickedObject = stopPicking(gl);
 
-			System.out.print("( ");
 			for (int i = 0; i < pickedObject.length; i++) {
 				if (pickedObject[i] == 1 && textureNum < 6) {
 					textureNum++;
+				} else if(pickedObject[i] == 2 && textureNum2 < 6) {
+					textureNum2++;
 				}
-				System.out.print(pickedObject[i] + " , ");
 			}
-			System.out.println(" )");
 
 			// System.out.println("TEXTURE NUM: " + textureNum);
 		}
 
-		draw(gl, textureNum);
+		draw(gl, textureNum, textureNum2);
 
 		if(jumping) updateJumpHeight();
 		checkKeysPressed();
