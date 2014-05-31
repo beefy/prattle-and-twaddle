@@ -247,7 +247,7 @@ public class Scene {
 	 * @param cube			the position of the cube
 	 * @param i				the texture that the cube should be
 	 */
-	public void drawScene(GL2 gl, int[] displayList, float[][] cube, int i) {
+	public void drawScene(GL2 gl, int[] displayList, float[][] cube, int i, int y) {
 		
 		
 		final int EVERYTHING = 0;
@@ -284,7 +284,7 @@ public class Scene {
 						cube[1][2]-(cube[1][2]/4));
 		
 		// draw the cube
-		gl.glCallList(displayList[2]);
+		gl.glCallList(displayList[y]);
 		
 		gl.glPopMatrix();
 		gl.glPopName();
