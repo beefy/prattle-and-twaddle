@@ -38,7 +38,7 @@ import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_POSITION;
  * Basic Lighting (Shadows appear on objects, but are not cast onto others),
  * Sound (Walking),
  * Picking (Click the Cube), and
- * Incomplete Collision Detection (Walk into the Cube).
+ * Collision Detection (Walk into the Cube).
  * <p>
  * If this javadoc does not provide enough information, I suggest consulting the
  * JOGL or openGL javadoc(s) as well.
@@ -280,11 +280,10 @@ public class Renderer implements GLEventListener,
 	public int[] stopPicking(GL2 gl) {
 		gl.glMatrixMode(GL2.GL_PROJECTION);
 		gl.glPopMatrix();
-		gl.glMatrixMode(GL2.GL_MODELVIEW);
+		//gl.glMatrixMode(GL2.GL_MODELVIEW);
 		gl.glFlush();
 
 		hits = gl.glRenderMode(GL2.GL_RENDER);
-		
 		if (hits > 0) {
 			pick = false;
 			return processHits(hits, selectBuf);
@@ -508,13 +507,13 @@ public class Renderer implements GLEventListener,
 																// and depth
 																// buffers
 
+		
 		int[] pickedObject = null;
 
 		if (pick) {
 			startPicking(gl);
-			draw(gl, 0, 0);
+			draw(gl, textureNum, textureNum2);
 			pickedObject = stopPicking(gl);
-
 			for (int i = 0; i < pickedObject.length; i++) {
 				if (pickedObject[i] == 1 && textureNum < 6) {
 					textureNum++;
@@ -537,26 +536,12 @@ public class Renderer implements GLEventListener,
 		movey = in[1];
 		movez = in[2];
 		
-		/*
-		if(in[3] == 1f) movex = in[0];
-		if(in[4] == 1f) movey = in[1];
-		if(in[5] == 1f) movez = in[2];
-		*/
-		
-		/*
-		if(in[3] == 1f || in[4] == 1f || in[5] == 1f) {
-			movex = in[0];
-			movey = in[1];
-			movez = in[2];
-		}
-		*/
-		
 		checkMoving();
 			
 		oldRotX = view_rotx;
 		oldRotY = view_roty;
 		oldRotZ = view_rotz;
-
+		
 		long drawNanos = System.nanoTime() - startNanos;
 		// System.out.println("drawn in " + drawNanos);
 		// System.out.println(drawable.getAnimator().getLastFPS());
@@ -653,13 +638,56 @@ public class Renderer implements GLEventListener,
 
 	@Override
 	public void mouseClicked(com.jogamp.newt.event.MouseEvent e) {
-		pick = true;
+		//pick = true;
 	}
 
 	@Override
-	public void mouseDragged(com.jogamp.newt.event.MouseEvent arg0) {
-		// TODO Auto-generated method stub
+	public void mouseDragged(com.jogamp.newt.event.MouseEvent e) {
+		if (initiated) {
+			if(pick) System.out.println("working");
+			mouseXGlobal = e.getX();
+			mouseYGlobal = e.getY();
 
+			if (!mouseInMiddle)
+				return;
+
+			prevMouseY = height / 2; // because the mouse is always in the
+										// middle of
+			prevMouseX = width / 2; // the screen, the prevMouseX/Y is also
+									// always
+									// the middle of the screen
+			float thetaY;
+			float thetaX;
+
+			mouseY = prevMouseY - e.getY();
+			mouseX = prevMouseX - e.getX();
+
+			thetaY = 360.0f * ((float) (mouseX) / (float) width);
+			thetaX = 360.0f * ((float) (mouseY) / (float) height);
+
+			prevMouseX = mouseX;
+			prevMouseY = mouseY;
+
+			// restricting x rotation movement to make physical sense
+			// DOESNT WORK
+			if (view_rotx + thetaX * mouseSensitivity < 180
+					&& view_rotx + thetaX * mouseSensitivity > -180) {
+				view_rotx += thetaX * mouseSensitivity;
+			}
+
+			view_roty += thetaY * mouseSensitivity;
+
+			view_roty = view_roty % 360;
+
+			mouseInMiddle = false;
+
+			// both robot.mouseMove and window.warpPointer work
+			// robot.mouseMove(width / 2, height / 2);
+			window.warpPointer(width / 2, height / 2);
+
+			mouseInMiddle = true;	//false when we are iterating just to keep the
+									//mouse in the middle
+		}
 	}
 
 	@Override
@@ -686,7 +714,7 @@ public class Renderer implements GLEventListener,
 	public void mouseMoved(com.jogamp.newt.event.MouseEvent e) {
 		
 		if (initiated) {
-
+			if(pick) System.out.println("working");
 			mouseXGlobal = e.getX();
 			mouseYGlobal = e.getY();
 
@@ -735,13 +763,13 @@ public class Renderer implements GLEventListener,
 	@Override
 	public void mousePressed(com.jogamp.newt.event.MouseEvent arg0) {
 		// TODO Auto-generated method stub
-
+		pick = true;
 	}
 
 	@Override
 	public void mouseReleased(com.jogamp.newt.event.MouseEvent arg0) {
 		// TODO Auto-generated method stub
-
+		pick = false;
 	}
 
 	@Override
