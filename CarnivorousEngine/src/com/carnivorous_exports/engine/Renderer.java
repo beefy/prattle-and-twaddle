@@ -669,9 +669,8 @@ public class Renderer implements GLEventListener,
 			prevMouseY = mouseY;
 
 			// restricting x rotation movement to make physical sense
-			// DOESNT WORK
-			if (view_rotx + thetaX * mouseSensitivity < 180
-					&& view_rotx + thetaX * mouseSensitivity > -180) {
+			if (view_rotx + thetaX * mouseSensitivity < 90
+					&& view_rotx + thetaX * mouseSensitivity > -90) {
 				view_rotx += thetaX * mouseSensitivity;
 			}
 
@@ -712,7 +711,6 @@ public class Renderer implements GLEventListener,
 	 */
 	@Override
 	public void mouseMoved(com.jogamp.newt.event.MouseEvent e) {
-		
 		if (initiated) {
 			if(pick) System.out.println("working");
 			mouseXGlobal = e.getX();
@@ -739,9 +737,8 @@ public class Renderer implements GLEventListener,
 			prevMouseY = mouseY;
 
 			// restricting x rotation movement to make physical sense
-			// DOESNT WORK
-			if (view_rotx + thetaX * mouseSensitivity < 180
-					&& view_rotx + thetaX * mouseSensitivity > -180) {
+			if (view_rotx + thetaX * mouseSensitivity < 90
+					&& view_rotx + thetaX * mouseSensitivity > -90) {
 				view_rotx += thetaX * mouseSensitivity;
 			}
 
