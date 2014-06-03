@@ -313,13 +313,13 @@ public class Scene {
 		////////////////////////////
 		
 		//cube4 (almost the same as cube1)
-		gl.glPushName(CUBE);
+		gl.glPushName(CUBE2);
 		gl.glPushMatrix();
 		
 		gl.glTranslatef(cube[3][0],cube[3][1],cube[3][2]);
 		
 		// draw the cube
-		gl.glCallList(displayList[i]);
+		gl.glCallList(displayList[y]);
 		
 		gl.glPopMatrix();
 		gl.glPopName();

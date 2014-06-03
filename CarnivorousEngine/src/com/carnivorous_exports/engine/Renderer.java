@@ -277,7 +277,7 @@ public class Renderer implements GLEventListener,
 	 * @param gl	the current GL
 	 * @return	an array containing the names of hit objects
 	 */
-	public int[] stopPicking(GL2 gl) {
+	public int stopPicking(GL2 gl) {
 		gl.glMatrixMode(GL2.GL_PROJECTION);
 		gl.glPopMatrix();
 		//gl.glMatrixMode(GL2.GL_MODELVIEW);
@@ -289,7 +289,7 @@ public class Renderer implements GLEventListener,
 			return processHits(hits, selectBuf);
 		} else {
 			pick = false;
-			return new int[0];
+			return -1;
 		}
 	}
 
@@ -305,8 +305,9 @@ public class Renderer implements GLEventListener,
 	 * @param	buffer	the buffer containing the names of hit objects
 	 * @return	an array containing the names of the hit objects
 	 */
-	public int[] processHits(int hits, IntBuffer buffer) {
+	public int processHits(int hits, IntBuffer buffer) {
 
+		/*
 		int[] out = new int[hits];
 
 		int offset = 0;
@@ -314,7 +315,9 @@ public class Renderer implements GLEventListener,
 		float z1, z2;
 		for (int i = 0; i < hits; i++) {
 			names = buffer.get(offset);
+			out[i] = names;
 			offset++;
+			
 			z1 = (float) (buffer.get(offset) & 0xffffffffL) / 0x7fffffff;
 			offset++;
 			z2 = (float) (buffer.get(offset) & 0xffffffffL) / 0x7fffffff;
@@ -325,9 +328,27 @@ public class Renderer implements GLEventListener,
 				out[i] = q;
 				offset++;
 			}
+			
 		}
 
 		return out;
+		*/
+		
+		 if (hits != 0) {
+	            int near = buffer.get(2);
+	            int index = 3;
+	            for (int i = 1; i < hits; i++) {
+	                if(near >  buffer.get(4*i+2))
+	                {
+	                    near = buffer.get(4*i+2);
+	                    index = 4*i + 3;
+	                }
+	            }
+
+	            index = buffer.get(index);
+	            return index;
+		 }
+		 return -1;
 	}
 
 	/**
@@ -508,21 +529,19 @@ public class Renderer implements GLEventListener,
 																// buffers
 
 		
-		int[] pickedObject = null;
+		int pickedObject;
 
 		if (pick) {
 			startPicking(gl);
 			draw(gl, textureNum, textureNum2);
 			pickedObject = stopPicking(gl);
-			for (int i = 0; i < pickedObject.length; i++) {
-				if (pickedObject[i] == 1 && textureNum < 6) {
+			//for (int i = 0; i < pickedObject.length; i++) {
+			//if(pickedObject.length > 0) {
+				if (pickedObject == 1 && textureNum < 6) {
 					textureNum++;
-				} else if(pickedObject[i] == 2 && textureNum2 < 6) {
+				} else if(pickedObject == 2 && textureNum2 < 6) {
 					textureNum2++;
 				}
-			}
-
-			// System.out.println("TEXTURE NUM: " + textureNum);
 		}
 
 		draw(gl, textureNum, textureNum2);
@@ -548,6 +567,21 @@ public class Renderer implements GLEventListener,
 
 		drawable.swapBuffers();
 		gl.glFlush();
+	}
+	
+	/**
+	 * 
+	 * @param a point a
+	 * @param b point b
+	 * @return distance between two points (a and b)
+	 */
+	public double distance(float[] a, float[] b) {
+		double disX = a[0]-b[0];
+		double disY = a[1]-b[1];
+		double disZ = a[2]-b[2];
+		double c = Math.sqrt(Math.pow(disX, 2)+Math.pow(disY, 2));
+		double dis = Math.sqrt(Math.pow(c, 2)-Math.pow(disZ, 2));
+		return dis;
 	}
 
 	/**
@@ -644,7 +678,6 @@ public class Renderer implements GLEventListener,
 	@Override
 	public void mouseDragged(com.jogamp.newt.event.MouseEvent e) {
 		if (initiated) {
-			if(pick) System.out.println("working");
 			mouseXGlobal = e.getX();
 			mouseYGlobal = e.getY();
 
@@ -712,7 +745,6 @@ public class Renderer implements GLEventListener,
 	@Override
 	public void mouseMoved(com.jogamp.newt.event.MouseEvent e) {
 		if (initiated) {
-			if(pick) System.out.println("working");
 			mouseXGlobal = e.getX();
 			mouseYGlobal = e.getY();
 
