@@ -327,6 +327,10 @@ public class Scene {
 		////////////////////////////
 		
 		//cube5 (gluUnProject Test)
+		//This test is not a great example for gluUnProject.
+		//gluUnProject is supposed to return the position of the mouse in 3D.
+		//This would work as intended if this box was drawn in the matrix above: the
+		//same matrix as the "camera".
 		gl.glPushName(10);
 		gl.glPushMatrix();
 				

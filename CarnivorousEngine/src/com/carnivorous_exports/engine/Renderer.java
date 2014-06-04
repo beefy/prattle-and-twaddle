@@ -376,7 +376,7 @@ public class Renderer implements GLEventListener,
 		cubeArray[1] = cube2;
 		cubeArray[2] = cube3;
 		cubeArray[3] = cube4;
-		double[] temp = getPositionUnProject(gl, 0.5f);
+		double[] temp = getPositionUnProject(gl, 0.9f);
 		cubeArray[4][0] = (float) temp[0];
 		cubeArray[4][1] = (float) temp[1];
 		cubeArray[4][2] = (float) temp[2]-4;
