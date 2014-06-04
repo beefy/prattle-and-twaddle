@@ -138,7 +138,8 @@ public class Renderer implements GLEventListener,
 	float[] cube2 = {6f,0f,-4f};
 	float[] cube3 = {0f,1f,-10f};
 	float[] cube4 = {-10f,0f,-4f};
-	float[][] cubeArray = {cube1, cube2, cube3, cube4};
+	float[][] cubeArray = new float[5][3];
+	//cubeArray = {cube1, cube2, cube3, cube4, null};
 
 	/**
 	 * A very simple constructor. All it does is add the event listeners to
@@ -235,8 +236,8 @@ public class Renderer implements GLEventListener,
 		gl.glGetDoublev(GL2.GL_PROJECTION_MATRIX, projection, 0);
 		gl.glGetIntegerv(GL2.GL_VIEWPORT, viewport, 0);
 
-		winX = (float) mouseX;
-		winY = (float) viewport[3] - (float) mouseY;
+		winX = (float) mouseXGlobal;
+		winY = (float) viewport[3] - (float) mouseYGlobal;
 
 		glu.gluUnProject(winX, winY, d, modelview, 0, projection, 0, viewport,
 				0, mouse3DPos, 0);
@@ -371,8 +372,16 @@ public class Renderer implements GLEventListener,
 
 		gl.glTranslatef(movex, movey, movez);
 
+		cubeArray[0] = cube1;
+		cubeArray[1] = cube2;
+		cubeArray[2] = cube3;
+		cubeArray[3] = cube4;
+		double[] temp = getPositionUnProject(gl, 0.5f);
+		cubeArray[4][0] = (float) temp[0];
+		cubeArray[4][1] = (float) temp[1];
+		cubeArray[4][2] = (float) temp[2]-4;
 		terrain.drawScene(gl, cubeList, cubeArray, textureNum, textureNum2);
-
+		
 		gl.glLightfv(GL_LIGHT1, GL_AMBIENT, lightColorAmbient, 0);
 		gl.glLightfv(GL_LIGHT1, GL_DIFFUSE, lightDif, 0);
 		gl.glLightfv(GL_LIGHT1, GL_SPECULAR, lightColorSpecular, 0);

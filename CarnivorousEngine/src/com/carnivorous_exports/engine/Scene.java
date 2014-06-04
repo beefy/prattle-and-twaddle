@@ -326,6 +326,20 @@ public class Scene {
 		
 		////////////////////////////
 		
+		//cube5 (gluUnProject Test)
+		gl.glPushName(10);
+		gl.glPushMatrix();
+				
+		gl.glTranslatef(cube[4][0],cube[4][1],cube[4][2]);
+				
+		// draw the cube
+		gl.glCallList(displayList[4]);
+				
+		gl.glPopMatrix();
+		gl.glPopName();
+				
+		////////////////////////////
+		
 		//sphere
 		gl.glPushName(SPHERE);
 		gl.glPushMatrix();
