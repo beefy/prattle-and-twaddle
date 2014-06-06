@@ -376,10 +376,6 @@ public class Renderer implements GLEventListener,
 		cubeArray[1] = cube2;
 		cubeArray[2] = cube3;
 		cubeArray[3] = cube4;
-		double[] temp = getPositionUnProject(gl, 0.9f);
-		cubeArray[4][0] = (float) temp[0];
-		cubeArray[4][1] = (float) temp[1];
-		cubeArray[4][2] = (float) temp[2]-4;
 		terrain.drawScene(gl, cubeList, cubeArray, textureNum, textureNum2);
 		
 		gl.glLightfv(GL_LIGHT1, GL_AMBIENT, lightColorAmbient, 0);
@@ -435,7 +431,8 @@ public class Renderer implements GLEventListener,
 
 		GL2 gl = drawable.getGL().getGL2(); // get the OpenGL graphics context
 		glu = new GLU(); // get GL Utilities
-		gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // set background (clear) color
+		//gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // set background (clear) color
+		gl.glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // set background (black) color
 		gl.glClearDepth(1.0f); // set clear depth value to farthest
 
 		// for anti-aliasing
@@ -582,14 +579,27 @@ public class Renderer implements GLEventListener,
 	 * 
 	 * @param a point a
 	 * @param b point b
-	 * @return distance between two points (a and b)
+	 * @return distance between two 3D points (a and b)
 	 */
-	public double distance(float[] a, float[] b) {
+	public double distance3D(float[] a, float[] b) {
 		double disX = a[0]-b[0];
 		double disY = a[1]-b[1];
 		double disZ = a[2]-b[2];
 		double c = Math.sqrt(Math.pow(disX, 2)+Math.pow(disY, 2));
 		double dis = Math.sqrt(Math.pow(c, 2)-Math.pow(disZ, 2));
+		return dis;
+	}
+	
+	/**
+	 * 
+	 * @param a point a
+	 * @param b point b
+	 * @return distance between two 2D points (a and b)
+	 */
+	public double distance2D(float[] a, float[] b) {
+		double disX = a[0]-b[0];
+		double disZ = a[2]-b[2];
+		double dis = Math.sqrt(Math.pow(disX, 2)+Math.pow(disZ, 2));
 		return dis;
 	}
 
