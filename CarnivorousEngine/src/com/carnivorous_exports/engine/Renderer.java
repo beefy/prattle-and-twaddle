@@ -487,6 +487,7 @@ public class Renderer implements GLEventListener,
 		cubeList[6] = terrain.getCubeList(gl,
 				"terrainTextures/White Water Texture.jpeg", ".jpeg");
 
+		terrain.initVBO(gl);
 		initiated = true;
 	}
 

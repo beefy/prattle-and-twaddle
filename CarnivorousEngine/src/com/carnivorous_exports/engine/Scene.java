@@ -11,7 +11,9 @@ import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_SHININESS;
 import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_SPECULAR;
 
 import java.io.IOException;
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.nio.ShortBuffer;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
@@ -20,6 +22,7 @@ import javax.media.opengl.fixedfunc.GLLightingFunc;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUquadric;
 
+import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureCoords;
 import com.jogamp.opengl.util.texture.TextureIO;
@@ -239,6 +242,50 @@ public class Scene {
 		}
 	}
 
+    private FloatBuffer vertices;
+    private ShortBuffer indices;
+    private int VBOVertices;
+    private int VBOIndices;
+	
+	public void initVBO(GL2 gl) {
+		float[] vertexArray = { -0.5f, 0.5f, 0, 0.5f, 0.5f, 0, 0.5f, -0.5f, 0,
+				-0.5f, -0.5f, 0 };
+		vertices = Buffers.newDirectFloatBuffer(vertexArray.length);
+		vertices.put(vertexArray);
+		vertices.flip();
+
+		short[] indexArray = { 0, 1, 2, 0, 2, 3 };
+		indices = Buffers.newDirectShortBuffer(indexArray.length);
+		indices.put(indexArray);
+		indices.flip();
+
+		int[] temp = new int[2];
+		gl.glGenBuffers(2, temp, 0);
+
+		VBOVertices = temp[0];
+		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, VBOVertices);
+		gl.glBufferData(GL.GL_ARRAY_BUFFER, vertices.capacity()
+				* Buffers.SIZEOF_FLOAT, vertices, GL.GL_STATIC_DRAW);
+		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
+
+		VBOIndices = temp[1];
+		gl.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, VBOIndices);
+		gl.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER, indices.capacity()
+				* Buffers.SIZEOF_SHORT, indices, GL.GL_STATIC_DRAW);
+		gl.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0);
+	}
+	
+	public void drawCubeVBO(GL2 gl) {
+		gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
+
+        gl.glBindBuffer(GL.GL_ARRAY_BUFFER, VBOVertices);
+        gl.glVertexPointer(3, GL.GL_FLOAT, 0, 0);
+        gl.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, VBOIndices);
+        gl.glDrawElements(GL.GL_TRIANGLES, indices.capacity(), GL.GL_UNSIGNED_SHORT, 0);
+
+        gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
+	}
+
 	/**
 	 * 
 	 * This method lays out everything in the scene. In this case, it's only a
@@ -266,7 +313,7 @@ public class Scene {
 		final int FLOOR = 5;
 
 		gl.glLoadName(EVERYTHING);
-		
+
 		// cube1
 		gl.glPushName(CUBE);
 		gl.glPushMatrix();
@@ -346,6 +393,19 @@ public class Scene {
 		GLUquadric quad = glu.gluNewQuadric();
 		glu.gluSphere(quad, 2, 10, 15);
 		glu.gluDeleteQuadric(quad);
+
+		gl.glPopMatrix();
+		gl.glPopName();
+		
+		// //////////////////////////
+
+		// cube drawn with VBO
+		gl.glPushName(SPHERE);
+		gl.glPushMatrix();
+
+		gl.glTranslatef(-5f, -3f, -4f);
+
+		drawCubeVBO(gl);
 
 		gl.glPopMatrix();
 		gl.glPopName();
