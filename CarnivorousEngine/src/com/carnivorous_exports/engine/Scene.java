@@ -249,13 +249,7 @@ public class Scene {
 	float x = -0.5f; //the length/width/height of the cube
     
     public void initVBO(GL2 gl) {
-		/*
-    	float[] vertexArray = { 
-				-0.5f, 0.5f, 0, 
-				0.5f, 0.5f, 0, 
-				0.5f, -0.5f, 0,
-				-0.5f, -0.5f, 0};
-		*/
+
     	float[] vertexArray = {
     			 0, 0, 0,
     			
@@ -273,49 +267,24 @@ public class Scene {
 		vertices.put(vertexArray);
 		vertices.flip();
 
-		//short[] indexArray = { 0, 1, 2, 0, 2, 3 };
-		/*
-		short[] indexArray = { 
-				0, 1, 2, 3, 4,
-				0, 1, 5, 7, 3,
-				0, 5, 6, 8, 7, 
-				0, 6, 8, 2, 4, 
-				0, 1, 5, 6, 2, 
-				0, 3, 7, 8, 4
-		};*/
-		//short[] indexArray = {
-		//		1, 2, 4, 1, 4, 3, 1, 7, 3, 1, 7, 5, 1, 2, 5, 1
-		//};
-		//short[] indexArray = {
-		//		0, 1, 3,
-		//		0, 2, 4,
-		//		0, 6, 8,
-		//		0, 5, 7, 0
-		//};
 		short[] indexArray = {
-			//front
-			1, 2, 4, 1,
-			1, 4, 3, 1, 
+			1, 2, 4,
+			1, 4, 3, 
 			
-			//right
-			1, 7, 5, 1, //correct
-			1, 3, 7, 1, //correct
+			1, 7, 5,
+			1, 3, 7,
 			
-			//top
-			1, 2, 5, 1, 
-			5, 6, 2, 5, 
+			1, 5, 2, 
+			5, 6, 2, 
 			
-			//back
-			7, 5, 8, 7,
-			5, 6, 8, 5, 
+			7, 8, 5,
+			5, 8, 6,
 			
-			//left
-			2, 6, 8, 2, //correct
-			2, 8, 4, 2, //correct
+			2, 6, 8,
+			2, 8, 4,
 			
-			//bottom
-			4, 7, 8, 4, //too high
-			4, 7, 3, 4
+			4, 8, 7,
+			4, 7, 3,
 		};
 		indices = Buffers.newDirectShortBuffer(indexArray.length);
 		indices.put(indexArray);
@@ -337,7 +306,7 @@ public class Scene {
 		gl.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 	
-    public void drawSideVBO(GL2 gl) {
+    public void drawCubeVBO(GL2 gl) {
     	gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
         gl.glBindBuffer(GL.GL_ARRAY_BUFFER, VBOVertices);
         gl.glVertexPointer(3, GL.GL_FLOAT, 0, 0);
@@ -345,36 +314,6 @@ public class Scene {
         gl.glDrawElements(GL.GL_TRIANGLES, indices.capacity(), GL.GL_UNSIGNED_SHORT, 0);
         gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
     }
-    
-	public void drawCubeVBO(GL2 gl) {
-		drawSideVBO(gl);
-		/*
-		gl.glTranslated(0f, 0f, 0f);
-		gl.glRotatef(0f, 0f, 0f, 0f);
-		drawSideVBO(gl);
-		
-		gl.glTranslated(0f, 0.5f, 0.5f);
-		gl.glRotatef(90f, 1f, 0f, 0f);
-		drawSideVBO(gl);
-		
-		gl.glTranslated(0f, -0.5f, 0.5f);
-		gl.glRotatef(90f, 1f, 0f, 0f);
-		gl.glRotatef(180f, 0f, 1f, 0f);
-		drawSideVBO(gl);
-		/*
-		gl.glTranslated(0f, 0f, 0f);
-		gl.glRotatef(90f, 0f, 0f, 0f);
-		drawSideVBO(gl);
-		
-		gl.glTranslated(0f, 0f, 0f);
-		gl.glRotatef(90f, 0f, 0f, 0f);
-		drawSideVBO(gl);
-		
-		gl.glTranslated(0f, 0f, 0f);
-		gl.glRotatef(90f, 0f, 0f, 0f);
-		drawSideVBO(gl);
-		*/
-	}
 
 	/**
 	 * 
