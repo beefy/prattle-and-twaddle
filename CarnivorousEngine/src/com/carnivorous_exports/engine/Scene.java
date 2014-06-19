@@ -37,6 +37,7 @@ import com.jogamp.opengl.util.texture.TextureIO;
  */
 public class Scene {
 
+	Shader shader;
 	GL2 gl;
 	int[] displayList;
 	boolean terrainBuilt;
@@ -79,6 +80,7 @@ public class Scene {
 			{ 0.0f, 1.0f, 0.0f }, { 0.0f, 1.0f, 1.0f } };
 
 	IntBuffer vertexArray = IntBuffer.allocate(1);
+	int vboTextureCoordHandle;
 
 	/**
 	 * This method returns a display list for a cube with a specific texture.
@@ -231,10 +233,12 @@ public class Scene {
 			// the top, bottom, left and right coordinates, instead of using
 			// 0.0f and 1.0f.
 			TextureCoords textureCoords = texture.getImageTexCoords();
+			
 			textureTop = textureCoords.top();
 			textureBottom = textureCoords.bottom();
 			textureLeft = textureCoords.left();
 			textureRight = textureCoords.right();
+
 		} catch (GLException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -248,7 +252,7 @@ public class Scene {
     private int VBOIndices;
 	float x = -0.5f; //the length/width/height of the cube
     
-    public void initVBO(GL2 gl) {
+    public void initVBO(GL2 gl, String textureFileName, String textureFileType) {
 
     	float[] vertexArray = {
     			 0, 0, 0,
@@ -261,7 +265,8 @@ public class Scene {
     			-x, x,-x,
     			 x, x,-x,
     			-x,-x,-x, 
-    			 x,-x,-x
+    			 x,-x,-x,
+    			 
     	};
 		vertices = Buffers.newDirectFloatBuffer(vertexArray.length);
 		vertices.put(vertexArray);
@@ -289,9 +294,16 @@ public class Scene {
 		indices = Buffers.newDirectShortBuffer(indexArray.length);
 		indices.put(indexArray);
 		indices.flip();
+		
+		FloatBuffer textureData = Buffers.newDirectFloatBuffer(12);
+	    textureData.put(textureLeft);
+	    textureData.put(textureRight);
+	    textureData.put(textureBottom);
+	    textureData.put(textureTop);
+	    textureData.flip();
 
-		int[] temp = new int[2];
-		gl.glGenBuffers(2, temp, 0);
+		int[] temp = new int[3];
+		gl.glGenBuffers(3, temp, 0);
 
 		VBOVertices = temp[0];
 		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, VBOVertices);
@@ -304,15 +316,46 @@ public class Scene {
 		gl.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER, indices.capacity()
 				* Buffers.SIZEOF_SHORT, indices, GL.GL_STATIC_DRAW);
 		gl.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0);
+		
+		vboTextureCoordHandle = temp[2];
+	    gl.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, vboTextureCoordHandle);
+	    gl.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER, vboTextureCoordHandle, textureData, GL.GL_STATIC_DRAW);
+	    gl.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0);
+	    
+	    shader = new Shader();
 	}
 	
-    public void drawCubeVBO(GL2 gl) {
+    public void drawCubeVBO(GL2 gl, String textureFileName, String textureFileType) {
+		
+    	//shader
+        gl.glEnable(GL.GL_TEXTURE_2D);           
+
+        //I'm not sure if this belongs in this method or in initVBO
+    	this.textureFileName = textureFileName;
+		this.textureFileType = textureFileType;
+		loadTexture(gl);
+		texture.enable(gl);
+		texture.bind(gl);
+    	
+
+		
     	gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
-        gl.glBindBuffer(GL.GL_ARRAY_BUFFER, VBOVertices);
-        gl.glVertexPointer(3, GL.GL_FLOAT, 0, 0);
+    	gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
+    	
+    	/* Setup Position Pointer */
+    	gl.glBindBuffer    (GL.GL_ARRAY_BUFFER, VBOVertices);
+    	gl.glVertexPointer (3, GL.GL_FLOAT, 0, 0);
+    	
+    	/* Setup Texture Coordinate Pointer */
+    	gl.glBindBuffer      (GL.GL_ARRAY_BUFFER, vboTextureCoordHandle);
+    	gl.glTexCoordPointer (2, GL.GL_FLOAT, 0, 0);
+    	
         gl.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, VBOIndices);
         gl.glDrawElements(GL.GL_TRIANGLES, indices.capacity(), GL.GL_UNSIGNED_SHORT, 0);
+        
+        gl.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
         gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
+        
     }
 
 	/**
@@ -434,7 +477,7 @@ public class Scene {
 
 		gl.glTranslatef(-5f, 0f, -4f);
 
-		drawCubeVBO(gl);
+		drawCubeVBO(gl, "terrainTextures/Layer Rock.jpeg", ".jpeg");
 
 		gl.glPopMatrix();
 		gl.glPopName();
