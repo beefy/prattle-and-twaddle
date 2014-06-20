@@ -322,12 +322,15 @@ public class Scene {
 	    gl.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER, vboTextureCoordHandle, textureData, GL.GL_STATIC_DRAW);
 	    gl.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0);
 	    
-	    shader = new Shader();
+	    shader = new Shader(gl);
+	    shader.attachVertexShader(gl);
+	    shader.attachFragmentShader(gl);
+	    shader.link(gl);
 	}
 	
     public void drawCubeVBO(GL2 gl, String textureFileName, String textureFileType) {
 		
-    	//shader
+    	shader.bind(gl);
         gl.glEnable(GL.GL_TEXTURE_2D);           
 
         //I'm not sure if this belongs in this method or in initVBO
@@ -355,6 +358,8 @@ public class Scene {
         
         gl.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
         gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
+        
+        shader.unbind(gl);
         
     }
 
