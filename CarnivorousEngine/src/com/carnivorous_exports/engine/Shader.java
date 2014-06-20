@@ -2,92 +2,15 @@ package com.carnivorous_exports.engine;
 
 import javax.media.opengl.GL2ES2;
 
+/**
+ * Shaders call the graphics card directly.  
+ * vertexShaderString and fragmentShaderString are in GLSL.
+ * 
+ * @author nschultz14
+ *
+ */
 public class Shader {
 
-/*
-public String vertexShaderString = 
-"#if __VERSION__ >= 130\n" + // GLSL 130+ uses in and out
-"  #define attribute in\n" + // instead of attribute and varying
-"  #define varying out\n" +  // used by OpenGL 3 core and later.
-"#endif\n" +
-
-		"uniform Transformation {\n"+
-			"mat4 projection_matrix;\n"+
-			"mat4 modelview_matrix;\n"+
-		"};\n"+
- 
-		"in vec3 vertex;\n"+
- 
-		"void main() {\n"+
-			"gl_Position = projection_matrix * modelview_matrix * vec4(vertex, 1.0);\n"+
-		"}";
-
-private String fragmentShaderString = 
-"#if __VERSION__ >= 130\n" + // GLSL 130+ uses in and out
-"  #define attribute in\n" + // instead of attribute and varying
-"  #define varying out\n" +  // used by OpenGL 3 core and later.
-"#endif\n" +
- 
-		"out vec4 MyFragColor;\n"+
-				
-		"void main() {\n"+
-			"MyFragColor = vec4(1.0, 0.0, 0.0, 1.0);\n"+
-		"}";
-*/
-	//switch to #if __VERSION__ >= 130 b/c some drivers refuse to compile
-
-/*	
-	private String vertexShaderString = 
-			"#version 330 core\n" +
-			"layout(location = 0)" + "in vec3 vertex;\n"+
-			"uniform Transformation {\n"+
-				"mat4 projection_matrix;\n"+
-				"mat4 modelview_matrix;\n"+
-			"};\n"+
- 
-			"void main() {\n" +
-			"gl_Position = projection_matrix * modelview_matrix * vec4(vertex, 1.0);\n" + "} ";
-	
-/*	
-	private String vertexShaderString = 
-			"#version 330 core\n" +
-			"layout(location = 0) in vec2 vertex;\n"+
-			"void main() {\n" +
-			"gl_Position = vec4(vertex, 0.0, 1.0);\n" + "} ";
-
-	private String fragmentShaderString = 
-			"#version 330 core\n" +
-			"out vec4 color;\n" +
-			"void main() {\n" +
-			"color = vec4(0.0, 0.0, 1.0, 1.0);\n" + "} ";
-*/
-
-	/*
-	private String vertexShaderString = 
-			"#version 330 core\n"+
-			 
-			"layout (std140) uniform Matrices {\n"+
-			    "mat4 projModelViewMatrix;\n"+
-			    "mat3 normalMatrix;\n"+
-			"};\n"+
-			 
-			"in vec3 position;\n"+
-			"in vec3 normal;\n"+
-			"in vec2 texCoord;\n"+
-			 
-			"out VertexData {\n"+
-			    "vec2 texCoord;\n"+
-			    "vec3 normal;\n"+
-			"} VertexOut;\n"+
-			 
-			"void main()\n"+
-			"{\n"+
-			    "VertexOut.texCoord = texCoord;\n"+
-			    "VertexOut.normal = normalize(normalMatrix * normal);\n"+  
-			    "gl_Position = projModelViewMatrix * vec4(position, 1.0);\n"+
-			"}";
-*/
-	
 	private String vertexShaderString =
 			"#version 110\n"+
 
@@ -98,9 +21,11 @@ private String fragmentShaderString =
 	
 	private String fragmentShaderString = 
 			"#version 330 core\n" +
+	
 			"out vec4 color;\n" +
 			"void main() {\n" +
-			"color = vec4(0.0, 0.0, 1.0, 1.0);\n" + "} ";
+				"color = vec4(0.0, 0.0, 1.0, 1.0);\n" + 
+			"} ";
 
 
 	// ProgramID
