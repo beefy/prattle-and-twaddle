@@ -410,7 +410,7 @@ public class Renderer implements GLEventListener,
 	 */
 	@Override
 	public void init(GLAutoDrawable drawable) {
-
+		if(initiated) return;
 		initAudio();
 
 		drawable.getAnimator().setUpdateFPSFrames(3, null); // 3
