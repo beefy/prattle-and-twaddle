@@ -124,6 +124,10 @@ public class Scene {
 		// gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE,
 		// GL.GL_REPLACE);
 
+	   	
+		//Set the active texture unit
+		//gl.glActiveTexture(GL.GL_ACTIVE_TEXTURE);
+		//gl.glActiveTexture(GL.GL_ACTIVE_TEXTURE);
 		// Binds this texture to the current GL context.
 		texture.bind(gl); // same as gl.glBindTexture(texture.getTarget(),
 							// texture.getTextureObject());
@@ -221,12 +225,10 @@ public class Scene {
 					.getResource(textureFileName), // relative to project root
 					false, textureFileType);
 
-			// Use linear filter for texture if image is larger than the
-			// original texture
-			gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			// Use linear filter for texture if image is smaller than the
-			// original texture
-			gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			texture.setTexParameteri(gl, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR); 
+			texture.setTexParameteri(gl, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR); 
+			texture.setTexParameteri(gl, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_EDGE); 
+			texture.setTexParameteri(gl, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP_TO_EDGE); 
 
 			// Texture image flips vertically. Shall use TextureCoords class to
 			// retrieve
@@ -323,25 +325,33 @@ public class Scene {
 	    gl.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0);
 	    
 	    shader = new Shader(gl);
+	    shader.bind(gl);
 	    shader.attachVertexShader(gl);
 	    shader.attachFragmentShader(gl);
 	    shader.link(gl);
+	    //shader.unbind(gl);
 	}
 	
     public void drawCubeVBO(GL2 gl, String textureFileName, String textureFileType) {
 		
-    	shader.bind(gl);
-        gl.glEnable(GL.GL_TEXTURE_2D);           
 
-        //I'm not sure if this belongs in this method or in initVBO
+    	//shader.bind(gl);
+    	
+        //initializing textures
     	this.textureFileName = textureFileName;
 		this.textureFileType = textureFileType;
 		loadTexture(gl);
 		texture.enable(gl);
-		texture.bind(gl);
-    	
+        gl.glEnable(GL.GL_TEXTURE_2D);  
 
+		//setting the uniform
+        shader.setUniform(gl, "tex", 0);  
+        
+		//activating textures
+		gl.glActiveTexture(GL2.GL_TEXTURE0 + 0);
+		texture.bind(gl);      
 		
+		//drawing
     	gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
     	gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
     	
@@ -353,13 +363,14 @@ public class Scene {
     	gl.glBindBuffer      (GL.GL_ARRAY_BUFFER, vboTextureCoordHandle);
     	gl.glTexCoordPointer (2, GL.GL_FLOAT, 0, 0);
     	
+    	//actual drawing
         gl.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, VBOIndices);
         gl.glDrawElements(GL.GL_TRIANGLES, indices.capacity(), GL.GL_UNSIGNED_SHORT, 0);
         
         gl.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
         gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
         
-        shader.unbind(gl);
+        //shader.unbind(gl);
         
     }
 

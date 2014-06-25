@@ -11,21 +11,32 @@ import javax.media.opengl.GL2ES2;
  */
 public class Shader {
 
-	private String vertexShaderString =
-			"#version 110\n"+
+    private String vertexShaderString =
+    		"#version 330 core\n"+
 
-			"void main()\n"+
-			"{\n"+
-			    "gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * gl_Vertex;\n"+
-			"}";
-	
-	private String fragmentShaderString = 
-			"#version 330 core\n" +
-	
-			"out vec4 color;\n" +
-			"void main() {\n" +
-				"color = vec4(0.0, 0.0, 1.0, 1.0);\n" + 
-			"} ";
+    		"layout(location = 0) in vec2 pos;\n"+
+    		"layout(location = 1) in vec2 tex;\n"+
+
+    		"out vec2 texCoords;\n"+
+
+    		"void main()\n"+
+    		"{\n"+
+    		    "texCoords = tex;\n"+
+    		    "gl_Position = vec4(pos, 0.0, 1.0);\n"+
+    		"}";
+
+    private String fragmentShaderString = 
+    		"#version 330 core\n"+
+
+    		"uniform sampler2D tex;\n"+
+
+    		"in vec2 texCoords;\n"+
+    		"out vec4 outColor;\n"+
+
+    		"void main()\n"+
+    		"{\n"+
+    		    "outColor = texture(tex, texCoords);\n"+
+    		"}";
 
 
 	// ProgramID
@@ -139,6 +150,41 @@ public class Shader {
 	public void unbind(GL2ES2 gl) {
 		gl.glUseProgram(0);
 	}
+	
+    /**
+     * Sets the uniforms in this shader
+     * 
+     * @param name    The name of the uniform
+     * @param values  The values of the uniforms (Max 4)
+     */
+    public void setUniform(GL2ES2 gl, String name, float... values)
+    {
+        if (values.length > 4)
+        {
+            System.err.println("Uniforms cannot have more than 4 values");
+            System.exit(1);
+        }
+        
+        // Get the location of the uniform
+        int location = gl.glGetUniformLocation(programID, name);
+        
+        // Set the uniform values
+        switch (values.length)
+        {
+            case 1:
+                gl.glUniform1f(location, values[0]);
+                break;                
+            case 2:
+                gl.glUniform2f(location, values[0], values[1]);
+                break;                
+            case 3:
+                gl.glUniform3f(location, values[0], values[1], values[2]);
+                break;                
+            case 4:
+                gl.glUniform4f(location, values[0], values[1], values[2], values[3]);
+                break;
+        }
+    }
 
 	public void dispose(GL2ES2 gl) {
         gl.glUseProgram(0);
