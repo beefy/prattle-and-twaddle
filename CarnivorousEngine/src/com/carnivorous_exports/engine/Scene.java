@@ -252,7 +252,7 @@ public class Scene {
     //private ShortBuffer indices;
     private int VBOVertices;
     //private int VBOIndices;
-	float x = -1f; //the length/width/height of the cube
+	float x = 1f; //the length/width/height of the cube
     
     public void initVBO(GL2 gl, String textureFileName, String textureFileType) {
 
@@ -271,28 +271,34 @@ public class Scene {
   // vertex is 3 components (x,y,z) of floats, therefore, the size of vertex
   // array is 108 floats (36 * 3 = 108).
     	
-  float[] vertexArray = { 1, 1, 1,  -1, 1, 1,  -1,-1, 1,      // v0-v1-v2 (front)
-                         -1,-1, 1,   1,-1, 1,   1, 1, 1,      // v2-v3-v0
+  float[] vertexArray = { x, x, x,  -x, x, x,  -x,-x, x,      // v0-v1-v2 (front)
+                         -x,-x, x,   x,-x, x,   x, x, x,      // v2-v3-v0
 
-                          1, 1, 1,   1,-1, 1,   1,-1,-1,      // v0-v3-v4 (right)
-                          1,-1,-1,   1, 1,-1,   1, 1, 1,      // v4-v5-v0
+                          x, x, x,   x,-x, x,   x,-x,-x,      // v0-v3-v4 (right)
+                          x,-x,-x,   x, x,-x,   x, x, x,      // v4-v5-v0
 
-                          1, 1, 1,   1, 1,-1,  -1, 1,-1,      // v0-v5-v6 (top)
-                         -1, 1,-1,  -1, 1, 1,   1, 1, 1,      // v6-v1-v0
+                          x, x, x,   x, x,-x,  -x, x,-x,      // v0-v5-v6 (top)
+                         -x, x,-x,  -x, x, x,   x, x, x,      // v6-v1-v0
 
-                         -1, 1, 1,  -1, 1,-1,  -1,-1,-1,      // v1-v6-v7 (left)
-                         -1,-1,-1,  -1,-1, 1,  -1, 1, 1,      // v7-v2-v1
+                         -x, x, x,  -x, x,-x,  -x,-x,-x,      // v1-v6-v7 (left)
+                         -x,-x,-x,  -x,-x, x,  -x, x, x,      // v7-v2-v1
 
-                         -1,-1,-1,   1,-1,-1,   1,-1, 1,      // v7-v4-v3 (bottom)
-                          1,-1, 1,  -1,-1, 1,  -1,-1,-1,      // v3-v2-v7
+                         -x,-x,-x,   x,-x,-x,   x,-x, x,      // v7-v4-v3 (bottom)
+                          x,-x, x,  -x,-x, x,  -x,-x,-x,      // v3-v2-v7
 
-                          1,-1,-1,  -1,-1,-1,  -1, 1,-1,      // v4-v7-v6 (back)
-                         -1, 1,-1,   1, 1,-1,   1,-1,-1 };    // v6-v5-v4
+                          x,-x,-x,  -x,-x,-x,  -x, x,-x,      // v4-v7-v6 (back)
+                         -x, x,-x,   x, x,-x,   x,-x,-x };    // v6-v5-v4
 
 		vertices = Buffers.newDirectFloatBuffer(vertexArray.length);
 		vertices.put(vertexArray);
 		vertices.flip();
 
+		this.textureFileName = textureFileName;
+		this.textureFileType = textureFileType;
+		loadTexture(gl);
+		texture.enable(gl);
+        gl.glEnable(GL.GL_TEXTURE_2D); 
+		
 		FloatBuffer textureData = Buffers.newDirectFloatBuffer(12);
 	    textureData.put(textureLeft);
 	    textureData.put(textureRight);
@@ -309,12 +315,12 @@ public class Scene {
 				* Buffers.SIZEOF_FLOAT, vertices, GL.GL_STATIC_DRAW);
 		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
 		
-		/*
+		
 		vboTextureCoordHandle = temp[2];
 	    gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vboTextureCoordHandle);
 	    gl.glBufferData(GL.GL_ARRAY_BUFFER, vboTextureCoordHandle, textureData, GL.GL_STATIC_DRAW);
 	    gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
-	    */
+	    
 	    
 	    shader = new Shader(gl);
 	    shader.bind(gl);
@@ -322,6 +328,13 @@ public class Scene {
 	    shader.attachFragmentShader(gl);
 	    shader.link(gl);
 	    //shader.unbind(gl);
+	    
+	  //setting the uniform
+        shader.setUniform(gl, "tex", 0);  
+        
+		//activating textures
+		gl.glActiveTexture(GL2.GL_TEXTURE0 + 0);
+		texture.bind(gl); 
 	}
 	
     public void drawCubeVBO(GL2 gl, String textureFileName, String textureFileType) {
@@ -330,38 +343,33 @@ public class Scene {
     	//shader.bind(gl);
     	
         //initializing textures
-    	/*
-    	this.textureFileName = textureFileName;
-		this.textureFileType = textureFileType;
-		loadTexture(gl);
-		texture.enable(gl);
-        gl.glEnable(GL.GL_TEXTURE_2D);  
-        */
-
-		//setting the uniform
-        //shader.setUniform(gl, "tex", 0);  
+    	
+    	//this.textureFileName = textureFileName;
+		//this.textureFileType = textureFileType;
+		//loadTexture(gl);
+		//texture.enable(gl);
+        //gl.glEnable(GL.GL_TEXTURE_2D);  
         
-		//activating textures
-		//gl.glActiveTexture(GL2.GL_TEXTURE0 + 0);
-		//texture.bind(gl);      
+
+		     
 		
 		//drawing
     	gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
-    	//gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
+    	gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
     	
     	/* Setup Position Pointer */
     	gl.glBindBuffer    (GL.GL_ARRAY_BUFFER, VBOVertices);
     	gl.glVertexPointer (3, GL.GL_FLOAT, 0, 0);
     	
     	/* Setup Texture Coordinate Pointer */
-    	//gl.glBindBuffer      (GL.GL_ARRAY_BUFFER, vboTextureCoordHandle);
-    	//gl.glTexCoordPointer (2, GL.GL_FLOAT, 0, 0);
+    	gl.glBindBuffer      (GL.GL_TEXTURE0, vboTextureCoordHandle);
+    	gl.glTexCoordPointer (2, GL.GL_FLOAT, 0, 0);
     	
     	//actual drawing
         gl.glBindBuffer(GL.GL_ARRAY_BUFFER, VBOVertices);
         gl.glDrawArrays(GL.GL_TRIANGLES, 0, vertices.capacity());
         
-        //gl.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
+        gl.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
         gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
         
         //shader.unbind(gl);
