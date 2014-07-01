@@ -57,7 +57,7 @@ public class Renderer implements GLEventListener,
 
 	private static GLWindow window;
 	private GLU glu; // for the GL Utility
-	public boolean audioOn = true;
+	public boolean audioOn = false;
 	public float gravity = 1f; //how far to go down every frame
 	public boolean jumping = false;
 	public float jumpHeight = 0.0f;
