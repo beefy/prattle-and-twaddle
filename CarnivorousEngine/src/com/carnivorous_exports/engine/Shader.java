@@ -12,30 +12,137 @@ import javax.media.opengl.GL2ES2;
 public class Shader {
 
     private String vertexShaderString =
+    		/*
+    		"#version 330\n"+
+    		 
+    		"layout (std140) uniform Matrices {\n"+
+    		    "mat4 m_pvm;\n"+
+    		    "mat4 m_viewModel;\n"+
+    		    "mat3 m_normal;\n"+
+    		"};\n"+
+    		 
+    		"layout (std140) uniform Lights {\n"+
+    		    "vec3 l_dir;    // camera space\n"+
+    		"};\n"+
+    		 
+    		"in vec4 position;   // local space\n"+
+    		"in vec3 normal;     // local space\n"+
+    		"in vec2 texCoord;\n"+
+    		 
+    		// the data to be sent to the fragment shader
+    		"out Data {\n"+
+    		    "vec3 normal;\n"+
+    		    "vec4 eye;\n"+
+    		    "vec2 texCoord;\n"+
+    		"} DataOut;\n"+
+    		 
+    		"void main () {\n"+
+    		 
+    		    "DataOut.normal = normalize(m_normal * normal);\n"+
+    		    "DataOut.eye = -(m_viewModel * position);\n"+
+    		    "DataOut.texCoord = texCoord;\n"+
+    		 
+    		    "gl_Position = m_pvm * position; \n"+
+    		"}";
+    		*/
     		"#version 330 core\n"+
-
-    		"layout(location = 0) in vec2 pos;\n"+
-    		"layout(location = 1) in vec2 tex;\n"+
-
-    		"out vec2 texCoords;\n"+
-
-    		"void main()\n"+
-    		"{\n"+
-    		    "texCoords = tex;\n"+
-    		    "gl_Position = vec4(pos, 0.0, 1.0);\n"+
+    		 
+    		// Input vertex data, different for all executions of this shader.
+    		"layout(location = 0) in vec3 vertexPosition_modelspace;\n"+
+    		"layout(location = 1) in vec2 vertexUV;\n"+
+    		 
+    		// Output data ; will be interpolated for each fragment.
+    		"out vec2 UV;\n"+
+    		 
+    		// Values that stay constant for the whole mesh.
+    		"uniform mat4 MVP;\n"+
+    		
+    		"void main(){\n"+
+    		 
+    		    // Output position of the vertex, in clip space : MVP * position
+    		    "gl_Position =  MVP * vec4(vertexPosition_modelspace,1);\n"+
+    		 
+    		    // UV of the vertex. No special space for this one.
+    		    "UV = vertexUV;\n"+
     		"}";
 
     private String fragmentShaderString = 
+    		/*
+    		"#version 330\n"+
+    		 
+    		"layout (std140) uniform Material {\n"+
+    		    "vec4 diffuse;\n"+
+    		    "vec4 ambient;\n"+
+    		    "vec4 specular;\n"+
+    		    "float shininess;\n"+
+    		"};\n"+
+    		 
+    		"layout (std140) uniform Lights {\n"+
+    		    "vec3 l_dir;    // camera space\n"+
+    		"};\n"+
+    		 
+    		"in Data {\n"+
+    		    "vec3 normal;\n"+
+    		    "vec4 eye;\n"+
+    		    "vec2 texCoord;\n"+
+    		"} DataIn;\n"+
+    		 
+    		"uniform sampler2D texUnit;\n"+
+    		 
+    		"out vec4 colorOut;\n"+
+    		 
+    		"void main() {\n"+
+    		 
+    		    // set the specular term to black
+    		    "vec4 spec = vec4(0.0);\n"+
+    		 
+    		    // normalize both input vectors
+    		    "vec3 n = normalize(DataIn.normal);\n"+
+    		    "vec3 e = normalize(vec3(DataIn.eye));\n"+
+    		 
+    		    "float intensity = max(dot(n,l_dir), 0.0);\n"+
+    		 
+    		    // if the vertex is lit compute the specular color
+    		    "if (intensity > 0.0) {\n"+
+    		        // compute the half vector
+    		        "vec3 h = normalize(l_dir + e);\n"+  
+    		        // compute the specular term into spec
+    		        "float intSpec = max(dot(h,n), 0.0);\n"+
+    		        "spec = specular * pow(intSpec,shininess);\n"+
+    		    "}\n"+
+    		    "vec4 texColor = texture(texUnit, DataIn.texCoord);\n"+
+    		    "vec4 diffColor = intensity *  diffuse * texColor;\n"+
+    		    "vec4 ambColor = ambient * texColor;\n"+
+    		 
+    		    "colorOut = max(diffColor + spec, ambColor);\n"+
+    		"}";
+    		*/
+    		/*
     		"#version 330 core\n"+
-
-    		"uniform sampler2D tex;\n"+
-
-    		"in vec2 texCoords;\n"+
-    		"out vec4 outColor;\n"+
+    		 
+    		// Interpolated values from the vertex shaders
+    		"in vec2 UV;\n"+
+    		 
+    		// Ouput data
+    		"out vec3 color;\n"+
+    		 
+    		// Values that stay constant for the whole mesh.
+    		"uniform sampler2D myTextureSampler;\n"+
+    		 
+    		"void main(){\n"+
+    		 
+    		    // Output color = color of the texture at the specified UV
+    		    "color = texture( myTextureSampler, UV ).rgb;\n"+
+    		"}";
+    		*/
+    		
+    		"uniform sampler2D mytexture;\n"+
 
     		"void main()\n"+
     		"{\n"+
-    		    "outColor = texture(tex, texCoords);\n"+
+    				"vec4 color = texture2D(mytexture, gl_TexCoord[0].xy);\n"+
+    				"gl_FragColor = color;\n"+
+    				//"gl_FragColor =vec4(1,1,1,1);\n"+
     		"}";
 
 
@@ -159,6 +266,9 @@ public class Shader {
      */
     public void setUniform(GL2ES2 gl, String name, float... values)
     {
+    	//int location = gl.glGetUniformLocation(programID, name);
+    	//gl.glUniform1f(location, values);
+    	/*
         if (values.length > 4)
         {
             System.err.println("Uniforms cannot have more than 4 values");
@@ -167,7 +277,7 @@ public class Shader {
         
         // Get the location of the uniform
         int location = gl.glGetUniformLocation(programID, name);
-        
+        if(location == -1) System.out.println( "Uniform Location Not Found!" );
         // Set the uniform values
         switch (values.length)
         {
@@ -184,6 +294,7 @@ public class Shader {
                 gl.glUniform4f(location, values[0], values[1], values[2], values[3]);
                 break;
         }
+        */
     }
 
 	public void dispose(GL2ES2 gl) {

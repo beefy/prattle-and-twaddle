@@ -1,5 +1,6 @@
 package com.carnivorous_exports.engine;
 
+import static javax.media.opengl.GL.GL_FLOAT;
 import static javax.media.opengl.GL.GL_LINEAR;
 import static javax.media.opengl.GL.GL_TEXTURE_2D;
 import static javax.media.opengl.GL.GL_TEXTURE_MAG_FILTER;
@@ -11,6 +12,8 @@ import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_SHININESS;
 import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_SPECULAR;
 
 import java.io.IOException;
+import java.nio.Buffer;
+import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
@@ -46,6 +49,9 @@ public class Scene {
 	boolean boxX;
 	boolean boxY;
 	boolean boxZ;
+	
+	// Vertex Attribute Locations
+	int vertexLoc, colorLoc;
 
 	// for testing rotation
 	float tempRotX;
@@ -78,7 +84,9 @@ public class Scene {
 			// Green, Blue
 			{ 1.0f, 0.0f, 0.0f }, { 1.0f, 0.5f, 0.0f }, { 1.0f, 1.0f, 0.0f },
 			{ 0.0f, 1.0f, 0.0f }, { 0.0f, 1.0f, 1.0f } };
-
+	
+	FloatBuffer indices;
+	FloatBuffer textureData;
 	IntBuffer vertexArray = IntBuffer.allocate(1);
 	int vboTextureCoordHandle;
 
@@ -124,10 +132,9 @@ public class Scene {
 		// gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE,
 		// GL.GL_REPLACE);
 
-	   	
-		//Set the active texture unit
-		//gl.glActiveTexture(GL.GL_ACTIVE_TEXTURE);
-		//gl.glActiveTexture(GL.GL_ACTIVE_TEXTURE);
+		// Set the active texture unit
+		// gl.glActiveTexture(GL.GL_ACTIVE_TEXTURE);
+		// gl.glActiveTexture(GL.GL_ACTIVE_TEXTURE);
 		// Binds this texture to the current GL context.
 		texture.bind(gl); // same as gl.glBindTexture(texture.getTarget(),
 							// texture.getTextureObject());
@@ -225,17 +232,21 @@ public class Scene {
 					.getResource(textureFileName), // relative to project root
 					false, textureFileType);
 
-			texture.setTexParameteri(gl, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR); 
-			texture.setTexParameteri(gl, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR); 
-			texture.setTexParameteri(gl, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_EDGE); 
-			texture.setTexParameteri(gl, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP_TO_EDGE); 
+			texture.setTexParameteri(gl, GL2.GL_TEXTURE_MIN_FILTER,
+					GL2.GL_LINEAR);
+			texture.setTexParameteri(gl, GL2.GL_TEXTURE_MAG_FILTER,
+					GL2.GL_LINEAR);
+			texture.setTexParameteri(gl, GL2.GL_TEXTURE_WRAP_S,
+					GL2.GL_CLAMP_TO_EDGE);
+			texture.setTexParameteri(gl, GL2.GL_TEXTURE_WRAP_T,
+					GL2.GL_CLAMP_TO_EDGE);
 
 			// Texture image flips vertically. Shall use TextureCoords class to
 			// retrieve
 			// the top, bottom, left and right coordinates, instead of using
 			// 0.0f and 1.0f.
 			TextureCoords textureCoords = texture.getImageTexCoords();
-			
+
 			textureTop = textureCoords.top();
 			textureBottom = textureCoords.bottom();
 			textureLeft = textureCoords.left();
@@ -248,46 +259,52 @@ public class Scene {
 		}
 	}
 
-    private FloatBuffer vertices;
-    //private ShortBuffer indices;
-    private int VBOVertices;
-    //private int VBOIndices;
-	float x = 1f; //the length/width/height of the cube
-    
-    public void initVBO(GL2 gl, String textureFileName, String textureFileType) {
+	private FloatBuffer vertices;
+	// private ShortBuffer indices;
+	private int VBOVertices;
+	// private int VBOIndices;
+	float x = 1f; // the length/width/height of the cube
 
-    	// cube ///////////////////////////////////////////////////////////////////////
-//      v6----- v5
-  //   /|      /|
-  //  v1------v0|
-  //  | |     | |
-  //  | |v7---|-|v4
-  //  |/      |/
-  //  v2------v3
+	public void initVBO(GL2 gl, String textureFileName, String textureFileType) {
 
-  // vertex coords array for glDrawArrays() =====================================
-  // A cube has 6 sides and each side has 2 triangles, therefore, a cube consists
-  // of 36 vertices (6 sides * 2 tris * 3 vertices = 36 vertices). And, each
-  // vertex is 3 components (x,y,z) of floats, therefore, the size of vertex
-  // array is 108 floats (36 * 3 = 108).
-    	
-  float[] vertexArray = { x, x, x,  -x, x, x,  -x,-x, x,      // v0-v1-v2 (front)
-                         -x,-x, x,   x,-x, x,   x, x, x,      // v2-v3-v0
+		// cube
+		// ///////////////////////////////////////////////////////////////////////
+		// v6----- v5
+		// /| /|
+		// v1------v0|
+		// | | | |
+		// | |v7---|-|v4
+		// |/ |/
+		// v2------v3
 
-                          x, x, x,   x,-x, x,   x,-x,-x,      // v0-v3-v4 (right)
-                          x,-x,-x,   x, x,-x,   x, x, x,      // v4-v5-v0
+		// vertex coords array for glDrawArrays()
+		// =====================================
+		// A cube has 6 sides and each side has 2 triangles, therefore, a cube
+		// consists
+		// of 36 vertices (6 sides * 2 tris * 3 vertices = 36 vertices). And,
+		// each
+		// vertex is 3 components (x,y,z) of floats, therefore, the size of
+		// vertex
+		// array is 108 floats (36 * 3 = 108).
 
-                          x, x, x,   x, x,-x,  -x, x,-x,      // v0-v5-v6 (top)
-                         -x, x,-x,  -x, x, x,   x, x, x,      // v6-v1-v0
+		float[] vertexArray = { 
+				x, x, x, -x, x, x, -x, -x, x, // v0-v1-v2 (front)
+				-x, -x, x, x, -x, x, x, x, x, // v2-v3-v0
 
-                         -x, x, x,  -x, x,-x,  -x,-x,-x,      // v1-v6-v7 (left)
-                         -x,-x,-x,  -x,-x, x,  -x, x, x,      // v7-v2-v1
+				x, x, x, x, -x, x, x, -x, -x, // v0-v3-v4 (right)
+				x, -x, -x, x, x, -x, x, x, x, // v4-v5-v0
 
-                         -x,-x,-x,   x,-x,-x,   x,-x, x,      // v7-v4-v3 (bottom)
-                          x,-x, x,  -x,-x, x,  -x,-x,-x,      // v3-v2-v7
+				x, x, x, x, x, -x, -x, x, -x, // v0-v5-v6 (top)
+				-x, x, -x, -x, x, x, x, x, x, // v6-v1-v0
 
-                          x,-x,-x,  -x,-x,-x,  -x, x,-x,      // v4-v7-v6 (back)
-                         -x, x,-x,   x, x,-x,   x,-x,-x };    // v6-v5-v4
+				-x, x, x, -x, x, -x, -x, -x, -x, // v1-v6-v7 (left)
+				-x, -x, -x, -x, -x, x, -x, x, x, // v7-v2-v1
+
+				-x, -x, -x, x, -x, -x, x, -x, x, // v7-v4-v3 (bottom)
+				x, -x, x, -x, -x, x, -x, -x, -x, // v3-v2-v7
+
+				x, -x, -x, -x, -x, -x, -x, x, -x, // v4-v7-v6 (back)
+				-x, x, -x, x, x, -x, x, -x, -x }; // v6-v5-v4
 
 		vertices = Buffers.newDirectFloatBuffer(vertexArray.length);
 		vertices.put(vertexArray);
@@ -297,84 +314,228 @@ public class Scene {
 		this.textureFileType = textureFileType;
 		loadTexture(gl);
 		texture.enable(gl);
-        gl.glEnable(GL.GL_TEXTURE_2D); 
-		
-		FloatBuffer textureData = Buffers.newDirectFloatBuffer(12);
-	    textureData.put(textureLeft);
-	    textureData.put(textureRight);
-	    textureData.put(textureBottom);
-	    textureData.put(textureTop);
-	    textureData.flip();
+		gl.glEnable(GL2.GL_TEXTURE_2D);
 
-		int[] temp = new int[3];
+		//float[] textureArray = { 0, 0, 1, 0, 0, 1,
+		//1, 1, 1, 0, 0, 1 };
+		float[] textureArray = 
+			//{ 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+			//	0.0f, 1.0f, 1.0f };
+			/*{   1.0f, 1.0f, 1.0f,
+				1.0f, 1.0f, -1.0f,
+				-1.0f, 1.0f, -1.0f,
+				-1.0f, 1.0f, 1.0f
+			};*/
+				/*
+			{	0.0f, 1.0f,//0
+			    1.0f, 1.0f,//1
+			    0.0f, 0.0f,//2
+			    1.0f, 0.0f,//3
+
+			    0.0f, 1.0f,//0
+			    1.0f, 1.0f,//1
+			    0.0f, 0.0f,//2
+			    1.0f, 0.0f //3
+			};
+			*/
+			{	0.000059f, 1.0f-0.000004f,
+			    0.000103f, 1.0f-0.336048f,
+			    0.335973f, 1.0f-0.335903f,
+			    1.000023f, 1.0f-0.000013f,
+			    0.667979f, 1.0f-0.335851f,
+			    0.999958f, 1.0f-0.336064f,
+			    0.667979f, 1.0f-0.335851f,
+			    0.336024f, 1.0f-0.671877f,
+			    0.667969f, 1.0f-0.671889f,
+			    1.000023f, 1.0f-0.000013f,
+			    0.668104f, 1.0f-0.000013f,
+			    0.667979f, 1.0f-0.335851f,
+			    0.000059f, 1.0f-0.000004f,
+			    0.335973f, 1.0f-0.335903f,
+			    0.336098f, 1.0f-0.000071f,
+			    0.667979f, 1.0f-0.335851f,
+			    0.335973f, 1.0f-0.335903f,
+			    0.336024f, 1.0f-0.671877f,
+			    1.000004f, 1.0f-0.671847f,
+			    0.999958f, 1.0f-0.336064f,
+			    0.667979f, 1.0f-0.335851f,
+			    0.668104f, 1.0f-0.000013f,
+			    0.335973f, 1.0f-0.335903f,
+			    0.667979f, 1.0f-0.335851f,
+			    0.335973f, 1.0f-0.335903f,
+			    0.668104f, 1.0f-0.000013f,
+			    0.336098f, 1.0f-0.000071f,
+			    0.000103f, 1.0f-0.336048f,
+			    0.000004f, 1.0f-0.671870f,
+			    0.336024f, 1.0f-0.671877f,
+			    0.000103f, 1.0f-0.336048f,
+			    0.336024f, 1.0f-0.671877f,
+			    0.335973f, 1.0f-0.335903f,
+			    0.667969f, 1.0f-0.671889f,
+			    1.000004f, 1.0f-0.671847f,
+			    0.667979f, 1.0f-0.335851f };
+		
+
+		textureData = Buffers.newDirectFloatBuffer(100);
+		// textureData.put(textureTop);
+		// textureData.put(textureBottom);
+		// textureData.put(textureRight);
+		// textureData.put(textureLeft);
+		textureData.put(textureArray);
+		// textureData.order();
+		textureData.flip();
+
+		int[] temp = new int[4];
 		gl.glGenBuffers(3, temp, 0);
 
 		VBOVertices = temp[0];
 		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, VBOVertices);
+		//gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
 		gl.glBufferData(GL.GL_ARRAY_BUFFER, vertices.capacity()
 				* Buffers.SIZEOF_FLOAT, vertices, GL.GL_STATIC_DRAW);
-		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
+		//gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
+		//gl.glEnableVertexAttribArray(vertexLoc);
+		//gl.glVertexAttribPointer(vertexLoc, 4, GL_FLOAT, false, 0, 0);
 		
+		//gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
 		
 		vboTextureCoordHandle = temp[2];
-	    gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vboTextureCoordHandle);
-	    gl.glBufferData(GL.GL_ARRAY_BUFFER, vboTextureCoordHandle, textureData, GL.GL_STATIC_DRAW);
-	    gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
-	    
-	    
-	    shader = new Shader(gl);
-	    shader.bind(gl);
-	    shader.attachVertexShader(gl);
-	    shader.attachFragmentShader(gl);
-	    shader.link(gl);
-	    //shader.unbind(gl);
-	    
-	  //setting the uniform
-        shader.setUniform(gl, "tex", 0);  
-        
-		//activating textures
-		gl.glActiveTexture(GL2.GL_TEXTURE0 + 0);
-		texture.bind(gl); 
+		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vboTextureCoordHandle);
+		//gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
+		gl.glBufferData(GL.GL_ARRAY_BUFFER, textureData.capacity()
+				* Buffers.SIZEOF_FLOAT, textureData, GL.GL_STATIC_DRAW);
+		//gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
+		//gl.glEnableVertexAttribArray(colorLoc);
+		//gl.glVertexAttribPointer(colorLoc, 4, GL_FLOAT, false, 0, 0);
+		
+		//gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
+
+		shader = new Shader(gl);
+		//shader.bind(gl);
+		shader.attachVertexShader(gl);
+		shader.attachFragmentShader(gl);
+		shader.link(gl);
+		//shader.unbind(gl);
+
+		//shader.bind(gl);
+		
+		//float [] texUniform = {0.5f , 0.5f};
+		// setting the uniform
+		//the uniforms may be set wrongly
+		//shader.setUniform(gl, "texUnit", texUniform);
+		//shader.setUniform(gl, "Material", 1, 1, 1);
+		//shader.setUniform(gl, "Lights", 2);
+		
+		// Two UV coordinates for each vertex. They were created with Blender.
+		/*
+		float[]  UVdata = {
+		    0.000059f, 1.0f-0.000004f,
+		    0.000103f, 1.0f-0.336048f,
+		    0.335973f, 1.0f-0.335903f,
+		    1.000023f, 1.0f-0.000013f,
+		    0.667979f, 1.0f-0.335851f,
+		    0.999958f, 1.0f-0.336064f,
+		    0.667979f, 1.0f-0.335851f,
+		    0.336024f, 1.0f-0.671877f,
+		    0.667969f, 1.0f-0.671889f,
+		    1.000023f, 1.0f-0.000013f,
+		    0.668104f, 1.0f-0.000013f,
+		    0.667979f, 1.0f-0.335851f,
+		    0.000059f, 1.0f-0.000004f,
+		    0.335973f, 1.0f-0.335903f,
+		    0.336098f, 1.0f-0.000071f,
+		    0.667979f, 1.0f-0.335851f,
+		    0.335973f, 1.0f-0.335903f,
+		    0.336024f, 1.0f-0.671877f,
+		    1.000004f, 1.0f-0.671847f,
+		    0.999958f, 1.0f-0.336064f,
+		    0.667979f, 1.0f-0.335851f,
+		    0.668104f, 1.0f-0.000013f,
+		    0.335973f, 1.0f-0.335903f,
+		    0.667979f, 1.0f-0.335851f,
+		    0.335973f, 1.0f-0.335903f,
+		    0.668104f, 1.0f-0.000013f,
+		    0.336098f, 1.0f-0.000071f,
+		    0.000103f, 1.0f-0.336048f,
+		    0.000004f, 1.0f-0.671870f,
+		    0.336024f, 1.0f-0.671877f,
+		    0.000103f, 1.0f-0.336048f,
+		    0.336024f, 1.0f-0.671877f,
+		    0.335973f, 1.0f-0.335903f,
+		    0.667969f, 1.0f-0.671889f,
+		    1.000004f, 1.0f-0.671847f,
+		    0.667979f, 1.0f-0.335851f
+		};
+		
+		shader.setUniform(gl, "UV", UVdata);
+		*/
+		
+		
+		//setting the sampler
+		int imageLoc = gl.glGetUniformLocation(shader.programID, "myTexture");
+		 
+		shader.bind(gl);
+		gl.glUniform1i(imageLoc, 0); //Texture unit 0 is for base images.
+		
+		shader.unbind(gl);
+		gl.glActiveTexture(GL.GL_TEXTURE0 + 0);
+		gl.glBindTexture(GL_TEXTURE_2D, texture.getTextureObject());
+		
+		//texture.bind(gl);
+		//gl.glBindSampler(0, linearFiltering);
+		
+		// activating textures
+		//gl.glActiveTexture(GL2.GL_TEXTURE0);   //done by default
+		//texture.bind(gl);
+		// gl.glBindTexture(GL.GL_TEXTURE_2D, GL.GL_TEXTURE0);
+
 	}
-	
-    public void drawCubeVBO(GL2 gl, String textureFileName, String textureFileType) {
-		
 
-    	//shader.bind(gl);
-    	
-        //initializing textures
-    	
-    	//this.textureFileName = textureFileName;
-		//this.textureFileType = textureFileType;
-		//loadTexture(gl);
-		//texture.enable(gl);
-        //gl.glEnable(GL.GL_TEXTURE_2D);  
-        
+	public void drawCubeVBO(GL2 gl, String textureFileName,
+			String textureFileType) {
 
-		     
+		//shader.bind(gl);
+
+		// initializing textures
+
+		// this.textureFileName = textureFileName;
+		// this.textureFileType = textureFileType;
+		// loadTexture(gl);
+		// texture.enable(gl);
+		// gl.glEnable(GL.GL_TEXTURE_2D);	//probibly dont need to enable the texture
+											//b/c the shader overrides that
+
+		// drawing
 		
-		//drawing
-    	gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
-    	gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
-    	
-    	/* Setup Position Pointer */
-    	gl.glBindBuffer    (GL.GL_ARRAY_BUFFER, VBOVertices);
-    	gl.glVertexPointer (3, GL.GL_FLOAT, 0, 0);
-    	
-    	/* Setup Texture Coordinate Pointer */
-    	gl.glBindBuffer      (GL.GL_TEXTURE0, vboTextureCoordHandle);
-    	gl.glTexCoordPointer (2, GL.GL_FLOAT, 0, 0);
-    	
-    	//actual drawing
-        gl.glBindBuffer(GL.GL_ARRAY_BUFFER, VBOVertices);
-        gl.glDrawArrays(GL.GL_TRIANGLES, 0, vertices.capacity());
-        
-        gl.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
-        gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
-        
-        //shader.unbind(gl);
-        
-    }
+		// unbind the VBO
+		//gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
+
+		/* Setup Position Pointer */
+		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, VBOVertices);
+		gl.glVertexPointer(3, GL.GL_FLOAT, 0, 0);
+
+		/* Setup Texture Coordinate Pointer */
+		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vboTextureCoordHandle);
+		gl.glTexCoordPointer(2, GL.GL_FLOAT, 0, 0);
+		
+		// unbind the VBO
+		//gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
+
+		// actual drawing
+		// gl.glBindBuffer(GL.GL_ARRAY_BUFFER, VBOVertices);
+
+		gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
+		gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
+		
+		gl.glDrawArrays(GL.GL_TRIANGLES, 0, vertices.capacity());
+		//gl.glDrawElements(GL.GL_TRIANGLES, 0, GL.GL_UNSIGNED_BYTE, indices);
+		
+		gl.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
+		gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
+
+		//shader.unbind(gl);
+
+	}
 
 	/**
 	 * 
@@ -486,7 +647,7 @@ public class Scene {
 
 		gl.glPopMatrix();
 		gl.glPopName();
-		
+
 		// //////////////////////////
 
 		// cube drawn with VBO
