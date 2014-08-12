@@ -316,107 +316,8 @@ public class Scene {
 		texture.enable(gl);
 		gl.glEnable(GL2.GL_TEXTURE_2D);
 
-		//float[] textureArray = { 0, 0, 1, 0, 0, 1,
-		//1, 1, 1, 0, 0, 1 };
 		float[] textureArray = 
-			//{ 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-			//	0.0f, 1.0f, 1.0f };
-			/*{   1.0f, 1.0f, 1.0f,
-				1.0f, 1.0f, -1.0f,
-				-1.0f, 1.0f, -1.0f,
-				-1.0f, 1.0f, 1.0f
-			};*/
-				/*
-			{	0.0f, 1.0f,//0
-			    1.0f, 1.0f,//1
-			    0.0f, 0.0f,//2
-			    1.0f, 0.0f,//3
-
-			    0.0f, 1.0f,//0
-			    1.0f, 1.0f,//1
-			    0.0f, 0.0f,//2
-			    1.0f, 0.0f //3
-			};
-			*/
-			/*
-			{	0.000059f, 1.0f-0.000004f,
-			    0.000103f, 1.0f-0.336048f,
-			    0.335973f, 1.0f-0.335903f,
-			    1.000023f, 1.0f-0.000013f,
-			    0.667979f, 1.0f-0.335851f,
-			    0.999958f, 1.0f-0.336064f,
-			    0.667979f, 1.0f-0.335851f,
-			    0.336024f, 1.0f-0.671877f,
-			    0.667969f, 1.0f-0.671889f,
-			    1.000023f, 1.0f-0.000013f,
-			    0.668104f, 1.0f-0.000013f,
-			    0.667979f, 1.0f-0.335851f,
-			    0.000059f, 1.0f-0.000004f,
-			    0.335973f, 1.0f-0.335903f,
-			    0.336098f, 1.0f-0.000071f,
-			    0.667979f, 1.0f-0.335851f,
-			    0.335973f, 1.0f-0.335903f,
-			    0.336024f, 1.0f-0.671877f,
-			    1.000004f, 1.0f-0.671847f,
-			    0.999958f, 1.0f-0.336064f,
-			    0.667979f, 1.0f-0.335851f,
-			    0.668104f, 1.0f-0.000013f,
-			    0.335973f, 1.0f-0.335903f,
-			    0.667979f, 1.0f-0.335851f,
-			    0.335973f, 1.0f-0.335903f,
-			    0.668104f, 1.0f-0.000013f,
-			    0.336098f, 1.0f-0.000071f,
-			    0.000103f, 1.0f-0.336048f,
-			    0.000004f, 1.0f-0.671870f,
-			    0.336024f, 1.0f-0.671877f,
-			    0.000103f, 1.0f-0.336048f,
-			    0.336024f, 1.0f-0.671877f,
-			    0.335973f, 1.0f-0.335903f,
-			    0.667969f, 1.0f-0.671889f,
-			    1.000004f, 1.0f-0.671847f,
-			    0.667979f, 1.0f-0.335851f };
-			   */
-				/*
-			{	0.00000f, 1.0f-0.00000f,
-			    0.00000f, 1.0f-0.33333f,
-			    0.33333f, 1.0f-0.33333f,
-			    1.00000f, 1.0f-0.00000f,
-			    0.66666f, 1.0f-0.33333f,
-			    1.00000f, 1.0f-0.33333f,
-			    0.66666f, 1.0f-0.33333f,
-			    0.33333f, 1.0f-0.66666f,
-			    0.66666f, 1.0f-0.66666f,
-			    1.00000f, 1.0f-0.00000f,
-			    0.66666f, 1.0f-0.00000f,
-			    0.66666f, 1.0f-0.33333f,
-			    0.00000f, 1.0f-0.00000f,
-			    0.33333f, 1.0f-0.33333f,
-			    0.33333f, 1.0f-0.00000f,
-			    0.66666f, 1.0f-0.33333f,
-			    0.33333f, 1.0f-0.33333f,
-			    0.33333f, 1.0f-0.66666f,
-			    1.00000f, 1.0f-0.66666f,
-			    1.00000f, 1.0f-0.33333f,
-			    0.66666f, 1.0f-0.33333f,
-			    0.66666f, 1.0f-0.00000f,
-			    0.33333f, 1.0f-0.33333f,
-			    0.66666f, 1.0f-0.33333f,
-			    0.33333f, 1.0f-0.33333f,
-			    0.66666f, 1.0f-0.00000f,
-			    0.33333f, 1.0f-0.00000f,
-			    0.00000f, 1.0f-0.33333f,
-			    0.00000f, 1.0f-0.66666f,
-			    0.33333f, 1.0f-0.66666f,
-			    0.00000f, 1.0f-0.33333f,
-			    0.33333f, 1.0f-0.66666f,
-			    0.33333f, 1.0f-0.33333f,
-			    0.66666f, 1.0f-0.66666f,
-			    1.00000f, 1.0f-0.66666f,
-			    0.66666f, 1.0f-0.33333f };
-			    				0f, 0f, 1f,
-				0f, 1f, 1f,
-				1f, 1f, 1f
-			    */
+				
 			{
 				//1
 				0f, 0f, 
@@ -426,7 +327,7 @@ public class Scene {
 				1f, 1f,
 				0f, 1f,
 				0f, 0f,
-				//2 right
+				//2
 				1f, 1f, 
 				1f, 0f,
 				0f, 0f,
@@ -434,7 +335,7 @@ public class Scene {
 				0f, 0f,
 				0f, 1f,
 				1f, 1f,
-				//3  top?
+				//3 
 				1f, 1f, 
 				1f, 0f,
 				0f, 0f,
@@ -471,12 +372,7 @@ public class Scene {
 		
 
 		textureData = Buffers.newDirectFloatBuffer(100);
-		// textureData.put(textureTop);
-		// textureData.put(textureBottom);
-		// textureData.put(textureRight);
-		// textureData.put(textureLeft);
 		textureData.put(textureArray);
-		// textureData.order();
 		textureData.flip();
 
 		int[] temp = new int[4];
@@ -484,88 +380,20 @@ public class Scene {
 
 		VBOVertices = temp[0];
 		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, VBOVertices);
-		//gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
 		gl.glBufferData(GL.GL_ARRAY_BUFFER, vertices.capacity()
 				* Buffers.SIZEOF_FLOAT, vertices, GL.GL_STATIC_DRAW);
-		//gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
-		//gl.glEnableVertexAttribArray(vertexLoc);
-		//gl.glVertexAttribPointer(vertexLoc, 4, GL_FLOAT, false, 0, 0);
-		
-		//gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
 		
 		vboTextureCoordHandle = temp[2];
 		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vboTextureCoordHandle);
-		//gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
 		gl.glBufferData(GL.GL_ARRAY_BUFFER, textureData.capacity()
 				* Buffers.SIZEOF_FLOAT, textureData, GL.GL_STATIC_DRAW);
-		//gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
-		//gl.glEnableVertexAttribArray(colorLoc);
-		//gl.glVertexAttribPointer(colorLoc, 4, GL_FLOAT, false, 0, 0);
-		
-		//gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
 
 		shader = new Shader(gl);
-		//shader.bind(gl);
 		shader.attachVertexShader(gl);
 		shader.attachFragmentShader(gl);
 		shader.link(gl);
-		//shader.unbind(gl);
 
-		//shader.bind(gl);
-		
-		//float [] texUniform = {0.5f , 0.5f};
-		// setting the uniform
-		//the uniforms may be set wrongly
-		//shader.setUniform(gl, "texUnit", texUniform);
-		//shader.setUniform(gl, "Material", 1, 1, 1);
-		//shader.setUniform(gl, "Lights", 2);
-		
-		// Two UV coordinates for each vertex. They were created with Blender.
-		/*
-		float[]  UVdata = {
-		    0.000059f, 1.0f-0.000004f,
-		    0.000103f, 1.0f-0.336048f,
-		    0.335973f, 1.0f-0.335903f,
-		    1.000023f, 1.0f-0.000013f,
-		    0.667979f, 1.0f-0.335851f,
-		    0.999958f, 1.0f-0.336064f,
-		    0.667979f, 1.0f-0.335851f,
-		    0.336024f, 1.0f-0.671877f,
-		    0.667969f, 1.0f-0.671889f,
-		    1.000023f, 1.0f-0.000013f,
-		    0.668104f, 1.0f-0.000013f,
-		    0.667979f, 1.0f-0.335851f,
-		    0.000059f, 1.0f-0.000004f,
-		    0.335973f, 1.0f-0.335903f,
-		    0.336098f, 1.0f-0.000071f,
-		    0.667979f, 1.0f-0.335851f,
-		    0.335973f, 1.0f-0.335903f,
-		    0.336024f, 1.0f-0.671877f,
-		    1.000004f, 1.0f-0.671847f,
-		    0.999958f, 1.0f-0.336064f,
-		    0.667979f, 1.0f-0.335851f,
-		    0.668104f, 1.0f-0.000013f,
-		    0.335973f, 1.0f-0.335903f,
-		    0.667979f, 1.0f-0.335851f,
-		    0.335973f, 1.0f-0.335903f,
-		    0.668104f, 1.0f-0.000013f,
-		    0.336098f, 1.0f-0.000071f,
-		    0.000103f, 1.0f-0.336048f,
-		    0.000004f, 1.0f-0.671870f,
-		    0.336024f, 1.0f-0.671877f,
-		    0.000103f, 1.0f-0.336048f,
-		    0.336024f, 1.0f-0.671877f,
-		    0.335973f, 1.0f-0.335903f,
-		    0.667969f, 1.0f-0.671889f,
-		    1.000004f, 1.0f-0.671847f,
-		    0.667979f, 1.0f-0.335851f
-		};
-		
-		shader.setUniform(gl, "UV", UVdata);
-		*/
-		
-		
-		//setting the sampler
+		//setting the sampler (in the shader)
 		int imageLoc = gl.glGetUniformLocation(shader.programID, "myTexture");
 		 
 		shader.bind(gl);
@@ -574,35 +402,10 @@ public class Scene {
 		shader.unbind(gl);
 		gl.glActiveTexture(GL.GL_TEXTURE0 + 0);
 		gl.glBindTexture(GL_TEXTURE_2D, texture.getTextureObject());
-		
-		//texture.bind(gl);
-		//gl.glBindSampler(0, linearFiltering);
-		
-		// activating textures
-		//gl.glActiveTexture(GL2.GL_TEXTURE0);   //done by default
-		//texture.bind(gl);
-		// gl.glBindTexture(GL.GL_TEXTURE_2D, GL.GL_TEXTURE0);
-
 	}
 
 	public void drawCubeVBO(GL2 gl, String textureFileName,
 			String textureFileType) {
-
-		//shader.bind(gl);
-
-		// initializing textures
-
-		// this.textureFileName = textureFileName;
-		// this.textureFileType = textureFileType;
-		// loadTexture(gl);
-		// texture.enable(gl);
-		// gl.glEnable(GL.GL_TEXTURE_2D);	//probibly dont need to enable the texture
-											//b/c the shader overrides that
-
-		// drawing
-		
-		// unbind the VBO
-		//gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
 
 		/* Setup Position Pointer */
 		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, VBOVertices);
@@ -612,22 +415,15 @@ public class Scene {
 		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vboTextureCoordHandle);
 		gl.glTexCoordPointer(2, GL.GL_FLOAT, 0, 0);
 		
-		// unbind the VBO
-		//gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
-
-		// actual drawing
-		// gl.glBindBuffer(GL.GL_ARRAY_BUFFER, VBOVertices);
 
 		gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
 		gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
 		
+		// actual drawing
 		gl.glDrawArrays(GL.GL_TRIANGLES, 0, vertices.capacity());
-		//gl.glDrawElements(GL.GL_TRIANGLES, 0, GL.GL_UNSIGNED_BYTE, indices);
 		
 		gl.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
 		gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
-
-		//shader.unbind(gl);
 
 	}
 
