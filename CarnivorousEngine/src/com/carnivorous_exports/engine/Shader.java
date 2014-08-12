@@ -257,45 +257,6 @@ public class Shader {
 	public void unbind(GL2ES2 gl) {
 		gl.glUseProgram(0);
 	}
-	
-    /**
-     * Sets the uniforms in this shader
-     * 
-     * @param name    The name of the uniform
-     * @param values  The values of the uniforms (Max 4)
-     */
-    public void setUniform(GL2ES2 gl, String name, float... values)
-    {
-    	//int location = gl.glGetUniformLocation(programID, name);
-    	//gl.glUniform1f(location, values);
-    	/*
-        if (values.length > 4)
-        {
-            System.err.println("Uniforms cannot have more than 4 values");
-            System.exit(1);
-        }
-        
-        // Get the location of the uniform
-        int location = gl.glGetUniformLocation(programID, name);
-        if(location == -1) System.out.println( "Uniform Location Not Found!" );
-        // Set the uniform values
-        switch (values.length)
-        {
-            case 1:
-                gl.glUniform1f(location, values[0]);
-                break;                
-            case 2:
-                gl.glUniform2f(location, values[0], values[1]);
-                break;                
-            case 3:
-                gl.glUniform3f(location, values[0], values[1], values[2]);
-                break;                
-            case 4:
-                gl.glUniform4f(location, values[0], values[1], values[2], values[3]);
-                break;
-        }
-        */
-    }
 
 	public void dispose(GL2ES2 gl) {
         gl.glUseProgram(0);
