@@ -25,8 +25,8 @@ import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_POSITION;
 
 /**
  * This is the base class that does all the stuff. It controls the Audio,
- * the Scene, the mouse and key listeners. Basically it makes all the other
- * classes it's bitch. This is because it implements GLEventListener and the
+ * the Scene, the mouse and key listeners. 
+ * This is because it implements GLEventListener and the
  * methods "init", "reshape", "display", and "dispose". Those are the meat and
  * potatoes of this class, this engine, and openGL in general.
  * <p>
@@ -37,6 +37,11 @@ import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_POSITION;
  * A First Person Perspective,
  * Basic Lighting (Shadows appear on objects, but are not cast onto others),
  * Sound (Walking),
+ * 			There is a problem with the audio so I 
+ * 			commented it out so I could work on other things.
+ * 			Sometimes when I run this program, it crashes 
+ * 			because it could not set up openAL and afterwards the audio on
+ * 			my laptop is screwed up.
  * Picking (Click the Cube), and
  * Collision Detection (Walk into the Cube).
  * <p>
@@ -67,7 +72,7 @@ public class Renderer implements GLEventListener,
 	private boolean initiated = false;
 	GLAutoDrawable drawable;
 
-	public static Audio audio = new Audio();
+	//public static Audio audio = new Audio();
 	int walkNum = 0;
 
 	// Prepare light parameters.
@@ -392,6 +397,7 @@ public class Renderer implements GLEventListener,
 	/**
 	 * Call before using audio.
 	 */
+	/*
 	public static void initAudio() {
 
 		audio.newFile(1, "SoundEffects/Groups/Humanoids/Walking1.wav", false,
@@ -403,6 +409,7 @@ public class Renderer implements GLEventListener,
 		audio.newFile(4, "SoundEffects/Groups/Humanoids/Walking4.wav", false,
 				new float[3], 1.0f, 500);
 	}
+	*/
 
 	/**
 	 * Called only once at the very begging.
@@ -411,7 +418,7 @@ public class Renderer implements GLEventListener,
 	@Override
 	public void init(GLAutoDrawable drawable) {
 		if(initiated) return;
-		initAudio();
+		//initAudio();
 
 		drawable.getAnimator().setUpdateFPSFrames(3, null); // 3
 		drawable.setAutoSwapBufferMode(false);
@@ -677,6 +684,7 @@ public class Renderer implements GLEventListener,
 				flyDownMove = false;
 			}
 
+			/*
 			if (audioOn) {
 				// for walking audio
 				if (!forwardMove && !strifeMove) {
@@ -687,6 +695,7 @@ public class Renderer implements GLEventListener,
 					audio.play(walkNum);
 				}
 			}
+			*/
 		}
 	}
 
