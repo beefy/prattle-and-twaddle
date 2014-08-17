@@ -1,14 +1,26 @@
 package com.carnivorous_exports.engine;
 
+import static javax.media.opengl.GL.GL_DEPTH_TEST;
 import static javax.media.opengl.GL.GL_FLOAT;
+import static javax.media.opengl.GL.GL_FRONT;
+import static javax.media.opengl.GL.GL_LEQUAL;
 import static javax.media.opengl.GL.GL_LINEAR;
+import static javax.media.opengl.GL.GL_NICEST;
 import static javax.media.opengl.GL.GL_TEXTURE_2D;
 import static javax.media.opengl.GL.GL_TEXTURE_MAG_FILTER;
 import static javax.media.opengl.GL.GL_TEXTURE_MIN_FILTER;
 import static javax.media.opengl.GL2.GL_COMPILE;
+import static javax.media.opengl.GL2ES1.GL_PERSPECTIVE_CORRECTION_HINT;
 import static javax.media.opengl.GL2GL3.GL_QUADS;
 import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_AMBIENT;
+import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_AMBIENT_AND_DIFFUSE;
+import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_COLOR_MATERIAL;
+import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_DIFFUSE;
+import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_LIGHT1;
+import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_LIGHTING;
+import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_POSITION;
 import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_SHININESS;
+import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_SMOOTH;
 import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_SPECULAR;
 
 import java.io.IOException;
@@ -87,8 +99,17 @@ public class Scene {
 	
 	FloatBuffer indices;
 	FloatBuffer textureData;
+	FloatBuffer normalData;
 	IntBuffer vertexArray = IntBuffer.allocate(1);
 	int vboTextureCoordHandle;
+	int normalHandle;
+	
+	// Prepare light parameters.
+	float SHINE_ALL_DIRECTIONS = 1;
+	float[] lightPos = { 20, 30, 20, SHINE_ALL_DIRECTIONS };
+	float[] lightDif = { 0.6f, 0.6f, 0.6f, 1.0f };
+	float[] lightColorAmbient = { 0.2f, 0.2f, 0.2f, 1f };
+	float[] lightColorSpecular = { 0.8f, 0.8f, 0.8f, 1f };
 
 	/**
 	 * This method returns a display list for a cube with a specific texture.
@@ -266,7 +287,7 @@ public class Scene {
 	float x = 1f; // the length/width/height of the cube
 
 	public void initVBO(GL2 gl, String textureFileName, String textureFileType) {
-
+		
 		// cube
 		// ///////////////////////////////////////////////////////////////////////
 		// v6----- v5
@@ -374,9 +395,24 @@ public class Scene {
 		textureData = Buffers.newDirectFloatBuffer(100);
 		textureData.put(textureArray);
 		textureData.flip();
+		
+		float[] normalArray = 
+			{
+				0, 0, 0,
+				0, 0, -1,
+				0, 1, 0,
+				0, -1, 0,
+				1, 0, 0,
+				-1, 0, 0
+			};
+		
+		
+		normalData = Buffers.newDirectFloatBuffer(18);
+		normalData.put(normalArray);
+		normalData.flip();
 
 		int[] temp = new int[4];
-		gl.glGenBuffers(3, temp, 0);
+		gl.glGenBuffers(4, temp, 0);
 
 		VBOVertices = temp[0];
 		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, VBOVertices);
@@ -388,20 +424,52 @@ public class Scene {
 		gl.glBufferData(GL.GL_ARRAY_BUFFER, textureData.capacity()
 				* Buffers.SIZEOF_FLOAT, textureData, GL.GL_STATIC_DRAW);
 
+		normalHandle = temp[3];
+        gl.glBindBuffer(GL.GL_ARRAY_BUFFER, normalHandle);
+        gl.glBufferData(GL.GL_ARRAY_BUFFER, normalData.capacity()
+				* Buffers.SIZEOF_FLOAT, normalData, GL.GL_STATIC_DRAW);
+        //gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
+		
+		
+		
+		//might not need any shader stuff
 		shader = new Shader(gl);
 		shader.attachVertexShader(gl);
 		shader.attachFragmentShader(gl);
 		shader.link(gl);
 
+		//shader.bind(gl);
+		
 		//setting the sampler (in the shader)
 		int imageLoc = gl.glGetUniformLocation(shader.programID, "myTexture");
-		 
-		shader.bind(gl);
+		int lightLoc =  gl.glGetUniformLocation(shader.programID, "Lights");
+		int matricesLoc = gl.glGetUniformLocation(shader.programID, "Matrices");
+		int materialsLoc = gl.glGetUniformLocation(shader.programID, "Materials");
+		
+		if(imageLoc == -1) System.out.println("imageLoc location not found!");
+		if(lightLoc == -1) System.out.println("lightLoc location not found!");
+		if(matricesLoc == -1) System.out.println("matricesLoc location not found!");
+		if(materialsLoc == -1) System.out.println("materialsLoc location not found!");
+		
+		//shader.bind(gl);
 		gl.glUniform1i(imageLoc, 0); //Texture unit 0 is for base images.
 		
-		shader.unbind(gl);
+		gl.glUniform3fv(lightLoc, 4, lightPos, 0 );
+		//gl.glUniform3fv(matricesLoc, 4, lightPos, 0 );
+		gl.glUniform3fv(materialsLoc, 4, lightDif, 0 );
+		
+		//shader.unbind(gl);
 		gl.glActiveTexture(GL.GL_TEXTURE0 + 0);
 		gl.glBindTexture(GL_TEXTURE_2D, texture.getTextureObject());
+		
+		/*
+		// Prepare light parameters.
+		float SHINE_ALL_DIRECTIONS = 1;
+		float[] lightPos = { 20, 30, 20, SHINE_ALL_DIRECTIONS };
+		float[] lightDif = { 0.6f, 0.6f, 0.6f, 1.0f };
+		float[] lightColorAmbient = { 0.2f, 0.2f, 0.2f, 1f };
+		float[] lightColorSpecular = { 0.8f, 0.8f, 0.8f, 1f };
+		*/
 	}
 
 	public void drawCubeVBO(GL2 gl, String textureFileName,
@@ -410,12 +478,18 @@ public class Scene {
 		/* Setup Position Pointer */
 		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, VBOVertices);
 		gl.glVertexPointer(3, GL.GL_FLOAT, 0, 0);
-
+		
 		/* Setup Texture Coordinate Pointer */
 		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vboTextureCoordHandle);
 		gl.glTexCoordPointer(2, GL.GL_FLOAT, 0, 0);
 		
+		/* Setup Normal Pointer */
+		//gl.glNormalPointer(NormalPointerType.Float, stride, 2 * GL.GL_FLOAT); 
+		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, normalHandle);
+		//gl.glNormalPointer(3, GL.GL_FLOAT, 0);
+		gl.glNormalPointer(GL.GL_FLOAT, 3, 0);
 
+		gl.glEnableClientState(GL2.GL_NORMAL_ARRAY);
 		gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
 		gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
 		
@@ -424,6 +498,7 @@ public class Scene {
 		
 		gl.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
 		gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
+		gl.glDisableClientState(GL2.GL_NORMAL_ARRAY);
 
 	}
 
