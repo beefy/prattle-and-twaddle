@@ -78,9 +78,9 @@ public class Renderer implements GLEventListener,
 	// Prepare light parameters.
 	float SHINE_ALL_DIRECTIONS = 1;
 	float[] lightPos = { 20, 30, 20, SHINE_ALL_DIRECTIONS };
-	float[] lightDif = { 0.6f, 0.6f, 0.6f, 1.0f };
-	float[] lightColorAmbient = { 0.2f, 0.2f, 0.2f, 1f };
-	float[] lightColorSpecular = { 0.8f, 0.8f, 0.8f, 1f };
+	float[] lightDif = { 1.0f, 0.0f, 0f, 1.0f }; //0.6
+	float[] lightColorAmbient = { 0.0f, 1f, 0f, 1f }; //0.2
+	float[] lightColorSpecular = { 0.0f, 0.0f, 1f, 1f };  //0.8
 	float cameraPos[] = { 5.0f, 5.0f, 10.0f, 0.0f };
 	float[] colorWhite = { 1.0f, 1.0f, 1.0f, 1.0f };
 
