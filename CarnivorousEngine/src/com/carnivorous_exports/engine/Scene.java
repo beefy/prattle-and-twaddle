@@ -399,57 +399,30 @@ public class Scene {
 		
 		float[] normalArray = 
 			{
-				/*
-				0, 0, 0,
-				0, 0, -1,
-				0, 1, 0,
-				0, -1, 0,
-				1, 0, 0,
-				-1, 0, 0
-				*/
 				
-				/*
-				0, 0, 0,
-				0, 0, -1,
-				0, 1, 0,
-				0, -1, 0,
-				1, 0, 0,
-				-1, 0, 0
-				*/
-				
-				/*
-				0, 0, 1,
-				0, 0, -1,
-				0, -1, 0,
-				0, 1, 0,
-				-1, 0, 0,
-				1, 0, 0
-				*/
-				/*
-				0, 0, -1,
-				0, 1, 0,
-				0, -1, 0,
-				1, 0, 0,
-				-1, 0, 0
-				*/
 				//front
-				1.0f, 1.0f, 0.0f, 0.5f,
-				1.0f, 1.0f, 0.5f, 0.0f,
+				0.0f, 0.5f, 0.0f, 0.0f,
+				0.0f, 0.0f, 0.5f, 0.0f,
 
-				0.0f, 0.0f, 0.0f, 0.0f,
-				0.0f, 0.0f, 0.0f, 0.0f,
+				//right and half of top
+				0.0f, 0.0f, 0.0f, 0.5f,
+				0.0f, 0.0f, 0.5f, 0.0f,
 				
-				0.0f, 0.0f, 0.0f, 0.0f,
+				//half of left and half of top
+				0.0f, 1.0f, 0.0f, 0.0f,
 				0.0f, 0.0f, 0.0f, 0.0f,
 			
-				0.0f, 0.0f, 0.0f, 0.0f,
+				//bottom
+				0.5f, 0.0f, 0.0f, 0.0f,
 				0.0f, 0.0f, 0.0f, 0.0f,
 
-				0.0f, 0.0f, 0.0f, 0.0f,
-				0.0f, 0.0f, 0.0f, 0.0f,
+				//back
+				0.0f, 0.0f, 0.5f, 0.0f,
+				0.0f, 0.5f, 0.0f, 0.0f,
 				
+				//?
 				0.0f, 0.0f, 0.0f, 0.0f,
-				0.0f, 0.0f, 0.0f, 0.0f,
+				0.0f, 0.0f, 0.0f, 0.0f
 				
 			};
 		
@@ -475,8 +448,6 @@ public class Scene {
         gl.glBindBuffer(GL.GL_ARRAY_BUFFER, normalHandle);
         gl.glBufferData(GL.GL_ARRAY_BUFFER, normalData.capacity()
 				* Buffers.SIZEOF_FLOAT, normalData, GL.GL_STATIC_DRAW);
-        //gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
-		
 		
 		
 		//might not need any shader stuff
