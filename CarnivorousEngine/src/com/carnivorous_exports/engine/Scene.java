@@ -396,18 +396,65 @@ public class Scene {
 		textureData.put(textureArray);
 		textureData.flip();
 		
+		
 		float[] normalArray = 
 			{
+				/*
 				0, 0, 0,
 				0, 0, -1,
 				0, 1, 0,
 				0, -1, 0,
 				1, 0, 0,
 				-1, 0, 0
+				*/
+				
+				/*
+				0, 0, 0,
+				0, 0, -1,
+				0, 1, 0,
+				0, -1, 0,
+				1, 0, 0,
+				-1, 0, 0
+				*/
+				
+				/*
+				0, 0, 1,
+				0, 0, -1,
+				0, -1, 0,
+				0, 1, 0,
+				-1, 0, 0,
+				1, 0, 0
+				*/
+				/*
+				0, 0, -1,
+				0, 1, 0,
+				0, -1, 0,
+				1, 0, 0,
+				-1, 0, 0
+				*/
+				//front
+				1.0f, 1.0f, 0.0f, 0.5f,
+				1.0f, 1.0f, 0.5f, 0.0f,
+
+				0.0f, 0.0f, 0.0f, 0.0f,
+				0.0f, 0.0f, 0.0f, 0.0f,
+				
+				0.0f, 0.0f, 0.0f, 0.0f,
+				0.0f, 0.0f, 0.0f, 0.0f,
+			
+				0.0f, 0.0f, 0.0f, 0.0f,
+				0.0f, 0.0f, 0.0f, 0.0f,
+
+				0.0f, 0.0f, 0.0f, 0.0f,
+				0.0f, 0.0f, 0.0f, 0.0f,
+				
+				0.0f, 0.0f, 0.0f, 0.0f,
+				0.0f, 0.0f, 0.0f, 0.0f,
+				
 			};
 		
 		
-		normalData = Buffers.newDirectFloatBuffer(18);
+		normalData = Buffers.newDirectFloatBuffer(100);
 		normalData.put(normalArray);
 		normalData.flip();
 
@@ -487,7 +534,7 @@ public class Scene {
 		//gl.glNormalPointer(NormalPointerType.Float, stride, 2 * GL.GL_FLOAT); 
 		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, normalHandle);
 		//gl.glNormalPointer(3, GL.GL_FLOAT, 0);
-		gl.glNormalPointer(GL.GL_FLOAT, 3, 0);
+		gl.glNormalPointer(GL.GL_FLOAT, 4, 0);
 
 		gl.glEnableClientState(GL2.GL_NORMAL_ARRAY);
 		gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
