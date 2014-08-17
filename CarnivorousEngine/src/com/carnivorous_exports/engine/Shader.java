@@ -45,6 +45,7 @@ public class Shader {
     		    "gl_Position = m_pvm * position; \n"+
     		"}";
     		*/
+    		/*
     		"#version 330 core\n"+
     		 
     		// Input vertex data, different for all executions of this shader.
@@ -64,6 +65,44 @@ public class Shader {
     		 
     		    // UV of the vertex. No special space for this one.
     		    "UV = vertexUV;\n"+
+    		"}";
+    		*/
+    		"#version 330\n"+
+    		 
+    		"layout (std140) uniform Matrices {\n"+
+    		    "mat4 m_pvm;\n"+
+    		    "mat3 m_normal;\n"+
+    		"};\n"+
+    		 
+    		"layout (std140) uniform Materials {\n"+
+    		    "vec4 diffuse;\n"+
+    		"};\n"+
+    		 
+    		"layout (std140) uniform Lights {\n"+
+    		    "vec3 l_dir;\n"+    // camera space
+    		"};\n"+
+    		 
+    		"in vec4 position;\n"+   // local space
+    		"in vec3 normal;\n"+     // local space
+    		 
+    		// the data to be sent to the fragment shader
+    		"out Data {\n"+
+    		    "vec4 color;\n"+
+    		"} DataOut;\n"+
+    		 
+    		"void main () {\n"+
+    		    // transform normal to camera space and normalize it
+    		    "vec3 n = normalize(m_normal * normal);\n"+
+    		 
+    		    // compute the intensity as the dot product
+    		    // the max prevents negative intensity values
+    		    "float intensity = max(dot(n, l_dir), 0.0);\n"+
+    		 
+    		    // Compute the color per vertex
+    		    "DataOut.color = intensity * diffuse;\n"+
+    		 
+    		    // transform the vertex coordinates
+    		    "gl_Position = m_pvm * position;\n"+
     		"}";
 
     private String fragmentShaderString = 
@@ -135,13 +174,32 @@ public class Shader {
     		    "color = texture( myTextureSampler, UV ).rgb;\n"+
     		"}";
     		*/
+    		/*
+    		 * #version 330
+ 
+in Data {
+    vec4 color;
+} DataIn;
+ 
+out vec4 outputF;
+ 
+void main() {
+ 
+    outputF = DataIn.color;
+}
+    		 */
     		
     		"uniform sampler2D mytexture;\n"+
+    		
+			"in Data {\n"+
+    		    "vec4 color;\n"+
+    		"} DataIn;\n"+
 
     		"void main()\n"+
     		"{\n"+
-    				"vec4 color = texture2D(mytexture, gl_TexCoord[0].xy);\n"+
-    				"gl_FragColor = color;\n"+
+    				//"vec4 color = texture2D(mytexture, gl_TexCoord[0].xy);\n"+
+    				"gl_FragColor = DataIn.color;\n"+
+    				//"gl_FragColor[1] = DataIn.color;\n"+
     				//"gl_FragColor =vec4(1,1,1,1);\n"+
     		"}";
 

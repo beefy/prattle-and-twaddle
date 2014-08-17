@@ -20,7 +20,7 @@ import static javax.media.opengl.GL2ES1.GL_PERSPECTIVE_CORRECTION_HINT;
 import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_AMBIENT;
 import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_COLOR_MATERIAL;
 import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_DIFFUSE;
-import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_LIGHT1;
+import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_LIGHT0;
 import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_POSITION;
 
 /**
@@ -383,10 +383,10 @@ public class Renderer implements GLEventListener,
 		cubeArray[3] = cube4;
 		terrain.drawScene(gl, cubeList, cubeArray, textureNum, textureNum2);
 		
-		gl.glLightfv(GL_LIGHT1, GL_AMBIENT, lightColorAmbient, 0);
-		gl.glLightfv(GL_LIGHT1, GL_DIFFUSE, lightDif, 0);
-		gl.glLightfv(GL_LIGHT1, GL_SPECULAR, lightColorSpecular, 0);
-		gl.glLightfv(GL_LIGHT1, GL_POSITION, lightPos, 0);
+		gl.glLightfv(GL_LIGHT0, GL_AMBIENT, lightColorAmbient, 0);
+		gl.glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDif, 0);
+		gl.glLightfv(GL_LIGHT0, GL_SPECULAR, lightColorSpecular, 0);
+		gl.glLightfv(GL_LIGHT0, GL_POSITION, lightPos, 0);
 
 		// terrain.testLight(gl, lightPos);
 		//^^^uncomment to put a box where the light is
@@ -453,7 +453,7 @@ public class Renderer implements GLEventListener,
 		gl.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_DONT_CARE);
 
 		// Enable lighting in GL.
-		gl.glEnable(GL_LIGHT1);
+		gl.glEnable(GL_LIGHT0);
 		gl.glEnable(GL_LIGHTING);
 
 		gl.glEnable(GL_DEPTH_TEST); // enables depth testing
