@@ -23,6 +23,7 @@ import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_SHININESS;
 import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_SMOOTH;
 import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_SPECULAR;
 
+import java.awt.Font;
 import java.io.IOException;
 import java.nio.Buffer;
 import java.nio.ByteOrder;
@@ -32,12 +33,14 @@ import java.nio.ShortBuffer;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLException;
 import javax.media.opengl.fixedfunc.GLLightingFunc;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUquadric;
 
 import com.jogamp.common.nio.Buffers;
+import com.jogamp.opengl.util.awt.TextRenderer;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureCoords;
 import com.jogamp.opengl.util.texture.TextureIO;
@@ -57,11 +60,13 @@ public class Scene {
 	int[] displayList;
 	boolean terrainBuilt;
 
+	TextRenderer renderer = new TextRenderer(new Font(Font.DIALOG_INPUT, Font.BOLD, 36));
+	
 	// for collision
 	boolean boxX;
 	boolean boxY;
 	boolean boxZ;
-	
+
 	// Vertex Attribute Locations
 	int vertexLoc, colorLoc;
 
@@ -96,14 +101,14 @@ public class Scene {
 			// Green, Blue
 			{ 1.0f, 0.0f, 0.0f }, { 1.0f, 0.5f, 0.0f }, { 1.0f, 1.0f, 0.0f },
 			{ 0.0f, 1.0f, 0.0f }, { 0.0f, 1.0f, 1.0f } };
-	
+
 	FloatBuffer indices;
 	FloatBuffer textureData;
 	FloatBuffer normalData;
 	IntBuffer vertexArray = IntBuffer.allocate(1);
 	int vboTextureCoordHandle;
 	int normalHandle;
-	
+
 	// Prepare light parameters.
 	float SHINE_ALL_DIRECTIONS = 1;
 	float[] lightPos = { 20, 30, 20, SHINE_ALL_DIRECTIONS };
@@ -287,7 +292,7 @@ public class Scene {
 	float x = 1f; // the length/width/height of the cube
 
 	public void initVBO(GL2 gl, String textureFileName, String textureFileType) {
-		
+
 		// cube
 		// ///////////////////////////////////////////////////////////////////////
 		// v6----- v5
@@ -307,9 +312,10 @@ public class Scene {
 		// vertex is 3 components (x,y,z) of floats, therefore, the size of
 		// vertex
 		// array is 108 floats (36 * 3 = 108).
+		//
 
-		float[] vertexArray = { 
-				x, x, x, -x, x, x, -x, -x, x, // v0-v1-v2 (front)
+		float[] vertexArray = { x, x, x, -x, x, x, -x, -x, x, // v0-v1-v2
+																// (front)
 				-x, -x, x, x, -x, x, x, x, x, // v2-v3-v0
 
 				x, x, x, x, -x, x, x, -x, -x, // v0-v3-v4 (right)
@@ -337,96 +343,62 @@ public class Scene {
 		texture.enable(gl);
 		gl.glEnable(GL2.GL_TEXTURE_2D);
 
-		float[] textureArray = 
-				
-			{
-				//1
-				0f, 0f, 
-				1f, 0f,
-				1f, 1f,
-				
-				1f, 1f,
-				0f, 1f,
-				0f, 0f,
-				//2
-				1f, 1f, 
-				1f, 0f,
-				0f, 0f,
-				
-				0f, 0f,
-				0f, 1f,
-				1f, 1f,
-				//3 
-				1f, 1f, 
-				1f, 0f,
-				0f, 0f,
-				
-				0f, 0f,
-				0f, 1f,
-				1f, 1f,
-				//4 
-				0f, 0f, 
-				1f, 0f,
-				1f, 1f,
-				
-				1f, 1f,
-				0f, 1f,
-				0f, 0f,
-				//5
-				0f, 0f, 
-				1f, 0f,
-				1f, 1f,
-				
-				1f, 1f,
-				0f, 1f,
-				0f, 0f,
-				//6
-				0f, 0f, 
-				1f, 0f,
-				1f, 1f,
-				
-				1f, 1f,
-				0f, 1f,
-				0f, 0f,
-				
-			};
-		
+		float[] textureArray =
+
+		{
+				// 1
+				0f, 0f, 1f, 0f, 1f, 1f,
+
+				1f, 1f, 0f, 1f, 0f, 0f,
+				// 2
+				1f, 1f, 1f, 0f, 0f, 0f,
+
+				0f, 0f, 0f, 1f, 1f, 1f,
+				// 3
+				1f, 1f, 1f, 0f, 0f, 0f,
+
+				0f, 0f, 0f, 1f, 1f, 1f,
+				// 4
+				0f, 0f, 1f, 0f, 1f, 1f,
+
+				1f, 1f, 0f, 1f, 0f, 0f,
+				// 5
+				0f, 0f, 1f, 0f, 1f, 1f,
+
+				1f, 1f, 0f, 1f, 0f, 0f,
+				// 6
+				0f, 0f, 1f, 0f, 1f, 1f,
+
+				1f, 1f, 0f, 1f, 0f, 0f,
+
+		};
 
 		textureData = Buffers.newDirectFloatBuffer(100);
 		textureData.put(textureArray);
 		textureData.flip();
-		
-		
-		float[] normalArray = 
-			{
-				
-				//front
-				0.0f, 0.5f, 0.0f, 0.0f,
-				0.0f, 0.0f, 0.5f, 0.0f,
 
-				//right and half of top
-				0.0f, 0.0f, 0.0f, 0.5f,
-				0.0f, 0.0f, 0.5f, 0.0f,
-				
-				//half of left and half of top
-				0.0f, 1.0f, 0.0f, 0.0f,
-				0.0f, 0.0f, 0.0f, 0.0f,
-			
-				//bottom
-				0.5f, 0.0f, 0.0f, 0.0f,
-				0.0f, 0.0f, 0.0f, 0.0f,
+		float[] normalArray = {
 
-				//back
-				0.0f, 0.0f, 0.5f, 0.0f,
-				0.0f, 0.5f, 0.0f, 0.0f,
-				
-				//?
-				0.0f, 0.0f, 0.0f, 0.0f,
-				0.0f, 0.0f, 0.0f, 0.0f
-				
-			};
-		
-		
+				// front
+				0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f,
+
+				// right and half of top
+				0.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.0f, 0.5f, 0.0f,
+
+				// half of left and half of top
+				0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+
+				// bottom
+				0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+
+				// back
+				0.0f, 0.0f, 0.5f, 0.0f, 0.0f, 0.5f, 0.0f, 0.0f,
+
+				// ?
+				0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f
+
+		};
+
 		normalData = Buffers.newDirectFloatBuffer(100);
 		normalData.put(normalArray);
 		normalData.flip();
@@ -438,56 +410,51 @@ public class Scene {
 		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, VBOVertices);
 		gl.glBufferData(GL.GL_ARRAY_BUFFER, vertices.capacity()
 				* Buffers.SIZEOF_FLOAT, vertices, GL.GL_STATIC_DRAW);
-		
+
 		vboTextureCoordHandle = temp[2];
 		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vboTextureCoordHandle);
 		gl.glBufferData(GL.GL_ARRAY_BUFFER, textureData.capacity()
 				* Buffers.SIZEOF_FLOAT, textureData, GL.GL_STATIC_DRAW);
 
 		normalHandle = temp[3];
-        gl.glBindBuffer(GL.GL_ARRAY_BUFFER, normalHandle);
-        gl.glBufferData(GL.GL_ARRAY_BUFFER, normalData.capacity()
+		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, normalHandle);
+		gl.glBufferData(GL.GL_ARRAY_BUFFER, normalData.capacity()
 				* Buffers.SIZEOF_FLOAT, normalData, GL.GL_STATIC_DRAW);
-		
-		
-		//might not need any shader stuff
+
+		// might not need any shader stuff
 		shader = new Shader(gl);
 		shader.attachVertexShader(gl);
 		shader.attachFragmentShader(gl);
 		shader.link(gl);
 
-		//shader.bind(gl);
-		
-		//setting the sampler (in the shader)
+		// shader.bind(gl);
+
+		// setting the sampler (in the shader)
 		int imageLoc = gl.glGetUniformLocation(shader.programID, "myTexture");
-		int lightLoc =  gl.glGetUniformLocation(shader.programID, "Lights");
+		int lightLoc = gl.glGetUniformLocation(shader.programID, "Lights");
 		int matricesLoc = gl.glGetUniformLocation(shader.programID, "Matrices");
-		int materialsLoc = gl.glGetUniformLocation(shader.programID, "Materials");
-		
-		if(imageLoc == -1) System.out.println("imageLoc location not found!");
-		if(lightLoc == -1) System.out.println("lightLoc location not found!");
-		if(matricesLoc == -1) System.out.println("matricesLoc location not found!");
-		if(materialsLoc == -1) System.out.println("materialsLoc location not found!");
-		
-		//shader.bind(gl);
-		gl.glUniform1i(imageLoc, 0); //Texture unit 0 is for base images.
-		
-		gl.glUniform3fv(lightLoc, 4, lightPos, 0 );
-		//gl.glUniform3fv(matricesLoc, 4, lightPos, 0 );
-		gl.glUniform3fv(materialsLoc, 4, lightDif, 0 );
-		
-		//shader.unbind(gl);
+		int materialsLoc = gl.glGetUniformLocation(shader.programID,
+				"Materials");
+
+		if (imageLoc == -1)
+			System.out.println("imageLoc location not found!");
+		if (lightLoc == -1)
+			System.out.println("lightLoc location not found!");
+		if (matricesLoc == -1)
+			System.out.println("matricesLoc location not found!");
+		if (materialsLoc == -1)
+			System.out.println("materialsLoc location not found!");
+
+		// shader.bind(gl);
+		gl.glUniform1i(imageLoc, 0); // Texture unit 0 is for base images.
+
+		gl.glUniform3fv(lightLoc, 4, lightPos, 0);
+		// gl.glUniform3fv(matricesLoc, 4, lightPos, 0 );
+		gl.glUniform3fv(materialsLoc, 4, lightDif, 0);
+
+		// shader.unbind(gl);
 		gl.glActiveTexture(GL.GL_TEXTURE0 + 0);
 		gl.glBindTexture(GL_TEXTURE_2D, texture.getTextureObject());
-		
-		/*
-		// Prepare light parameters.
-		float SHINE_ALL_DIRECTIONS = 1;
-		float[] lightPos = { 20, 30, 20, SHINE_ALL_DIRECTIONS };
-		float[] lightDif = { 0.6f, 0.6f, 0.6f, 1.0f };
-		float[] lightColorAmbient = { 0.2f, 0.2f, 0.2f, 1f };
-		float[] lightColorSpecular = { 0.8f, 0.8f, 0.8f, 1f };
-		*/
 	}
 
 	public void drawCubeVBO(GL2 gl, String textureFileName,
@@ -496,30 +463,28 @@ public class Scene {
 		/* Setup Position Pointer */
 		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, VBOVertices);
 		gl.glVertexPointer(3, GL.GL_FLOAT, 0, 0);
-		
+
 		/* Setup Texture Coordinate Pointer */
 		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vboTextureCoordHandle);
 		gl.glTexCoordPointer(2, GL.GL_FLOAT, 0, 0);
-		
+
 		/* Setup Normal Pointer */
-		//gl.glNormalPointer(NormalPointerType.Float, stride, 2 * GL.GL_FLOAT); 
 		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, normalHandle);
-		//gl.glNormalPointer(3, GL.GL_FLOAT, 0);
 		gl.glNormalPointer(GL.GL_FLOAT, 4, 0);
 
 		gl.glEnableClientState(GL2.GL_NORMAL_ARRAY);
 		gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
 		gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
-		
+
 		// actual drawing
 		gl.glDrawArrays(GL.GL_TRIANGLES, 0, vertices.capacity());
-		
+
 		gl.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
 		gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
 		gl.glDisableClientState(GL2.GL_NORMAL_ARRAY);
 
 	}
-
+	
 	/**
 	 * 
 	 * This method lays out everything in the scene. In this case, it's only a
@@ -536,7 +501,7 @@ public class Scene {
 	 * @param i
 	 *            the texture that the cube should be
 	 */
-	public void drawScene(GL2 gl, int[] displayList, float[][] cube, int i,
+	public void drawScene(GL2 gl, GLAutoDrawable drawable, int[] displayList, float[][] cube, int i,
 			int y) {
 
 		final int EVERYTHING = 0;
@@ -547,6 +512,27 @@ public class Scene {
 		final int FLOOR = 5;
 
 		gl.glLoadName(EVERYTHING);
+		
+		// draw words
+		gl.glPushMatrix();
+		//you can either use translatef or use the variables in draw3D
+		//gl.glTranslatef(cube[0][0]-1f, cube[0][1]+2, cube[0][2]);
+		
+		renderer.begin3DRendering();
+		
+		renderer.setColor(1.0f, 0.2f, 0.2f, 0.8f);
+		renderer.draw3D("Cube 1", cube[0][0]-1f, cube[0][1]+2, cube[0][2], 0.015f);
+		renderer.draw3D("Cube 2", cube[1][0]-1f, cube[1][1]+2, cube[1][2], 0.015f);
+		renderer.draw3D("Cube 3", cube[2][0]-1f, cube[2][1]+6, cube[2][2], 0.015f);
+		renderer.draw3D("Cube 4", cube[3][0]-1f, cube[3][1]+2, cube[3][2], 0.015f);
+		renderer.draw3D("VBO Cube", -5f-1f, 0+2, -4f, 0.015f);
+		
+		renderer.end3DRendering();
+		renderer.flush();
+		renderer.setColor(1, 1, 1, 1);  //reset color
+		gl.glPopMatrix();
+		
+		
 
 		// cube1
 		gl.glPushName(CUBE);

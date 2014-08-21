@@ -366,7 +366,7 @@ public class Renderer implements GLEventListener,
 	 * @param textureNum	The texture to draw on the cube.
 	 * 						This is set to 0 when picking.
 	 */
-	public void draw(GL2 gl, int textureNum, int textureNum2) {
+	public void draw(GL2 gl, GLAutoDrawable drawable, int textureNum, int textureNum2) {
 
 		gl.glPushMatrix();
 
@@ -381,7 +381,7 @@ public class Renderer implements GLEventListener,
 		cubeArray[1] = cube2;
 		cubeArray[2] = cube3;
 		cubeArray[3] = cube4;
-		terrain.drawScene(gl, cubeList, cubeArray, textureNum, textureNum2);
+		terrain.drawScene(gl, drawable, cubeList, cubeArray, textureNum, textureNum2);
 		
 		gl.glLightfv(GL_LIGHT0, GL_AMBIENT, lightColorAmbient, 0);
 		gl.glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDif, 0);
@@ -547,7 +547,7 @@ public class Renderer implements GLEventListener,
 
 		if (pick) {
 			startPicking(gl);
-			draw(gl, textureNum, textureNum2);
+			draw(gl, drawable, textureNum, textureNum2);
 			pickedObject = stopPicking(gl);
 			//for (int i = 0; i < pickedObject.length; i++) {
 			//if(pickedObject.length > 0) {
@@ -558,7 +558,7 @@ public class Renderer implements GLEventListener,
 				}
 		}
 
-		draw(gl, textureNum, textureNum2);
+		draw(gl, drawable, textureNum, textureNum2);
 
 		if(jumping) updateJumpHeight();
 		checkKeysPressed();
