@@ -1,6 +1,6 @@
 # README #
 
-<b>THE IMAGES/SOUNDS IN THIS PROJECT ARE NOT TO BE USED, CONSULT nate.schultz@outlook.com FOR PROPER ARTIST CONTACTS </b>  
+<b>THE IMAGES/SOUNDS IN THIS PROJECT ARE NOT TO BE USED ELSEWHERE, CONSULT nate.schultz@outlook.com FOR PROPER ARTIST CONTACTS </b>  
 </br>  
 I made this project a while ago on bitbucket and recently moved it over to github. The most recent version wasn't able to move, so this version is not the latest, but I think it's pretty close. It has simple rendering (VBOs), lighting, picking, and lighting. I'm probably going to continue working on this the summer of 2015. 
   
